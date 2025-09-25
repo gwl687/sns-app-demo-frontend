@@ -43,6 +43,8 @@ dependencies:
   provider: ^6.1.5
   #下拉刷新
   pull_to_refresh_flutter3: ^2.0.2
+  sqflite: ^2.3.0
+  path: ^1.8.3
 
 
 

@@ -126,4 +126,8 @@ class Api {
     print("获得好友列表：${response.data}");
     return FriendlistData.fromJson(response.data);
   }
+  //点击好友列表名字后添加到好友聊天列表
+  addFriendToFriendChatList(String name){
+
+  }
 }

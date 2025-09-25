@@ -1,3 +1,7 @@
+import 'dart:math';
+
+import 'package:demo10/constants.dart';
+import 'package:demo10/manager/FriendListManager.dart';
 import 'package:demo10/pages/Chat/chat_page.dart';
 import 'package:demo10/pages/Chat/chat_page.dart';
 import 'package:demo10/pages/auth/login_page.dart';
@@ -7,6 +11,7 @@ import 'package:demo10/pages/home/home_page.dart';
 import 'package:demo10/pages/home/home_page2.dart';
 import 'package:demo10/pages/hot_key/hot_key_page.dart';
 import 'package:demo10/pages/personal/personal_page.dart';
+import 'package:demo10/utils/sp_utils.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -93,13 +98,30 @@ class _TabPageState extends State<TabPage> {
 
   @override
   Widget build(BuildContext context) {
-    return NavigationBarWidget(
-      pages: pages,
-      labels: labels,
-      icons: icons,
-      activeIcons: activeIcons,
-      currentIndex: 0,
-      onTabChange: (index) {},
+    return Scaffold(
+      body: pages[currentIndex], // 根据下标显示不同页面
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: currentIndex,
+        type: BottomNavigationBarType.fixed, // 超过3个要加这个
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: "首页"),
+          BottomNavigationBarItem(icon: Icon(Icons.people), label: "朋友"),
+          BottomNavigationBarItem(icon: Icon(Icons.chat), label: "聊天"),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: "我的"),
+        ],
+        onTap: (index) {
+          setState(() {
+            currentIndex = index;
+          });
+          if (index == 1) {
+            // 点击朋友页面时刷新
+            FriendListManager.instance.loadFriends();
+            SpUtils.getString(Constants.SP_User_Name).then((name) {
+              print("点击刷新朋友页面,当前用户名为: $name");
+            });
+          }
+        },
+      ),
     );
   }
 }

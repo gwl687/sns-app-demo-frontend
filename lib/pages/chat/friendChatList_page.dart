@@ -1,6 +1,7 @@
+import 'package:demo10/manager/ChatFriendManager.dart';
+import 'package:demo10/manager/FriendListManager.dart';
 import 'package:demo10/pages/Chat/Chat_page.dart';
 import 'package:flutter/material.dart';
-
 
 // 好友列表页面
 class FriendChatList_page extends StatefulWidget {
@@ -8,40 +9,46 @@ class FriendChatList_page extends StatefulWidget {
   State createState() {
     return _FriendPage();
   }
+
+  static void addFriend(String friendName) {
+    _FriendPage.addFriend(friendName);
+  }
 }
 
 class _FriendPage extends State<FriendChatList_page> {
-  final List<String> _friends = [
-    "张三",
-    "李四",
-    "王五",
-    "赵六",
-    "小明",
-  ];
+  static List<String> _friends = [];
+
+  static void addFriend(String friendName) {
+    if (!_friends.contains(friendName)) {
+      _friends.add(friendName);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("聊天"),
-        backgroundColor: Colors.green,
-      ),
-      body: ListView.builder(
-        itemCount: _friends.length,
-        itemBuilder: (context, index) {
-          final friend = _friends[index];
-          return ListTile(
-            leading: CircleAvatar(
-              child: Text(friend[0]), // 显示首字母
-            ),
-            title: Text(friend),
-            onTap: () {
-              // 点击进入 ChatPage
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => ChatPage(friendName: friend),
+      appBar: AppBar(title: Text("聊天"), backgroundColor: Colors.green),
+      body: ValueListenableBuilder<List<Friend>>(
+        valueListenable: FriendListManager.instance.friends,
+        builder: (context, friends, _) {
+          return ListView.builder(
+            itemCount: friends.length,
+            itemBuilder: (context, index) {
+              final friend = friends[index];
+              return ListTile(
+                leading: CircleAvatar(
+                  child: Text(friend.userName[0]), // 显示首字母
                 ),
+                title: Text(friend.userName),
+                onTap: () {
+                  // 点击进入 ChatPage
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ChatPage(friendId: friend.id, friendName: friend.userName)
+                    ),
+                  );
+                },
               );
             },
           );

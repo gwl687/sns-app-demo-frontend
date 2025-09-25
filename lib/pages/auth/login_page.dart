@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:demo10/constants.dart';
+import 'package:demo10/manager/WebSocketManager.dart';
 import 'package:demo10/repository/api.dart';
 import 'package:demo10/repository/datas/login_data.dart';
 import 'package:demo10/utils/sp_utils.dart';
@@ -33,13 +34,14 @@ class _LoginPageState extends State<LoginPage> {
       );
       if (data.data?.userName != null &&
           data.data?.userName?.isNotEmpty == true) {
-        //保存用户名和token
-        SpUtils.saveString(Constants.SP_User_Name, data.data?.userName ?? "");
+        //保存用户信息
+        SpUtils.saveString(Constants.SP_User_Id, data.data?.id.toString()??"");
+        SpUtils.saveString(Constants.SP_User_Name, data.data?.userName??"");
         SpUtils.saveString(Constants.SP_Token, data.data?.token??"");
         print("保存用户名: ${data.data?.userName}");
         print("保存token: ${data.data?.token}");
         // 登录成功后建立 WebSocket 连接
-        await _connectSocket();
+        await WebSocketManager.instance.connect();
         return true;
       }
       showToast("登录失败");

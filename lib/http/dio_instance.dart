@@ -1,8 +1,11 @@
+import 'package:demo10/constants.dart';
 import 'package:demo10/http/cookie_interceptor.dart';
 import 'package:demo10/http/print_log_interceptor.dart';
 import 'package:demo10/http/rsp_interceptor.dart';
+import 'package:demo10/utils/sp_utils.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:demo10/constants.dart';
 
 import 'http_method.dart';
 
@@ -17,6 +20,9 @@ class DioInstance {
 
   final Dio _dio = Dio();
   final _defaultTime = const Duration(seconds: 30);
+
+  //token
+  //.SP_Token
 
   void initDio({
     required String baseUrl,
@@ -55,13 +61,12 @@ class DioInstance {
   }) async {
     return await _dio.get(
       path,
-      queryParameters: param,
       options:
-          options ??
           Options(
             method: HttpMethod.GET,
             receiveTimeout: _defaultTime,
             sendTimeout: _defaultTime,
+            headers: {'Authorization': 'Bearer ${await SpUtils.getString(Constants.SP_Token)}'}
           ),
       cancelToken: cancelToken,
     );
