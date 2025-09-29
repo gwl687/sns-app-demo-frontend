@@ -39,6 +39,7 @@ class _ChatPage extends State<ChatPage> {
   }
 
   Future<void> _loadMessages() async {
+    print("收到消息，刷新页面");
     myId = await SpUtils.getString(Constants.SP_User_Id);
     final msgs = await ChatDbManager.getMessages(myId, widget.friendId);
     setState(() {
