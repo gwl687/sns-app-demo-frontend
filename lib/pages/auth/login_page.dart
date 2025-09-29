@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:demo10/constants.dart';
 import 'package:demo10/manager/WebSocketManager.dart';
 import 'package:demo10/repository/api.dart';
@@ -24,52 +23,68 @@ class _LoginPageState extends State<LoginPage> {
   final LoginInfo loginInfo = LoginInfo();
   WebSocket? _socket;
 
-  /// 登录方法（你说的已经写好，这里直接放进来）
+  final TextEditingController _passwordController = TextEditingController(
+    text: "123456", // 默认密码
+  );
+  final TextEditingController _usernameController = TextEditingController();
+
+  List<String> _historyAccounts = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadHistoryAccounts(); // ✅ 初始化时加载历史账号
+  }
+
+  /// 加载历史账号
+  Future<void> _loadHistoryAccounts() async {
+    List<String>? list = await SpUtils.getStringList("login_history");
+    setState(() {
+      _historyAccounts = list ?? [];
+    });
+  }
+
+  /// 保存账号到历史记录
+  Future<void> _saveAccount(String account) async {
+    List<String>? list = await SpUtils.getStringList("login_history") ?? [];
+    if (!list.contains(account)) {
+      list.insert(0, account); // 最新账号放前面
+      await SpUtils.saveStringList("login_history", list);
+    }
+  }
+
+  /// 登录方法
   Future<bool?> login() async {
     if (loginInfo.name != null && loginInfo.password != null) {
-      //调你的接口
+      // 调你的接口
       LoginData data = await Api.instance.login(
         emailaddress: loginInfo.name,
         password: loginInfo.password,
       );
-      if (data.data?.userName != null &&
-          data.data?.userName?.isNotEmpty == true) {
-        //保存用户信息
-        SpUtils.saveString(Constants.SP_User_Id, data.data?.id.toString()??"");
-        SpUtils.saveString(Constants.SP_User_Name, data.data?.userName??"");
-        SpUtils.saveString(Constants.SP_Token, data.data?.token??"");
+
+      if (data.data?.userName != null && data.data!.userName!.isNotEmpty) {
+        // 保存用户信息
+        SpUtils.saveString(
+          Constants.SP_User_Id,
+          data.data?.id.toString() ?? "",
+        );
+        SpUtils.saveString(Constants.SP_User_Name, data.data?.userName ?? "");
+        SpUtils.saveString(Constants.SP_Token, data.data?.token ?? "");
+
         print("保存用户名: ${data.data?.userName}");
         print("保存token: ${data.data?.token}");
+
         // 登录成功后建立 WebSocket 连接
         await WebSocketManager.instance.connect();
         return true;
       }
+
       showToast("登录失败");
       return false;
     }
+
     showToast("输入不能为空");
     return false;
-  }
-
-  /// 建立 WebSocket 连接
-  Future<void> _connectSocket() async {
-    try {
-      _socket = await WebSocket.connect('ws://10.0.2.2:8081/ws'); // 模拟器访问本地
-      _socket!.listen(
-        (message) {
-          print("收到消息: $message");
-        },
-        onDone: () {
-          print("WebSocket 关闭");
-        },
-        onError: (error) {
-          print("WebSocket 错误: $error");
-        },
-      );
-      print("WebSocket 已连接到 Netty 8081");
-    } catch (e) {
-      print("连接失败: $e");
-    }
   }
 
   @override
@@ -86,9 +101,11 @@ class _LoginPageState extends State<LoginPage> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            /// 用户名输入
+            /// 用户名输入框
             TextField(
+              controller: _usernameController,
               decoration: const InputDecoration(
                 labelText: "用户名",
                 border: OutlineInputBorder(),
@@ -97,10 +114,38 @@ class _LoginPageState extends State<LoginPage> {
                 loginInfo.name = value;
               },
             ),
+
+            /// 历史账号列表（只在有历史时显示）
+            if (_historyAccounts.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              Text(
+                "历史账号",
+                style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+              ),
+              const SizedBox(height: 4),
+              SizedBox(
+                height: 120, // 最多显示的高度
+                child: ListView.builder(
+                  itemCount: _historyAccounts.length,
+                  itemBuilder: (context, index) {
+                    final account = _historyAccounts[index];
+                    return ListTile(
+                      title: Text(account),
+                      onTap: () {
+                        _usernameController.text = account;
+                        loginInfo.name = account;
+                      },
+                    );
+                  },
+                ),
+              ),
+            ],
+
             const SizedBox(height: 16),
 
-            /// 密码输入
+            /// 密码输入框
             TextField(
+              controller: _passwordController,
               decoration: const InputDecoration(
                 labelText: "密码",
                 border: OutlineInputBorder(),
@@ -110,6 +155,7 @@ class _LoginPageState extends State<LoginPage> {
                 loginInfo.password = value;
               },
             ),
+
             const SizedBox(height: 32),
 
             /// 登录按钮
@@ -117,10 +163,12 @@ class _LoginPageState extends State<LoginPage> {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () async {
+                  loginInfo.password = _passwordController.text;
                   bool? success = await login();
                   if (success == true) {
+                    _saveAccount(_usernameController.text);
+                    print("保存账号${_usernameController.text}");
                     showToast("登录成功");
-                    //Navigator.pop(context); // 登录成功后返回上一个页面
                   }
                 },
                 child: const Text("登录"),

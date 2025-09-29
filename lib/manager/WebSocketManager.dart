@@ -28,7 +28,6 @@ class WebSocketManager {
         (message) async {
           print("收到消息: $message");
           Map<String, dynamic> data;
-          //data = jsonDecode(message) as Map<String, String>;
           try {
             data = jsonDecode(message);
           } catch (e) {
