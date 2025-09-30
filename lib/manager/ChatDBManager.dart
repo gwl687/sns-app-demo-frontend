@@ -29,29 +29,32 @@ class ChatDbManager {
 
     return _db!;
   }
+
   //获取当前用户id
   // static String getUserId() async{
   //
   // }
 
-
   // 保存消息
-  static Future<void> insertMessage(String fromUser, String toUser, String content) async {
+  static Future<void> insertMessage(
+    String fromUser,
+    String toUser,
+    String content,
+  ) async {
     final db = await getDb();
-    await db.insert(
-      'messages',
-      {
-        'fromUser': fromUser,
-        'toUser': toUser,
-        'content': content,
-        'time': DateTime.now().toIso8601String(),
-      },
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    await db.insert('messages', {
+      'fromUser': fromUser,
+      'toUser': toUser,
+      'content': content,
+      'time': DateTime.now().toIso8601String(),
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   // 查询两个人之间的聊天记录
-  static Future<List<Map<String, dynamic>>> getMessages(String user1, String user2) async {
+  static Future<List<Map<String, dynamic>>> getMessages(
+    String user1,
+    String user2,
+  ) async {
     final db = await getDb();
     return await db.query(
       'messages',
@@ -59,5 +62,10 @@ class ChatDbManager {
       whereArgs: [user1, user2, user2, user1],
       orderBy: 'time ASC',
     );
+  }
+  //查询全部
+  static Future<List<Map<String, dynamic>>> selectAll() async {
+    final db = await getDb();
+    return await db.query('messages');
   }
 }

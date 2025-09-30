@@ -24,11 +24,10 @@ class _ChatPage extends State<ChatPage> {
   void initState() {
     super.initState();
     _loadMessages();
+
     // 监听 WebSocket 消息(收消息，toUser一定是自己的id)
     WebSocketManager.instance.onMessageReceived = (data) async {
-      // 假设后端发来的 JSON 结构是：
-      // {"fromUser":"123","toUser":"456","content":"hello"}
-      final String fromUser = data['userId'].toString();
+      final String fromUser = data['fromUser'].toString();
       final String content = data['content'].toString();
       final String toUser = await SpUtils.getString(Constants.SP_User_Id)??"";
       // 保存到本地数据库
@@ -39,9 +38,13 @@ class _ChatPage extends State<ChatPage> {
   }
 
   Future<void> _loadMessages() async {
-    print("收到消息，刷新页面");
     myId = await SpUtils.getString(Constants.SP_User_Id);
     final msgs = await ChatDbManager.getMessages(myId, widget.friendId);
+    final allmsgs = await ChatDbManager.selectAll();
+    for (var row in allmsgs) {
+      print("from: ${row['fromUser']}, to: ${row['toUser']}, content: ${row['content']}");
+    }
+    print("加载消息，刷新页面。我的id为${myId},对方为${widget.friendId},目前消息长度为${allmsgs.length}");
     setState(() {
       _messages = msgs;
     });

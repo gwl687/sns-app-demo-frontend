@@ -4,13 +4,14 @@ import 'package:flutter/material.dart';
 import 'app.dart';
 
 void main() {
-  String token = "eyJhbGciOiJIUzI1NiJ9.eyJpZCI6OCwiaWF0IjoxNzU4MjAzMjgyLCJleHAiOjE3NTg4MDgwODJ9.gji6EcdxpDKqQIYg2rjsRDZXDEFajsvp4Nskri4QOeQ";
+  //String token = "eyJhbGciOiJIUzI1NiJ9.eyJpZCI6OCwiaWF0IjoxNzU4MjAzMjgyLCJleHAiOjE3NTg4MDgwODJ9.gji6EcdxpDKqQIYg2rjsRDZXDEFajsvp4Nskri4QOeQ";
   DioInstance.instance().initDio(
       baseUrl: "http://10.0.2.2:8080/",
       //headers: {
       //  'Authorization': 'Bearer $token',
       );
   WidgetsFlutterBinding.ensureInitialized();
+
   runApp(const MyApp());
 }
 
