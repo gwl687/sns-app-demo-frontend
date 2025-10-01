@@ -67,8 +67,8 @@ class WebSocketManager {
   }
 
   //发命令
-  void sendCommand(String toUser){
-    final msg = {"type": "command", "toUser": toUser};
+  void sendCommand(String toUser, String command) {
+    final msg = {"type": "command", "toUser": toUser, "command": command};
     send(jsonEncode(msg));
   }
 

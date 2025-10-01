@@ -1,6 +1,7 @@
 import 'package:demo10/constants.dart';
 import 'package:demo10/manager/ChatDBManager.dart';
 import 'package:demo10/manager/WebSocketManager.dart';
+import 'package:demo10/pages/chat/videoChat_page.dart';
 import 'package:demo10/utils/sp_utils.dart';
 import 'package:flutter/material.dart';
 
@@ -27,29 +28,91 @@ class _ChatPage extends State<ChatPage> {
 
     // 监听 WebSocket 消息(收消息，toUser一定是自己的id)
     WebSocketManager.instance.onMessageReceived = (data) async {
-      final String fromUser = data['fromUser'].toString();
-      final String content = data['content'].toString();
-      final String toUser = await SpUtils.getString(Constants.SP_User_Id)??"";
-      // 保存到本地数据库
-      await ChatDbManager.insertMessage(fromUser, toUser, content);
-      // 更新页面
-      _loadMessages();
+      final String type = data['type'].toString();
+      print("收到消息，type为${type}");
+      switch (type) {
+        case 'command':
+          final String command = data['command'].toString();
+          if (command == "VIDEOREQUEST") {
+            print("收到了别人发起的视频请求");
+            // 弹出对话框
+            final bool? accepted = await showDialog<bool>(
+              context: context,
+              barrierDismissible: false, // 点空白处不能关闭，必须选一个
+              builder: (ctx) => AlertDialog(
+                title: Text("视频通话请求"),
+                content: Text("对方想和你视频通话，是否接受？"),
+                actions: [
+                  TextButton(
+                    child: Text("拒绝"),
+                    onPressed: () => Navigator.pop(ctx, false),
+                  ),
+                  TextButton(
+                    child: Text("接受"),
+                    onPressed: () => Navigator.pop(ctx, true),
+                  ),
+                ],
+              ),
+            );
+            if (accepted == true) {
+              print("接收视频请求");
+              // ✅ 用户点击了接受 → 通知对方
+              WebSocketManager.instance.sendCommand(
+                data['fromUser'].toString(),
+                "VIDEO_CALL_ACCEPT",
+              );
+              // ✅ 跳转到视频页面
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => VideoChatPage(
+                    myId: myId,
+                    friendId: data['fromUser'].toString(),
+                  ),
+                ),
+              );
+            } else {
+              print("拒绝视频请求");
+              WebSocketManager.instance.sendCommand(
+                data['fromUser'].toString(),
+                "VIDEO_CALL_REJECT",
+              );
+            }
+          }
+          break;
+        //默认为聊天消息
+        default:
+          final String fromUser = data['fromUser'].toString();
+          final String content = data['content'].toString();
+          final String toUser =
+              await SpUtils.getString(Constants.SP_User_Id) ?? "";
+          // 保存到本地数据库
+          await ChatDbManager.insertMessage(fromUser, toUser, content);
+          // 更新页面
+          _loadMessages();
+      }
     };
   }
 
+  //重新加载消息
   Future<void> _loadMessages() async {
     myId = await SpUtils.getString(Constants.SP_User_Id);
     final msgs = await ChatDbManager.getMessages(myId, widget.friendId);
     final allmsgs = await ChatDbManager.selectAll();
     for (var row in allmsgs) {
-      print("from: ${row['fromUser']}, to: ${row['toUser']}, content: ${row['content']}");
+      print(
+        "from: ${row['fromUser']}, to: ${row['toUser']}, content: ${row['content']}",
+      );
     }
-    print("加载消息，刷新页面。我的id为${myId},对方为${widget.friendId},目前消息长度为${allmsgs.length}");
+    print(
+      "加载消息，刷新页面。我的id为${myId},对方为${widget.friendId},目前消息长度为${allmsgs.length}",
+    );
     setState(() {
       _messages = msgs;
     });
   }
 
+  //发送消息
   void _sendMessage(String text) async {
     if (text.isEmpty) return;
 
@@ -65,12 +128,27 @@ class _ChatPage extends State<ChatPage> {
     _controller.clear();
   }
 
+  //发起视频通话
+  void _startVideoCall() {
+    // 发起请求，发送特殊类型消息
+    WebSocketManager.instance.sendCommand(
+      widget.friendId,
+      "VIDEOREQUEST", // 约定一个特殊消息标记
+    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text("已向对方发起视频通话请求")));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.friendName),
         backgroundColor: Colors.green,
+        actions: [
+          IconButton(icon: Icon(Icons.videocam), onPressed: _startVideoCall),
+        ],
       ),
       body: Column(
         children: [
