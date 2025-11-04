@@ -35,6 +35,7 @@ dependencies:
   cupertino_icons: ^1.0.8
   oktoast: ^3.4.0         # 或者最新版本
   flutter_screenutil: ^5.9.3  # 或者最新版本
+  flutter_webrtc: ^1.2.0
   #本地存储化
   shared_preferences: ^2.5.3
   #banner轮播图组件
@@ -45,6 +46,7 @@ dependencies:
   pull_to_refresh_flutter3: ^2.0.2
   sqflite: ^2.3.0
   path: ^1.8.3
+  image_picker: ^1.1.2
 
 
 

@@ -32,7 +32,7 @@ class DioInstance {
     Duration? sendTimeout,
     ResponseType? responseType = ResponseType.json,
     String? contentType,
-    Map<String,dynamic>? headers
+    Map<String, dynamic>? headers,
   }) {
     _dio.options = BaseOptions(
       method: httpMethod,
@@ -42,7 +42,7 @@ class DioInstance {
       sendTimeout: sendTimeout ?? _defaultTime,
       responseType: responseType,
       contentType: contentType,
-      headers: headers
+      headers: headers,
     );
     //添加打印请求返回信息拦截器
     // _dio.interceptors.add(PrintLogInterceptor());
@@ -61,13 +61,16 @@ class DioInstance {
   }) async {
     return await _dio.get(
       path,
-      options:
-          Options(
-            method: HttpMethod.GET,
-            receiveTimeout: _defaultTime,
-            sendTimeout: _defaultTime,
-            headers: {'Authorization': 'Bearer ${await SpUtils.getString(Constants.SP_Token)}'}
-          ),
+      queryParameters: param,
+      options: Options(
+        method: HttpMethod.GET,
+        receiveTimeout: _defaultTime,
+        sendTimeout: _defaultTime,
+        headers: {
+          'Authorization':
+              'Bearer ${await SpUtils.getString(Constants.SP_Token)}',
+        },
+      ),
       cancelToken: cancelToken,
     );
   }
@@ -80,6 +83,11 @@ class DioInstance {
     Options? options,
     CancelToken? cancelToken,
   }) async {
+    String? myToken = await SpUtils.getString(Constants.SP_Token);
+    final headers = {'Content-Type': Headers.jsonContentType};
+    if (myToken != null) {
+      headers['Authorization'] = 'Bearer $myToken';
+    }
     return await _dio.post(
       path,
       queryParameters: queryParameters,
@@ -89,9 +97,11 @@ class DioInstance {
           options ??
           Options(
             method: HttpMethod.POST,
+            headers: headers,
             receiveTimeout: _defaultTime,
             sendTimeout: _defaultTime,
-          )
+            contentType: Headers.jsonContentType,
+          ),
     );
   }
 }

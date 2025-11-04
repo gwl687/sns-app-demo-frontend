@@ -1,11 +1,17 @@
 import 'dart:io';
 import 'package:demo10/constants.dart';
+import 'package:demo10/manager/ChatListManager.dart';
+import 'package:demo10/manager/ChatMessageManager.dart';
+import 'package:demo10/manager/FriendListManager.dart';
 import 'package:demo10/manager/WebSocketManager.dart';
 import 'package:demo10/repository/api.dart';
 import 'package:demo10/repository/datas/login_data.dart';
 import 'package:demo10/utils/sp_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:oktoast/oktoast.dart';
+import 'package:demo10/pages/tab_page.dart';
+
+final ValueNotifier<int> loginNotifier = ValueNotifier<int>(0);
 
 class LoginInfo {
   String? name;
@@ -64,18 +70,18 @@ class _LoginPageState extends State<LoginPage> {
 
       if (data.data?.userName != null && data.data!.userName!.isNotEmpty) {
         // 保存用户信息
-        SpUtils.saveString(
-          Constants.SP_User_Id,
-          data.data?.id.toString() ?? "",
-        );
+        SpUtils.saveInt(Constants.SP_User_Id, data.data?.id ?? 0);
         SpUtils.saveString(Constants.SP_User_Name, data.data?.userName ?? "");
         SpUtils.saveString(Constants.SP_Token, data.data?.token ?? "");
 
-        print("保存用户名: ${data.data?.userName}");
-        print("保存token: ${data.data?.token}");
-
-        // 登录成功后建立 WebSocket 连接
+        //登录成功后建立 WebSocket 连接
         await WebSocketManager.instance.connect();
+        //load friend list
+        await FriendListManager.instance.loadFriends();
+        //load chatFriend list
+        await Chatlistmanager.instance.loadFriends();
+        //加载离线时收到的消息
+        await ChatMessageManager.instance.loadMessages();
         return true;
       }
 
@@ -169,6 +175,8 @@ class _LoginPageState extends State<LoginPage> {
                     _saveAccount(_usernameController.text);
                     print("保存账号${_usernameController.text}");
                     showToast("登录成功");
+                    //跳转到登录成功页
+                    loginNotifier.value = 1;
                   }
                 },
                 child: const Text("登录"),

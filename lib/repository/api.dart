@@ -1,10 +1,20 @@
+import 'dart:convert';
+
+import 'package:demo10/manager/FriendListManager.dart';
+import 'package:demo10/pages/chat/groupChat_page.dart';
 import 'package:demo10/repository/datas/auth_data.dart';
 import 'package:demo10/repository/datas/common_website_data.dart';
-import 'package:demo10/repository/datas/friendlist_data.dart';
+import 'package:demo10/repository/datas/friendList_data.dart';
+import 'package:demo10/repository/datas/friendlist_data.dart'
+    hide FriendListData;
+import 'package:demo10/repository/datas/groupChat_data.dart';
+import 'package:demo10/repository/datas/groupMessageData_data.dart';
+import 'package:demo10/repository/datas/groupMessage_data.dart';
 import 'package:demo10/repository/datas/home_banner_data.dart';
 import 'package:demo10/repository/datas/home_list_data.dart';
 import 'package:demo10/repository/datas/login_data.dart';
 import 'package:demo10/repository/datas/search_hot_keys_data.dart';
+import 'package:demo10/repository/datas/user/updateUserInfo_data.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 
@@ -83,7 +93,7 @@ class Api {
       path: "/user/login",
       data: {"emailaddress": emailaddress, "password": password},
     );
-    print("用户：${response.data["id"]}登录");
+    print("用户：${response.data['data']['id']}登录");
     return LoginData.fromJson(response.data);
   }
 
@@ -104,6 +114,7 @@ class Api {
     //return boolCallback(response.data);
     return true;
   }
+
   ///登出
   Future<bool?> logout() async {
     Response response = await DioInstance.instance().get(
@@ -112,22 +123,91 @@ class Api {
     //return boolCallback(response.data);
     return true;
   }
+
   bool? boolCallback(dynamic data) {
     if (data["data"] != null && data["data"] is bool) {
       return true;
     }
     return false;
   }
+
   //获取好友列表
-  Future<FriendlistData> getFriendList() async {
+  Future<FriendListData> getFriendList() async {
     Response response = await DioInstance.instance().get(
-      path: "/user/getFriendList"
+      path: "/user/getfriendList",
     );
     print("获得好友列表：${response.data}");
-    return FriendlistData.fromJson(response.data);
+    return FriendListData.fromJson(response.data);
   }
-  //点击好友列表名字后添加到好友聊天列表
-  addFriendToFriendChatList(String name){
 
+  //点击好友列表名字后添加到好友聊天列表
+  addFriendToFriendChatList(String name) {}
+
+  //建群
+  Future<GroupChatData> createGroupChat(List<int> selectedFriends) async {
+    Response response = await DioInstance.instance().post(
+      path: "/user/creategroupchat",
+      data: {"selectedFriends": selectedFriends},
+    );
+    //
+    print("创建群聊: ${response.data}");
+    GroupChatData groupChatData = GroupChatData.fromJson(response.data);
+
+    return groupChatData;
+  }
+
+  //获取群信息
+  Future<GroupChatData> getGroupChat(int groupId) async {
+    Response response = await DioInstance.instance().get(
+      path: "/user/getgroupchat",
+      param: {'groupId': groupId},
+    );
+    //
+    print("获取群聊信息: ${response.data}");
+    return GroupChatData.fromJson(response.data);
+  }
+
+  //获取聊天列表
+  Future<dynamic> getChatList() async {
+    Response response = await DioInstance.instance().get(
+      path: "/user/getchatlist",
+    );
+    print("获取聊天列表: ${response.data}");
+    var data = response.data;
+    return data;
+  }
+
+  //获得群聊天消息
+  Future<GroupMessageData> getGroupMessages(int groupId) async {
+    Response response = await DioInstance.instance().get(
+      path: "/user/getgroupmessages",
+      param: {'groupId': groupId},
+    );
+    print("获取群消息: ${response.data}");
+    GroupMessageData groupMessageData = GroupMessageData.fromJson(
+      response.data,
+    );
+    return groupMessageData;
+  }
+
+  //保存群消息到后端数据库
+  Future<void> saveGroupMessage(
+    GroupMessageDataData groupMessageDataData,
+  ) async {
+    Response response = await DioInstance.instance().post(
+      path: "/user/saveGroupMessage",
+      queryParameters: {'groupMessageDTO': groupMessageDataData},
+    );
+    print("保存聊天消息到后端: ${response.data}");
+  }
+
+  //更新用户数据
+  Future<bool> updateUserInfo(UpdateUserInfo updateUserInfoDTO) async
+  {
+    Response response = await DioInstance.instance().post(
+      path: "/user/updateuserinfo",
+      queryParameters: {'updateUserInfoDTO': updateUserInfoDTO},
+    );
+    return response.data;
   }
 }

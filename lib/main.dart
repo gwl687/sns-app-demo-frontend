@@ -1,17 +1,22 @@
 import 'package:demo10/http/dio_instance.dart';
+import 'package:demo10/manager/ChatDBManager.dart';
 import 'package:flutter/material.dart';
 
 import 'app.dart';
 
-void main() {
+void main() async {
   //String token = "eyJhbGciOiJIUzI1NiJ9.eyJpZCI6OCwiaWF0IjoxNzU4MjAzMjgyLCJleHAiOjE3NTg4MDgwODJ9.gji6EcdxpDKqQIYg2rjsRDZXDEFajsvp4Nskri4QOeQ";
   DioInstance.instance().initDio(
-      baseUrl: "http://10.0.2.2:8080/",
-      //headers: {
-      //  'Authorization': 'Bearer $token',
-      );
+    //baseUrl: "http://10.0.2.2:8080/",
+    baseUrl: "http://192.168.0.12:8080/",
+    //headers: {
+    //  'Authorization': 'Bearer $token',
+  );
   WidgetsFlutterBinding.ensureInitialized();
-
+  ChatDbManager.deleteFromTable('group_messages');
+  List<Map<String, dynamic>> gData = await ChatDbManager.selectAll(
+    'group_messages',
+  );
   runApp(const MyApp());
 }
 

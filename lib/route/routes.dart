@@ -55,4 +55,6 @@ class RoutePath {
   static const String loginPage = "/login_page";
   //注册
   static const String registerPage = "/register_page";
+  //聊天朋友页
+  static const String ChatFriendPage = "/chatfriend_page";
 }

@@ -4,8 +4,9 @@ import 'package:demo10/constants.dart';
 import 'package:demo10/manager/FriendListManager.dart';
 import 'package:demo10/pages/Chat/chat_page.dart';
 import 'package:demo10/pages/Chat/chat_page.dart';
+import 'package:demo10/pages/auth/loginSuccess_page.dart';
 import 'package:demo10/pages/auth/login_page.dart';
-import 'package:demo10/pages/chat/friendChatList_page.dart';
+import 'package:demo10/pages/friend/friendChatList_page.dart';
 import 'package:demo10/pages/friend/friend_page.dart';
 import 'package:demo10/pages/home/home_page.dart';
 import 'package:demo10/pages/home/home_page2.dart';
@@ -19,7 +20,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../common_ui/Navigation/navigation_bar_widget.dart';
 
 class TabPage extends StatefulWidget {
-  const TabPage({super.key});
+  const TabPage({super.key, this.initialIndex = 0});
+
+  final int initialIndex;
 
   @override
   State createState() {
@@ -30,6 +33,9 @@ class TabPage extends StatefulWidget {
 class _TabPageState extends State<TabPage> {
   ///页面数组
   late List<Widget> pages;
+
+  ///每个页面对应的页面可能性
+  late List<Widget> loginPages;
 
   ///底部标题
   late List<String> labels;
@@ -42,6 +48,10 @@ class _TabPageState extends State<TabPage> {
   int currentIndex = 0;
 
   void initTabData() {
+    loginPages = [LoginPage(), LoginSuccessPage()];
+    //监听页面状态
+    loginNotifier.addListener(_handleLoginPage);
+    currentIndex = widget.initialIndex;
     pages = [HomePage2(), FriendPage(), FriendChatList_page(), LoginPage()];
     labels = ["首页", "好友", "聊天", "我的"];
     icons = [
@@ -96,6 +106,13 @@ class _TabPageState extends State<TabPage> {
     initTabData();
   }
 
+  ///登录界面内容更改
+  void _handleLoginPage() {
+    setState(() {
+      pages[3] = loginPages[loginNotifier.value];
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -115,10 +132,10 @@ class _TabPageState extends State<TabPage> {
           });
           if (index == 1) {
             // 点击朋友页面时刷新
-            FriendListManager.instance.loadFriends();
-            SpUtils.getString(Constants.SP_User_Name).then((name) {
-              print("点击刷新朋友页面,当前用户名为: $name");
-            });
+            // FriendListManager.instance.loadFriends();
+            // SpUtils.getString(Constants.SP_User_Name).then((name) {
+            //   print("点击刷新朋友页面,当前用户名为: $name");
+            // });
           }
         },
       ),
