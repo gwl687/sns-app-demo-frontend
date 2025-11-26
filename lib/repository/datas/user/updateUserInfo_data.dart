@@ -1,4 +1,4 @@
-class UpdateUserInfo {
+class UserInfoDTO {
   String? username;
 
   String? sex;

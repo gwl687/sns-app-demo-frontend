@@ -1,14 +1,19 @@
 import 'package:demo10/constants.dart';
+import 'package:demo10/http/dio_instance.dart';
 import 'package:demo10/manager/ChatDBManager.dart';
 import 'package:demo10/manager/ChatMessageManager.dart';
 import 'package:demo10/manager/MessageReceiveManager.dart';
 import 'package:demo10/manager/WebSocketManager.dart';
+import 'package:demo10/pages/chat/groupVideoChat_page.dart';
 import 'package:demo10/pages/chat/videoChat_page.dart';
+import 'package:demo10/pages/friend/addGroupMember_page.dart';
 import 'package:demo10/pages/tab_page.dart';
 import 'package:demo10/repository/api.dart';
 import 'package:demo10/repository/datas/groupMessageData_data.dart';
 import 'package:demo10/utils/sp_utils.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:demo10/pages/chat/videoChat_page.dart';
 
 class GroupChatPage extends StatefulWidget {
   final int id;
@@ -43,6 +48,7 @@ class _GroupChatPage extends State<GroupChatPage> {
       _loadMessages();
     };
     _loadMessages();
+    //重置群名
   }
 
   @override
@@ -98,9 +104,51 @@ class _GroupChatPage extends State<GroupChatPage> {
         appBar: AppBar(
           title: Text(widget.name),
           backgroundColor: Colors.green,
-          // actions: [
-          //   IconButton(icon: Icon(Icons.videocam), onPressed: _startVideoCall),
-          // ],
+          actions: [
+            IconButton(
+              icon: Icon(Icons.person_add),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => AddGroupMember(
+                      groupId: widget.id,
+                      memberIds: widget.memberIds,
+                      isAdd: true,
+                    ),
+                  ),
+                );
+              },
+            ),
+            IconButton(
+              icon: Icon(Icons.person_remove),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => AddGroupMember(
+                      groupId: widget.id,
+                      memberIds: widget.memberIds,
+                      isAdd: false,
+                    ),
+                  ),
+                );
+              },
+            ),
+            //vediochat
+            IconButton(
+              icon: Icon(Icons.camera_front),
+              onPressed: () async {
+                String token = await Api.instance.getLivekitToken(widget.id);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => GroupVideoChatPage(token: token)
+                  ),
+                );
+              },
+            ),
+          ],
         ),
         body: Column(
           children: [

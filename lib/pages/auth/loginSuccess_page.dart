@@ -2,15 +2,20 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:demo10/constants.dart';
+import 'package:demo10/http/dio_instance.dart';
 import 'package:demo10/manager/ChatFriendManager.dart';
 import 'package:demo10/manager/ChatListManager.dart';
 import 'package:demo10/manager/FriendListManager.dart';
+import 'package:demo10/manager/LoginSuccessManager.dart';
 import 'package:demo10/manager/WebSocketManager.dart';
 import 'package:demo10/pages/auth/login_page.dart';
 import 'package:demo10/repository/api.dart';
 import 'package:demo10/repository/datas/user/updateUserInfo_data.dart';
+import 'package:demo10/repository/datas/user/userInfo_data.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:http/http.dart' as http;
+import 'package:path/path.dart';
 
 class LoginSuccessPage extends StatefulWidget {
   @override
@@ -18,8 +23,19 @@ class LoginSuccessPage extends StatefulWidget {
 }
 
 class _LoginSuccessPage extends State<LoginSuccessPage> {
+  static final _LoginSuccessPage loginSuceessPage  = _LoginSuccessPage();
   File? _avatarFile; // 存储用户选择的头像文件
+  String? _avatarFileUrl;
+  String? _username;
   final ImagePicker _picker = ImagePicker();
+  UserInfoData? userInfoData;
+  ImageProvider? _avatarImage;
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -32,19 +48,13 @@ class _LoginSuccessPage extends State<LoginSuccessPage> {
             // 头像
             GestureDetector(
               onTap: _pickImage,
-              child: CircleAvatar(
-                radius: 50,
-                backgroundImage: _avatarFile != null
-                    ? FileImage(_avatarFile!) // 用户选择的本地图片
-                    : NetworkImage(Constants.DefaultAvatarurl)
-                          as ImageProvider, // 默认网络头像 // 头像图片链接，可换成本地或网络图
-              ),
+              child: CircleAvatar(radius: 50, backgroundImage: LoginSuccessManager.instance.avatarImage),
             ),
             SizedBox(height: 20),
 
             // 用户名
             Text(
-              '用户名',
+              LoginSuccessManager.instance.userInfoData?.username ?? "",
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 40),
@@ -71,8 +81,13 @@ class _LoginSuccessPage extends State<LoginSuccessPage> {
     //关闭websocket
     WebSocketManager.instance.close();
     //清空各种界面
+
+    //聊天页面
     Chatlistmanager.instance.clearChatFriendList();
+    //朋友页面
     FriendListManager.instance.clearFriendList();
+    //我的页面
+    _clearLoginSuccess();
     loginNotifier.value = 0;
   }
 
@@ -84,10 +99,29 @@ class _LoginSuccessPage extends State<LoginSuccessPage> {
 
     if (pickedFile != null) {
       setState(() {
-        _avatarFile = File(pickedFile.path);
-        UpdateUserInfo updateUserInfoDTO = UpdateUserInfo();
-        Api.instance.updateUserInfo(updateUserInfoDTO);
+        LoginSuccessManager.instance.avatarFile = File(pickedFile.path);
+        LoginSuccessManager.instance.avatarImage = FileImage(LoginSuccessManager.instance.avatarFile!);
+        //upload to s3
+        uploadToS3(pickedFile.path);
+        //update mysql user table
+        //UpdateUserInfo updateUserInfoDTO = UpdateUserInfo();
+        //Api.instance.updateUserInfo(updateUserInfoDTO);
       });
     }
+  }
+
+  /// 上传到s3
+  Future<void> uploadToS3(String filePath) async {
+    final file = File(filePath);
+    final fileName = basename(filePath);
+    //final bytes = await file.readAsBytes();
+    await Api.instance.uploadAvatar(filePath, fileName);
+  }
+
+  ///清空页面数据
+  void _clearLoginSuccess() {
+    print("清空我的页面数据");
+    userInfoData = null;
+    _avatarFile = null;
   }
 }

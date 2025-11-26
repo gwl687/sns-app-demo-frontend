@@ -1,11 +1,37 @@
-class UserInfo {
-  UserInfo instance = UserInfo._();
+// To parse this JSON data, do
+//
+//     final userInfoData = userInfoDataFromJson(jsonString);
 
-  UserInfo._();
+import 'dart:convert';
 
-  String? username;
+UserInfoData userInfoDataFromJson(String str) => UserInfoData.fromJson(json.decode(str));
 
-  String? sex;
+String userInfoDataToJson(UserInfoData data) => json.encode(data.toJson());
 
+class UserInfoData {
+  String username;
+  String sex;
   String? avatarurl;
+  String? emailaddress;
+
+  UserInfoData({
+    required this.username,
+    required this.sex,
+    required this.avatarurl,
+    required this.emailaddress,
+  });
+
+  factory UserInfoData.fromJson(Map<String, dynamic> json) => UserInfoData(
+    username: json["username"],
+    sex: json["sex"],
+    avatarurl: json["avatarurl"],
+    emailaddress: json["emailaddress"],
+  );
+
+  Map<String, dynamic> toJson() => {
+    "username": username,
+    "sex": sex,
+    "avatarurl": avatarurl,
+    "emailaddress": emailaddress,
+  };
 }

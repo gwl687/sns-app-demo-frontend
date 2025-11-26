@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:demo10/constants.dart';
 import 'package:demo10/manager/FriendListManager.dart';
+import 'package:demo10/manager/TabPageManager.dart';
 import 'package:demo10/pages/Chat/chat_page.dart';
 import 'package:demo10/pages/Chat/chat_page.dart';
 import 'package:demo10/pages/auth/loginSuccess_page.dart';
@@ -12,6 +13,7 @@ import 'package:demo10/pages/home/home_page.dart';
 import 'package:demo10/pages/home/home_page2.dart';
 import 'package:demo10/pages/hot_key/hot_key_page.dart';
 import 'package:demo10/pages/personal/personal_page.dart';
+import 'package:demo10/pages/social/timeline_page.dart';
 import 'package:demo10/utils/sp_utils.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -50,9 +52,14 @@ class _TabPageState extends State<TabPage> {
   void initTabData() {
     loginPages = [LoginPage(), LoginSuccessPage()];
     //监听页面状态
-    loginNotifier.addListener(_handleLoginPage);
+    TabPageManager.loginNotifier.addListener(_handleLoginPage);
     currentIndex = widget.initialIndex;
-    pages = [HomePage2(), FriendPage(), FriendChatList_page(), LoginPage()];
+    pages = [
+      TimelinePage(),
+      FriendPage(),
+      FriendChatList_page(),
+      loginPages[TabPageManager.loginNotifier.value],
+    ];
     labels = ["首页", "好友", "聊天", "我的"];
     icons = [
       Image.asset(
@@ -109,7 +116,7 @@ class _TabPageState extends State<TabPage> {
   ///登录界面内容更改
   void _handleLoginPage() {
     setState(() {
-      pages[3] = loginPages[loginNotifier.value];
+      pages[3] = loginPages[TabPageManager.loginNotifier.value];
     });
   }
 

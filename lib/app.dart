@@ -22,10 +22,8 @@ Size get designSize {
 }
 
 class MyApp extends StatelessWidget {
-
-
-  const MyApp({super.key});
-
+  MyApp({super.key});
+  static final TabPage tabPage = TabPage();
   @override
   Widget build(BuildContext context) {
     //toast提示必须为APP的顶层组件
@@ -43,7 +41,7 @@ class MyApp extends StatelessWidget {
               navigatorKey: RouteUtils.navigatorKey,
               onGenerateRoute: Routes.generateRoute,
               initialRoute: RoutePath.tab,
-              home: TabPage(),
+              home: tabPage,
             );
           },
         ));

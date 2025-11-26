@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:demo10/manager/FriendListManager.dart';
 import 'package:demo10/pages/chat/groupChat_page.dart';
@@ -15,10 +16,12 @@ import 'package:demo10/repository/datas/home_list_data.dart';
 import 'package:demo10/repository/datas/login_data.dart';
 import 'package:demo10/repository/datas/search_hot_keys_data.dart';
 import 'package:demo10/repository/datas/user/updateUserInfo_data.dart';
+import 'package:demo10/repository/datas/user/userInfo_data.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter/cupertino.dart';
-
+import 'package:path/path.dart';
 import '../http/dio_instance.dart';
+import 'package:mime/mime.dart';
+import 'package:http_parser/http_parser.dart';
 
 class Api {
   static Api instance = Api._();
@@ -201,13 +204,79 @@ class Api {
     print("保存聊天消息到后端: ${response.data}");
   }
 
+  //获取用户数据
+  Future<UserInfoData> getUserInfo() async {
+    Response response = await DioInstance.instance().get(
+      path: "/user/getuserinfo",
+    );
+    return UserInfoData.fromJson(response.data['data']);
+  }
+
   //更新用户数据
-  Future<bool> updateUserInfo(UpdateUserInfo updateUserInfoDTO) async
-  {
+  Future<bool> updateUserInfo(UserInfoDTO userInfoDTO) async {
     Response response = await DioInstance.instance().post(
       path: "/user/updateuserinfo",
-      queryParameters: {'updateUserInfoDTO': updateUserInfoDTO},
+      queryParameters: {'updateUserInfoDTO': userInfoDTO},
     );
-    return response.data;
+    return response.data['data'];
+  }
+
+  //上传头像到s3
+  Future<bool> uploadAvatar(String filePath, String fileName) async {
+    final mimeType = lookupMimeType(filePath) ?? 'application/octet-stream';
+    final formData = FormData.fromMap({
+      'file': await MultipartFile.fromFile(
+        filePath,
+        filename: fileName,
+        contentType: DioMediaType.parse(mimeType),
+      ),
+    });
+    Response response = await DioInstance.instance().put(
+      path: "/user/uploadavatar",
+      data: formData,
+    );
+    return response.data['data'];
+  }
+
+  //添加群成员
+  Future<bool> addGroupMembers(int groupId, List<int> selectedFriends) async {
+    Response response = await DioInstance.instance().post(
+      path: "/group/addgroupmembers/$groupId",
+      data: {"selectedFriends": selectedFriends},
+    );
+    return response.data['data'];
+  }
+
+  //移除群成员
+  Future<bool> removeGroupMembers(
+    int groupId,
+    List<int> selectedFriends,
+  ) async {
+    Response response = await DioInstance.instance().post(
+      path: "/group/removegroupmembers/$groupId",
+      data: {"selectedFriends": selectedFriends},
+    );
+    return response.data['data'];
+  }
+
+  //获取livekittoken
+  Future<String> getLivekitToken(int groupId) async {
+    Response response = await DioInstance.instance().get(
+      path: "/group/getlivekittoken/$groupId",
+    );
+    return response.data['data'];
+  }
+
+  //推送帖子
+  Future<String> postTimeline(
+    int? id,
+    String context,
+    List<String> imgUrls,
+  ) async {
+    Response response = await DioInstance.instance().post(
+      path: "/timeline/posttimeline",
+      data: {"id": id, "context": context, "imgUrls": imgUrls},
+    );
+    return response.data['data'];
   }
 }

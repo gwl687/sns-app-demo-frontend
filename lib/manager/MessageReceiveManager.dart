@@ -15,6 +15,8 @@ class MessageReceiveManager {
       "private": privateMessage,
       "group": groupMessage,
       "joinGroupChat": joinGroupMessage,
+      "groupMessageChange": groupMessageChange,
+      "timelinepublish": timelinePublish,
     };
   }
 
@@ -63,6 +65,15 @@ class MessageReceiveManager {
     print("收到群聊消息: $data");
   }
 
+  //收到改变好友名消息
+  void groupMessageChange(Map<String, dynamic> data) async {
+    print("收到好友改名消息: $data");
+    Chatlistmanager.instance.loadFriends();
+  }
+
+  //收到改变群名消息
+  //void groupNameChange() {}
+
   //这里收到的data里应该只需要groupid,然后直接从后端数据库查(之后在做本地数据库)
   void joinGroupMessage(Map<String, dynamic> data) async {
     print("收到加入群组消息: $data");
@@ -76,5 +87,9 @@ class MessageReceiveManager {
     print("群名为${_groupName}");
     GroupChatData groupChat = await Api.instance.getGroupChat(_groupId);
     Chatlistmanager.instance.addGroup(groupChat);
+  }
+
+  void timelinePublish(Map<String, dynamic> data) async {
+
   }
 }

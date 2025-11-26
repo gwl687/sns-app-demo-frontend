@@ -74,8 +74,32 @@ class DioInstance {
       cancelToken: cancelToken,
     );
   }
+  ///put request
+  Future<Response> put({
+    required String path,
+    required Object? data,
+    Map<String, dynamic>? param,
+    Options? options,
+    CancelToken? cancelToken,
+  }) async {
+    return await _dio.put(
+      path,
+      queryParameters: param,
+      data: data,
+      options: Options(
+        method: HttpMethod.PUT,
+        receiveTimeout: _defaultTime,
+        sendTimeout: _defaultTime,
+        headers: {
+          'Authorization':
+          'Bearer ${await SpUtils.getString(Constants.SP_Token)}',
+        },
+      ),
+      cancelToken: cancelToken,
+    );
+  }
 
-  //POST请求方法
+  ///POST请求方法
   Future<Response> post({
     required String path,
     Object? data,

@@ -13,11 +13,11 @@ void main() async {
     //  'Authorization': 'Bearer $token',
   );
   WidgetsFlutterBinding.ensureInitialized();
-  ChatDbManager.deleteFromTable('group_messages');
-  List<Map<String, dynamic>> gData = await ChatDbManager.selectAll(
-    'group_messages',
-  );
-  runApp(const MyApp());
+  // ChatDbManager.deleteFromTable('group_messages');
+  // List<Map<String, dynamic>> gData = await ChatDbManager.selectAll(
+  //   'group_messages',
+  // );
+  runApp(MyApp());
 }
 
 // class MyApp extends StatelessWidget {

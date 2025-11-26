@@ -24,6 +24,13 @@ class _FriendPage extends State<FriendChatList_page> {
   @override
   void initState() {
     super.initState();
+    setState(() {
+
+    });
+  }
+
+  void initData(){
+
   }
 
 

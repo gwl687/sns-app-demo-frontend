@@ -1,9 +1,13 @@
 import 'dart:io';
+import 'package:demo10/app.dart';
 import 'package:demo10/constants.dart';
 import 'package:demo10/manager/ChatListManager.dart';
 import 'package:demo10/manager/ChatMessageManager.dart';
 import 'package:demo10/manager/FriendListManager.dart';
+import 'package:demo10/manager/LoginSuccessManager.dart';
+import 'package:demo10/manager/TabPageManager.dart';
 import 'package:demo10/manager/WebSocketManager.dart';
+import 'package:demo10/pages/auth/loginSuccess_page.dart';
 import 'package:demo10/repository/api.dart';
 import 'package:demo10/repository/datas/login_data.dart';
 import 'package:demo10/utils/sp_utils.dart';
@@ -80,6 +84,8 @@ class _LoginPageState extends State<LoginPage> {
         await FriendListManager.instance.loadFriends();
         //load chatFriend list
         await Chatlistmanager.instance.loadFriends();
+        //load loginsuccesspage data
+        //await
         //加载离线时收到的消息
         await ChatMessageManager.instance.loadMessages();
         return true;
@@ -173,10 +179,11 @@ class _LoginPageState extends State<LoginPage> {
                   bool? success = await login();
                   if (success == true) {
                     _saveAccount(_usernameController.text);
-                    print("保存账号${_usernameController.text}");
-                    showToast("登录成功");
+                  //print("保存账号${_usernameController.text}");
+                  //showToast("登录成功");
                     //跳转到登录成功页
-                    loginNotifier.value = 1;
+                    await LoginSuccessManager.instance.init();
+                    TabPageManager.loginNotifier.value = 1;
                   }
                 },
                 child: const Text("登录"),
