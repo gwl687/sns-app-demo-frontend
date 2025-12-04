@@ -271,12 +271,29 @@ class Api {
   Future<String> postTimeline(
     int? id,
     String context,
-    List<String> imgUrls,
+    List<String> filePaths,
   ) async {
+    List<MultipartFile> files = [];
+    for (String path in filePaths) {
+      final mimeType = lookupMimeType(path) ?? 'application/octet-stream';
+      files.add(
+        await MultipartFile.fromFile(
+          path,
+          filename: path.split('/').last,
+          contentType: DioMediaType.parse(mimeType),
+        ),
+      );
+    }
+    FormData formData= FormData.fromMap({
+      "userId": id,
+      "context": context,
+      "files": files,
+    });
     Response response = await DioInstance.instance().post(
       path: "/timeline/posttimeline",
-      data: {"id": id, "context": context, "imgUrls": imgUrls},
+      data: formData,
     );
+
     return response.data['data'];
   }
 }

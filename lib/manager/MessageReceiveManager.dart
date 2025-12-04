@@ -90,6 +90,6 @@ class MessageReceiveManager {
   }
 
   void timelinePublish(Map<String, dynamic> data) async {
-
+    print("收到帖子推送了!");
   }
 }

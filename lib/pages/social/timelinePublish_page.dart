@@ -1,8 +1,10 @@
+import 'dart:io';
 import 'package:demo10/repository/api.dart';
 import 'package:demo10/constants.dart';
 import 'package:demo10/utils/sp_utils.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 class TimelinePublishPage extends StatefulWidget {
   @override
@@ -11,6 +13,19 @@ class TimelinePublishPage extends StatefulWidget {
 
 class _TimelinePublishPage extends State<TimelinePublishPage> {
   final TextEditingController _controller = TextEditingController();
+  final ImagePicker _picker = ImagePicker();
+
+  List<XFile> _images = [];   // 选中的图片文件
+
+  // 选择多张图片
+  Future<void> pickImages() async {
+    final List<XFile> imgs = await _picker.pickMultiImage();
+    if (imgs.isNotEmpty) {
+      setState(() {
+        _images.addAll(imgs);
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -20,6 +35,8 @@ class _TimelinePublishPage extends State<TimelinePublishPage> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
+
+            /// 输入框
             TextField(
               controller: _controller,
               maxLines: 6,
@@ -28,13 +45,77 @@ class _TimelinePublishPage extends State<TimelinePublishPage> {
                 border: OutlineInputBorder(),
               ),
             ),
+
             SizedBox(height: 16),
+
+            /// 图片预览
+            _images.isNotEmpty
+                ? SizedBox(
+              height: 100,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: _images.length,
+                itemBuilder: (_, index) {
+                  return Stack(
+                    children: [
+                      Container(
+                        margin: EdgeInsets.only(right: 10),
+                        child: Image.file(
+                          File(_images[index].path),
+                          width: 100,
+                          height: 100,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                      /// 删除按钮
+                      Positioned(
+                        right: 5,
+                        top: 5,
+                        child: InkWell(
+                          onTap: () {
+                            setState(() {
+                              _images.removeAt(index);
+                            });
+                          },
+                          child: CircleAvatar(
+                            radius: 12,
+                            backgroundColor: Colors.black54,
+                            child: Icon(Icons.close, size: 14, color: Colors.white),
+                          ),
+                        ),
+                      )
+                    ],
+                  );
+                },
+              ),
+            )
+                : Container(),
+
+            SizedBox(height: 16),
+
+            /// 选择图片按钮
+            Row(
+              children: [
+                ElevatedButton.icon(
+                  onPressed: pickImages,
+                  icon: Icon(Icons.image),
+                  label: Text("Add Images"),
+                ),
+              ],
+            ),
+
+            SizedBox(height: 16),
+
+            /// 发布按钮（不上传图片）
             ElevatedButton(
               onPressed: () async {
                 int? id = await SpUtils.getInt(Constants.SP_User_Id);
+
+                /// 图片不上传，所以传空列表
                 List<String> imgUrls = [];
-                //推送给粉丝
-                Api.instance.postTimeline(id, _controller.text, imgUrls);
+
+                await Api.instance.postTimeline(id, _controller.text, imgUrls);
+
                 Navigator.pop(context, _controller.text);
               },
               child: Text("Post"),

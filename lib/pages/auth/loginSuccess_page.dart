@@ -7,8 +7,10 @@ import 'package:demo10/manager/ChatFriendManager.dart';
 import 'package:demo10/manager/ChatListManager.dart';
 import 'package:demo10/manager/FriendListManager.dart';
 import 'package:demo10/manager/LoginSuccessManager.dart';
+import 'package:demo10/manager/TabPageManager.dart';
 import 'package:demo10/manager/WebSocketManager.dart';
 import 'package:demo10/pages/auth/login_page.dart';
+import 'package:demo10/pages/tab_page.dart';
 import 'package:demo10/repository/api.dart';
 import 'package:demo10/repository/datas/user/updateUserInfo_data.dart';
 import 'package:demo10/repository/datas/user/userInfo_data.dart';
@@ -23,7 +25,7 @@ class LoginSuccessPage extends StatefulWidget {
 }
 
 class _LoginSuccessPage extends State<LoginSuccessPage> {
-  static final _LoginSuccessPage loginSuceessPage  = _LoginSuccessPage();
+  static final _LoginSuccessPage loginSuceessPage = _LoginSuccessPage();
   File? _avatarFile; // 存储用户选择的头像文件
   String? _avatarFileUrl;
   String? _username;
@@ -36,7 +38,6 @@ class _LoginSuccessPage extends State<LoginSuccessPage> {
     super.initState();
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -48,7 +49,10 @@ class _LoginSuccessPage extends State<LoginSuccessPage> {
             // 头像
             GestureDetector(
               onTap: _pickImage,
-              child: CircleAvatar(radius: 50, backgroundImage: LoginSuccessManager.instance.avatarImage),
+              child: CircleAvatar(
+                radius: 50,
+                backgroundImage: LoginSuccessManager.instance.avatarImage,
+              ),
             ),
             SizedBox(height: 20),
 
@@ -88,7 +92,7 @@ class _LoginSuccessPage extends State<LoginSuccessPage> {
     FriendListManager.instance.clearFriendList();
     //我的页面
     _clearLoginSuccess();
-    loginNotifier.value = 0;
+    TabPageManager.loginNotifier.value = 0;
   }
 
   /// 从相册选择图片
@@ -100,7 +104,9 @@ class _LoginSuccessPage extends State<LoginSuccessPage> {
     if (pickedFile != null) {
       setState(() {
         LoginSuccessManager.instance.avatarFile = File(pickedFile.path);
-        LoginSuccessManager.instance.avatarImage = FileImage(LoginSuccessManager.instance.avatarFile!);
+        LoginSuccessManager.instance.avatarImage = FileImage(
+          LoginSuccessManager.instance.avatarFile!,
+        );
         //upload to s3
         uploadToS3(pickedFile.path);
         //update mysql user table
@@ -112,9 +118,7 @@ class _LoginSuccessPage extends State<LoginSuccessPage> {
 
   /// 上传到s3
   Future<void> uploadToS3(String filePath) async {
-    final file = File(filePath);
     final fileName = basename(filePath);
-    //final bytes = await file.readAsBytes();
     await Api.instance.uploadAvatar(filePath, fileName);
   }
 
