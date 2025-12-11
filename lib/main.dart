@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'app.dart';
 
 void main() async {
-  //String token = "eyJhbGciOiJIUzI1NiJ9.eyJpZCI6OCwiaWF0IjoxNzU4MjAzMjgyLCJleHAiOjE3NTg4MDgwODJ9.gji6EcdxpDKqQIYg2rjsRDZXDEFajsvp4Nskri4QOeQ";
   DioInstance.instance().initDio(
     //baseUrl: "http://10.0.2.2:8080/",
     baseUrl: "http://192.168.0.12:8080/",

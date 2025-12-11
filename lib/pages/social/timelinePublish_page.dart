@@ -114,7 +114,7 @@ class _TimelinePublishPage extends State<TimelinePublishPage> {
                 /// 图片不上传，所以传空列表
                 List<String> imgUrls = [];
 
-                await Api.instance.postTimeline(id, _controller.text, imgUrls);
+                await Api.instance.postTimeline(id, _controller.text, _images);
 
                 Navigator.pop(context, _controller.text);
               },

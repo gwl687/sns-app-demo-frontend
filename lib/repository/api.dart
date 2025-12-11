@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:camera/camera.dart';
 import 'package:demo10/manager/FriendListManager.dart';
 import 'package:demo10/pages/chat/groupChat_page.dart';
 import 'package:demo10/repository/datas/auth_data.dart';
@@ -271,20 +272,21 @@ class Api {
   Future<String> postTimeline(
     int? id,
     String context,
-    List<String> filePaths,
+    List<XFile> imgFiles,
   ) async {
     List<MultipartFile> files = [];
-    for (String path in filePaths) {
-      final mimeType = lookupMimeType(path) ?? 'application/octet-stream';
+
+    for (XFile file in imgFiles) {
+      //final mimeType = lookupMimeType(path) ?? 'application/octet-stream';
       files.add(
         await MultipartFile.fromFile(
-          path,
-          filename: path.split('/').last,
-          contentType: DioMediaType.parse(mimeType),
+          file.path,
+          filename: file.name,
+          // contentType: DioMediaType.parse(mimeType),
         ),
       );
     }
-    FormData formData= FormData.fromMap({
+    FormData formData = FormData.fromMap({
       "userId": id,
       "context": context,
       "files": files,
