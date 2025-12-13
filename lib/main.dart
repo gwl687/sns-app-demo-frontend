@@ -1,5 +1,7 @@
 import 'package:demo10/http/dio_instance.dart';
 import 'package:demo10/manager/ChatDBManager.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 
 import 'app.dart';
@@ -12,10 +14,6 @@ void main() async {
     //  'Authorization': 'Bearer $token',
   );
   WidgetsFlutterBinding.ensureInitialized();
-  // ChatDbManager.deleteFromTable('group_messages');
-  // List<Map<String, dynamic>> gData = await ChatDbManager.selectAll(
-  //   'group_messages',
-  // );
   runApp(MyApp());
 }
 

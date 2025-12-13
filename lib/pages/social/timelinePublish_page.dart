@@ -15,7 +15,7 @@ class _TimelinePublishPage extends State<TimelinePublishPage> {
   final TextEditingController _controller = TextEditingController();
   final ImagePicker _picker = ImagePicker();
 
-  List<XFile> _images = [];   // 选中的图片文件
+  List<XFile> _images = []; // 选中的图片文件
 
   // 选择多张图片
   Future<void> pickImages() async {
@@ -35,7 +35,6 @@ class _TimelinePublishPage extends State<TimelinePublishPage> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-
             /// 输入框
             TextField(
               controller: _controller,
@@ -51,44 +50,49 @@ class _TimelinePublishPage extends State<TimelinePublishPage> {
             /// 图片预览
             _images.isNotEmpty
                 ? SizedBox(
-              height: 100,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: _images.length,
-                itemBuilder: (_, index) {
-                  return Stack(
-                    children: [
-                      Container(
-                        margin: EdgeInsets.only(right: 10),
-                        child: Image.file(
-                          File(_images[index].path),
-                          width: 100,
-                          height: 100,
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                      /// 删除按钮
-                      Positioned(
-                        right: 5,
-                        top: 5,
-                        child: InkWell(
-                          onTap: () {
-                            setState(() {
-                              _images.removeAt(index);
-                            });
-                          },
-                          child: CircleAvatar(
-                            radius: 12,
-                            backgroundColor: Colors.black54,
-                            child: Icon(Icons.close, size: 14, color: Colors.white),
-                          ),
-                        ),
-                      )
-                    ],
-                  );
-                },
-              ),
-            )
+                    height: 100,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: _images.length,
+                      itemBuilder: (_, index) {
+                        return Stack(
+                          children: [
+                            Container(
+                              margin: EdgeInsets.only(right: 10),
+                              child: Image.file(
+                                File(_images[index].path),
+                                width: 100,
+                                height: 100,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+
+                            /// 删除按钮
+                            Positioned(
+                              right: 5,
+                              top: 5,
+                              child: InkWell(
+                                onTap: () {
+                                  setState(() {
+                                    _images.removeAt(index);
+                                  });
+                                },
+                                child: CircleAvatar(
+                                  radius: 12,
+                                  backgroundColor: Colors.black54,
+                                  child: Icon(
+                                    Icons.close,
+                                    size: 14,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                  )
                 : Container(),
 
             SizedBox(height: 16),
@@ -114,7 +118,12 @@ class _TimelinePublishPage extends State<TimelinePublishPage> {
                 /// 图片不上传，所以传空列表
                 List<String> imgUrls = [];
 
-                await Api.instance.postTimeline(id, _controller.text, _images);
+                await Api.instance.postTimeline(
+                  id,
+                  _controller.text,
+                  _images,
+                  DateTime.now().toString(),
+                );
 
                 Navigator.pop(context, _controller.text);
               },

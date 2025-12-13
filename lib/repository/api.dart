@@ -92,10 +92,18 @@ class Api {
   }
 
   ///登录
-  Future<LoginData> login({String? emailaddress, String? password}) async {
+  Future<LoginData> login({
+    String? emailaddress,
+    String? password,
+    String? pushToken,
+  }) async {
     Response response = await DioInstance.instance().post(
       path: "/user/login",
-      data: {"emailaddress": emailaddress, "password": password},
+      data: {
+        "emailaddress": emailaddress,
+        "password": password,
+        "pushToken": pushToken,
+      },
     );
     print("用户：${response.data['data']['id']}登录");
     return LoginData.fromJson(response.data);
@@ -273,6 +281,7 @@ class Api {
     int? id,
     String context,
     List<XFile> imgFiles,
+    String createTime,
   ) async {
     List<MultipartFile> files = [];
 
@@ -290,6 +299,7 @@ class Api {
       "userId": id,
       "context": context,
       "files": files,
+      "createTime": createTime,
     });
     Response response = await DioInstance.instance().post(
       path: "/timeline/posttimeline",

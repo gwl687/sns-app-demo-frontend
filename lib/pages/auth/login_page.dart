@@ -11,6 +11,8 @@ import 'package:demo10/pages/auth/loginSuccess_page.dart';
 import 'package:demo10/repository/api.dart';
 import 'package:demo10/repository/datas/login_data.dart';
 import 'package:demo10/utils/sp_utils.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:oktoast/oktoast.dart';
 import 'package:demo10/pages/tab_page.dart';
@@ -65,11 +67,15 @@ class _LoginPageState extends State<LoginPage> {
 
   /// 登录方法
   Future<bool?> login() async {
+    FirebaseMessaging messaging = FirebaseMessaging.instance;
+    String? pushToken = await messaging.getToken();
+
     if (loginInfo.name != null && loginInfo.password != null) {
       // 调你的接口
       LoginData data = await Api.instance.login(
         emailaddress: loginInfo.name,
         password: loginInfo.password,
+        pushToken: pushToken,
       );
 
       if (data.data?.userName != null && data.data!.userName!.isNotEmpty) {
@@ -179,8 +185,8 @@ class _LoginPageState extends State<LoginPage> {
                   bool? success = await login();
                   if (success == true) {
                     _saveAccount(_usernameController.text);
-                  //print("保存账号${_usernameController.text}");
-                  //showToast("登录成功");
+                    //print("保存账号${_usernameController.text}");
+                    //showToast("登录成功");
                     //跳转到登录成功页
                     await LoginSuccessManager.instance.init();
                     TabPageManager.loginNotifier.value = 1;
