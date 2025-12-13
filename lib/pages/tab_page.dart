@@ -15,6 +15,7 @@ import 'package:demo10/pages/hot_key/hot_key_page.dart';
 import 'package:demo10/pages/personal/personal_page.dart';
 import 'package:demo10/pages/social/timeline_page.dart';
 import 'package:demo10/utils/sp_utils.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -28,6 +29,7 @@ class TabPage extends StatefulWidget {
 
   @override
   State createState() {
+    Firebase.initializeApp();
     return _TabPageState();
   }
 }

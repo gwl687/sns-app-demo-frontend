@@ -69,13 +69,20 @@ class _LoginPageState extends State<LoginPage> {
   Future<bool?> login() async {
     FirebaseMessaging messaging = FirebaseMessaging.instance;
     String? pushToken = await messaging.getToken();
-
+    String platform;
+    if (Platform.isAndroid) {
+      platform = 'android';
+    } else if (Platform.isIOS) {
+      platform = 'ios';
+    } else {
+      platform = 'other';
+    }
     if (loginInfo.name != null && loginInfo.password != null) {
       // 调你的接口
       LoginData data = await Api.instance.login(
         emailaddress: loginInfo.name,
         password: loginInfo.password,
-        pushToken: pushToken,
+        pushToken: platform + ':' + pushToken!,
       );
 
       if (data.data?.userName != null && data.data!.userName!.isNotEmpty) {

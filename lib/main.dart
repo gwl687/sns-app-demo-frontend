@@ -1,3 +1,4 @@
+import 'package:demo10/firebase_options.dart';
 import 'package:demo10/http/dio_instance.dart';
 import 'package:demo10/manager/ChatDBManager.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -13,7 +14,11 @@ void main() async {
     //headers: {
     //  'Authorization': 'Bearer $token',
   );
+
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform, //
+  );
   runApp(MyApp());
 }
 
