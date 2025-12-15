@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:camera/camera.dart';
 import 'package:demo10/manager/FriendListManager.dart';
 import 'package:demo10/pages/chat/groupChat_page.dart';
+import 'package:demo10/pages/social/store/timeline_vm.dart';
 import 'package:demo10/repository/datas/auth_data.dart';
 import 'package:demo10/repository/datas/common_website_data.dart';
 import 'package:demo10/repository/datas/friendList_data.dart';
@@ -16,6 +17,7 @@ import 'package:demo10/repository/datas/home_banner_data.dart';
 import 'package:demo10/repository/datas/home_list_data.dart';
 import 'package:demo10/repository/datas/login_data.dart';
 import 'package:demo10/repository/datas/search_hot_keys_data.dart';
+import 'package:demo10/repository/datas/timeline/timlinePost_data.dart';
 import 'package:demo10/repository/datas/user/updateUserInfo_data.dart';
 import 'package:demo10/repository/datas/user/userInfo_data.dart';
 import 'package:dio/dio.dart';
@@ -204,8 +206,7 @@ class Api {
 
   //保存群消息到后端数据库
   Future<void> saveGroupMessage(
-    GroupMessageDataData groupMessageDataData,
-  ) async {
+      GroupMessageDataData groupMessageDataData,) async {
     Response response = await DioInstance.instance().post(
       path: "/user/saveGroupMessage",
       queryParameters: {'groupMessageDTO': groupMessageDataData},
@@ -257,10 +258,8 @@ class Api {
   }
 
   //移除群成员
-  Future<bool> removeGroupMembers(
-    int groupId,
-    List<int> selectedFriends,
-  ) async {
+  Future<bool> removeGroupMembers(int groupId,
+      List<int> selectedFriends,) async {
     Response response = await DioInstance.instance().post(
       path: "/group/removegroupmembers/$groupId",
       data: {"selectedFriends": selectedFriends},
@@ -277,12 +276,10 @@ class Api {
   }
 
   //推送帖子
-  Future<String> postTimeline(
-    int? id,
-    String context,
-    List<XFile> imgFiles,
-    String createTime,
-  ) async {
+  Future<String> postTimeline(int? id,
+      String context,
+      List<XFile> imgFiles,
+      String createTime,) async {
     List<MultipartFile> files = [];
 
     for (XFile file in imgFiles) {
@@ -299,7 +296,6 @@ class Api {
       "userId": id,
       "context": context,
       "files": files,
-      "createTime": createTime,
     });
     Response response = await DioInstance.instance().post(
       path: "/timeline/posttimeline",
@@ -307,5 +303,17 @@ class Api {
     );
 
     return response.data['data'];
+  }
+
+  //刷新获取帖子
+  Future<List<TimelinePost>> getTimelinePost() async {
+    Response response = await DioInstance.instance().get(
+      path: "/timeline/gettimelinepost",
+    );
+    final List list = response.data['data'];
+
+    return list
+        .map((json) => TimelinePost.fromJson(json))
+        .toList();
   }
 }
