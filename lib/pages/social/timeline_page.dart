@@ -104,8 +104,12 @@ class _TimelinePage extends State<TimelinePage> {
                           alignment: Alignment.centerRight,
                           child: IconButton(
                             icon: Icon(
-                              Icons.favorite_border,
-                              color: Colors.red,
+                              posts[index].hasLikedByMe
+                                  ? Icons.favorite
+                                  : Icons.favorite_border,
+                              color: posts[index].hasLikedByMe
+                                  ? Colors.red
+                                  : Colors.grey,
                               size: 28,
                             ),
                             onPressed: () {
@@ -117,29 +121,43 @@ class _TimelinePage extends State<TimelinePage> {
                         ),
 
                         /// 如果有点赞才显示头像 + 次数区域
-                        if (currentLikes > 0) ...[
-                          Divider(),
-                          Column(
-                            children: [
-                              CircleAvatar(
-                                radius: 18,
-                                backgroundImage:
-                                    LoginSuccessManager.instance.avatarImage!,
-                              ),
-                              SizedBox(width: 6),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                        if (posts[index].topLikeUsers.isNotEmpty) ...[
+                          const Divider(),
+
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: posts[index].topLikeUsers.map((user) {
+                              return Row(
+                                mainAxisSize: MainAxisSize.min,
                                 children: [
+                                  CircleAvatar(
+                                    radius: 16,
+                                    backgroundImage: NetworkImage(
+                                      user.avatarUrl,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 4),
                                   Text(
-                                    "$currentLikes",
-                                    style: TextStyle(
-                                      fontSize: 16,
+                                    "${user.userLikeCount}",
+                                    style: const TextStyle(
+                                      fontSize: 14,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
                                 ],
-                              ),
-                            ],
+                              );
+                            }).toList(),
+                          ),
+
+                          const SizedBox(height: 6),
+
+                          Text(
+                            "${posts[index].totalLikeCount}",
+                            style: const TextStyle(
+                              fontSize: 13,
+                              color: Colors.black
+                            ),
                           ),
                         ],
                       ],
