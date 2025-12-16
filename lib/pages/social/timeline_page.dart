@@ -138,13 +138,6 @@ class _TimelinePage extends State<TimelinePage> {
                                     ),
                                   ),
                                   const SizedBox(width: 4),
-                                  Text(
-                                    "${user.userLikeCount}",
-                                    style: const TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
                                 ],
                               );
                             }).toList(),
