@@ -7,16 +7,25 @@ String timelinePostToJson(TimelinePost data) =>
     json.encode(data.toJson());
 
 class TimelinePost {
+  /// 时间线帖子ID（后端字段：timelineId）
+  int timelineId;
+
   String userName;
   String context;
   DateTime createdAt;
   List<String> imgUrls;
 
+  /// 总点赞数
   int totalLikeCount;
+
+  /// 当前用户点赞次数（>0 即点过赞）
   int likedByMeCount;
+
+  /// 点赞用户（头像列表）
   List<LikeUser> topLikeUsers;
 
   TimelinePost({
+    required this.timelineId,
     required this.userName,
     required this.context,
     required this.createdAt,
@@ -28,6 +37,7 @@ class TimelinePost {
 
   factory TimelinePost.fromJson(Map<String, dynamic> json) {
     return TimelinePost(
+      timelineId: json['timelineId'],
       userName: json['userName'] ?? '',
       context: json['context'] ?? '',
       createdAt: DateTime.parse(json['createdAt']),
@@ -45,17 +55,17 @@ class TimelinePost {
   }
 
   Map<String, dynamic> toJson() => {
+    "timelineId": timelineId,
     "userName": userName,
     "context": context,
     "createdAt": createdAt.toIso8601String(),
     "imgUrls": imgUrls,
     "totalLikeCount": totalLikeCount,
     "likedByMeCount": likedByMeCount,
-    "topLikeUsers":
-    topLikeUsers.map((e) => e.toJson()).toList(),
+    "topLikeUsers": topLikeUsers.map((e) => e.toJson()).toList(),
   };
 
-  ///判断红心
+  /// 是否点过赞（红心判断）
   bool get hasLikedByMe => likedByMeCount > 0;
 }
 

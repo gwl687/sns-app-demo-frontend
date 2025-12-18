@@ -1,8 +1,10 @@
-import 'package:demo10/manager/LoginSuccessManager.dart';
+import 'package:demo10/constants.dart';
+import 'package:demo10/pages/social/store/timeline_data.dart';
 import 'package:demo10/pages/social/store/timeline_vm.dart';
 import 'package:demo10/pages/social/timelinePublish_page.dart';
 import 'package:demo10/repository/api.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -15,46 +17,51 @@ class _TimelinePage extends State<TimelinePage> {
   // 模拟帖子
   List<String> posts = [];
 
-  //vm
-  TimelineViewModel timelineViewModel = new TimelineViewModel();
-
-  // key: post index, value: like count of CURRENT USER
-  Map<int, int> likeCount = {};
+  // 点赞总次数
+  Map<int, int> totalLikeCount = {};
 
   final String userAvatar = "https://i.pravatar.cc/150?img=3"; // 模拟当前用户头像
 
-  //点赞
-  void hitLike() {}
+  @override
+  void initState() {
+    super.initState();
+    final vm = context.read<TimelineViewModel>();
+    //vm.load();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) {
-        final vm = TimelineViewModel();
-        vm.load();
-        return vm;
-      },
-      child: Scaffold(
-        appBar: AppBar(title: Text("Timeline")),
-        //发帖按钮
-        floatingActionButton: FloatingActionButton(
-          child: Icon(Icons.add),
-          onPressed: () async {
-            // 跳转到发帖页面
-            await Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => TimelinePublishPage()),
-            );
-          },
-        ),
-        body: Consumer<TimelineViewModel>(
-          builder: (context, vm, child) {
-            final posts = vm.timelinePosts;
-            return ListView.builder(
+    return Scaffold(
+      appBar: AppBar(title: Text("Timeline")),
+      //发帖按钮
+      floatingActionButton: FloatingActionButton(
+        child: Icon(Icons.add),
+        onPressed: () async {
+          // 跳转到发帖页面
+          await Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => TimelinePublishPage()),
+          );
+        },
+      ),
+      body: Consumer<TimelineViewModel>(
+        builder: (context, vm, child) {
+          final posts = vm.timelinePosts;
+          return RefreshIndicator(
+            onRefresh: () async {
+              await vm.load();
+            },
+            child: ListView.builder(
               itemCount: posts.length,
               itemBuilder: (context, index) {
-                int currentLikes = likeCount[index] ?? 0;
-
+                bool hasLikedByme = false;
+                //根据点赞数排序后的postId:<imageprovider:likeCount>map
+                final sortedAvatars = vm.avatars[index]!.entries.toList()
+                  ..sort((a, b) => b.value.compareTo(a.value));
+                if (vm.heartColorChange.containsKey(index) &&
+                    vm.heartColorChange[index] == true) {
+                  hasLikedByme = true;
+                }
                 return Card(
                   margin: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   child: Padding(
@@ -100,56 +107,84 @@ class _TimelinePage extends State<TimelinePage> {
                           ),
 
                         /// 右下角爱心按钮
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: IconButton(
-                            icon: Icon(
-                              posts[index].hasLikedByMe
-                                  ? Icons.favorite
-                                  : Icons.favorite_border,
-                              color: posts[index].hasLikedByMe
-                                  ? Colors.red
-                                  : Colors.grey,
-                              size: 28,
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            /// 爱心上面的次数
+                            Text(
+                              (vm.heartLikeCount[index] ?? 0).toString(),
+                              style: TextStyle(fontSize: 20, color: Colors.red),
                             ),
-                            onPressed: () {
-                              setState(() {
-                                likeCount[index] = (likeCount[index] ?? 0) + 1;
-                              });
-                            },
-                          ),
+                            const SizedBox(height: 12),
+
+                            ///爱心
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: IconButton(
+                                icon: Icon(
+                                  hasLikedByme
+                                      ? Icons.favorite
+                                      : Icons.favorite_border,
+                                  color: hasLikedByme
+                                      ? Colors.red
+                                      : Colors.grey,
+                                  size: 28,
+                                ),
+                                onPressed: () {
+                                  vm.likeHit(index, posts[index].timelineId);
+                                },
+                              ),
+                            ),
+                          ],
                         ),
 
                         /// 如果有点赞才显示头像 + 次数区域
-                        if (posts[index].topLikeUsers.isNotEmpty) ...[
+                        if (vm.avatars.length > 0) ...[
                           const Divider(),
-
                           Wrap(
                             spacing: 8,
                             runSpacing: 8,
-                            children: posts[index].topLikeUsers.map((user) {
-                              return Row(
+                            children: sortedAvatars.map((entry) {
+                              final userId = entry.key;
+                              final likeCount = entry.value;
+                              return Column(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   CircleAvatar(
                                     radius: 16,
-                                    backgroundImage: NetworkImage(
-                                      user.avatarUrl,
+                                    backgroundImage:
+                                        (vm.userAvatarMap[userId] != null &&
+                                            vm
+                                                .userAvatarMap[userId]!
+                                                .isNotEmpty)
+                                        ? NetworkImage(
+                                            vm.userAvatarMap[userId]!,
+                                          )
+                                        : NetworkImage(
+                                            Constants.DefaultAvatarurl,
+                                          ),
+                                  ),
+
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    likeCount.toString(),
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.black,
                                     ),
                                   ),
-                                  const SizedBox(width: 4),
                                 ],
                               );
                             }).toList(),
                           ),
 
                           const SizedBox(height: 6),
-
+                          //总点赞数
                           Text(
-                            "${posts[index].totalLikeCount}",
+                            "TOTALLIKES: ${vm.totalLikeCount[index] ?? 0}",
                             style: const TextStyle(
                               fontSize: 13,
-                              color: Colors.black
+                              color: Colors.black,
                             ),
                           ),
                         ],
@@ -158,9 +193,9 @@ class _TimelinePage extends State<TimelinePage> {
                   ),
                 );
               },
-            );
-          },
-        ),
+            ),
+          );
+        },
       ),
     );
   }

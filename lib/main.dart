@@ -1,9 +1,11 @@
 import 'package:demo10/firebase_options.dart';
 import 'package:demo10/http/dio_instance.dart';
 import 'package:demo10/manager/ChatDBManager.dart';
+import 'package:demo10/pages/social/store/timeline_vm.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import 'app.dart';
 
@@ -19,7 +21,16 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform, //
   );
-  runApp(MyApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (_) => TimelineViewModel()
+        ),
+      ],
+      child: MyApp(),
+    ),
+  );
 }
 
 // class MyApp extends StatelessWidget {

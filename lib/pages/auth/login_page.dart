@@ -18,6 +18,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:oktoast/oktoast.dart';
 import 'package:demo10/pages/tab_page.dart';
+import 'package:provider/provider.dart';
 
 final ValueNotifier<int> loginNotifier = ValueNotifier<int>(0);
 
@@ -114,7 +115,8 @@ class _LoginPageState extends State<LoginPage> {
         //load chatFriend list
         await Chatlistmanager.instance.loadFriends();
         //load timeline
-        await timelineViewModel.load();
+        context.read<TimelineViewModel>().load();
+        //await timelineViewModel.load();
         //加载离线时收到的消息
         await ChatMessageManager.instance.loadMessages();
         return true;
@@ -208,8 +210,6 @@ class _LoginPageState extends State<LoginPage> {
                   bool? success = await login();
                   if (success == true) {
                     _saveAccount(_usernameController.text);
-                    //print("保存账号${_usernameController.text}");
-                    //showToast("登录成功");
                     //跳转到登录成功页
                     await LoginSuccessManager.instance.init();
                     TabPageManager.loginNotifier.value = 1;
