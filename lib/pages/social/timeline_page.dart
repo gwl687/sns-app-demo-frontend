@@ -1,10 +1,7 @@
 import 'package:demo10/constants.dart';
-import 'package:demo10/pages/social/store/timeline_data.dart';
 import 'package:demo10/pages/social/store/timeline_vm.dart';
 import 'package:demo10/pages/social/timelinePublish_page.dart';
-import 'package:demo10/repository/api.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -25,7 +22,8 @@ class _TimelinePage extends State<TimelinePage> {
   @override
   void initState() {
     super.initState();
-    final vm = context.read<TimelineViewModel>();
+    //final vm = context.read<TimelineViewModel>();
+    //context.read<TimelineViewModel>();
     //vm.load();
   }
 

@@ -9,37 +9,13 @@ GroupChatData groupChatDataFromJson(String str) => GroupChatData.fromJson(json.d
 String groupChatDataToJson(GroupChatData data) => json.encode(data.toJson());
 
 class GroupChatData {
-  int code;
-  String? msg;
-  Data data;
-
-  GroupChatData({
-    required this.code,
-    required this.msg,
-    required this.data,
-  });
-
-  factory GroupChatData.fromJson(Map<String, dynamic> json) => GroupChatData(
-    code: json["code"],
-    msg: json["msg"],
-    data: Data.fromJson(json["data"]),
-  );
-
-  Map<String, dynamic> toJson() => {
-    "code": code,
-    "msg": msg,
-    "data": data.toJson(),
-  };
-}
-
-class Data {
   int groupId;
   String groupName;
   int ownerId;
   String avatarUrl;
   List<int> memberIds;
 
-  Data({
+  GroupChatData({
     required this.groupId,
     required this.groupName,
     required this.ownerId,
@@ -47,7 +23,7 @@ class Data {
     required this.memberIds,
   });
 
-  factory Data.fromJson(Map<String, dynamic> json) => Data(
+  factory GroupChatData.fromJson(Map<String, dynamic> json) => GroupChatData(
     groupId: json["groupId"],
     groupName: json["groupName"],
     ownerId: json["ownerId"],
@@ -60,6 +36,6 @@ class Data {
     "groupName": groupName,
     "ownerId": ownerId,
     "avatarUrl": avatarUrl,
-    "memberIds": List<int>.from(memberIds.map((x) => x)),
+    "memberIds": List<dynamic>.from(memberIds.map((x) => x)),
   };
 }

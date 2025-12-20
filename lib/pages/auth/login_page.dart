@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'package:demo10/app.dart';
 import 'package:demo10/constants.dart';
 import 'package:demo10/manager/ChatListManager.dart';
 import 'package:demo10/manager/ChatMessageManager.dart';
@@ -8,16 +7,14 @@ import 'package:demo10/manager/FriendListManager.dart';
 import 'package:demo10/manager/LoginSuccessManager.dart';
 import 'package:demo10/manager/TabPageManager.dart';
 import 'package:demo10/manager/WebSocketManager.dart';
-import 'package:demo10/pages/auth/loginSuccess_page.dart';
+import 'package:demo10/pages/friend/friendChatList_vm.dart';
 import 'package:demo10/pages/social/store/timeline_vm.dart';
 import 'package:demo10/repository/api.dart';
 import 'package:demo10/repository/datas/login_data.dart';
 import 'package:demo10/utils/sp_utils.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:oktoast/oktoast.dart';
-import 'package:demo10/pages/tab_page.dart';
 import 'package:provider/provider.dart';
 
 final ValueNotifier<int> loginNotifier = ValueNotifier<int>(0);
@@ -49,7 +46,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   void initState() {
     super.initState();
-    _loadHistoryAccounts(); // ✅ 初始化时加载历史账号
+    _loadHistoryAccounts();
   }
 
   /// 加载历史账号
@@ -95,27 +92,15 @@ class _LoginPageState extends State<LoginPage> {
         SpUtils.saveString(Constants.SP_User_Name, data.data?.userName ?? "");
         SpUtils.saveString(Constants.SP_Token, data.data?.token ?? "");
 
-        //firebaes推送初始化
-        // 前台消息
-        FirebaseMessaging.onMessage.listen((RemoteMessage msg) {
-          print("前台收到消息");
-          FirebaseMessageManager.instance.handleMessage(msg);
-        });
-
-        // 点击通知（后台 → 前台）
-        FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage msg) {
-          print(" 点击通知进入 App");
-          FirebaseMessageManager.instance.handleMessage(msg);
-        });
-
+        FirebaseMessageManager.instance.loggedIn = true;
         //登录成功后建立 WebSocket 连接
         await WebSocketManager.instance.connect();
         //load friend list
         await FriendListManager.instance.loadFriends();
         //load chatFriend list
-        await Chatlistmanager.instance.loadFriends();
+        await context.read<FriendChatListViewModel>().load();
         //load timeline
-        context.read<TimelineViewModel>().load();
+        await context.read<TimelineViewModel>().load();
         //await timelineViewModel.load();
         //加载离线时收到的消息
         await ChatMessageManager.instance.loadMessages();

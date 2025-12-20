@@ -164,8 +164,8 @@ class Api {
       data: {"selectedFriends": selectedFriends},
     );
     //
-    print("创建群聊: ${response.data}");
-    GroupChatData groupChatData = GroupChatData.fromJson(response.data);
+    print("创建群聊: ${response.data['data']}");
+    GroupChatData groupChatData = GroupChatData.fromJson(response.data['data']);
 
     return groupChatData;
   }
@@ -182,13 +182,18 @@ class Api {
   }
 
   //获取聊天列表
-  Future<dynamic> getChatList() async {
+  Future<List<dynamic>> getChatList() async {
     Response response = await DioInstance.instance().get(
       path: "/user/getchatlist",
     );
-    print("获取聊天列表: ${response.data}");
-    var data = response.data;
-    return data;
+    print("获取聊天列表: ${response.data['data']}");
+    List<dynamic> result = [];
+    (response.data['data'] as List).forEach((e) {
+      if (e != null) {
+        result.add(GroupChatData.fromJson(e));
+      }
+    });
+    return result;
   }
 
   //获得群聊天消息

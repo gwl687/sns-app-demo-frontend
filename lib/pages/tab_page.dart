@@ -139,13 +139,6 @@ class _TabPageState extends State<TabPage> {
           setState(() {
             currentIndex = index;
           });
-          if (index == 1) {
-            // 点击朋友页面时刷新
-            // FriendListManager.instance.loadFriends();
-            // SpUtils.getString(Constants.SP_User_Name).then((name) {
-            //   print("点击刷新朋友页面,当前用户名为: $name");
-            // });
-          }
         },
       ),
     );

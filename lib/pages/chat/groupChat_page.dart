@@ -74,7 +74,7 @@ class _GroupChatPage extends State<GroupChatPage> {
   void _sendGroupMessage(String text) async {
     if (text.isEmpty) return;
 
-    // 发送消息到服务器
+    //发送消息到服务器
     WebSocketManager.instance.sendGroupMessage(widget.id, text);
 
     // 保存到本地数据库

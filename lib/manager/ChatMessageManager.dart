@@ -16,7 +16,7 @@ class ChatMessageManager {
     //群
     Chatlistmanager.instance.chatList.value.forEach((chatListMember) async {
       if (chatListMember is GroupChatData) {
-        SaveGroupMessagesIntoDartDb(chatListMember.data.groupId);
+        SaveGroupMessagesIntoDartDb(chatListMember.groupId);
       } else {
         //好友
       }

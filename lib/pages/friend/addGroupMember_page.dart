@@ -45,19 +45,6 @@ class _AddGroupMember extends State<AddGroupMember> {
                 );
               }
               Navigator.pop(context);
-              //这里用push
-              // Navigator.push(
-              //   context,
-              //   MaterialPageRoute(
-              //     builder: (_) => GroupChatPage(
-              //       memberIds: _selectedFriends,
-              //       ownerId: groupChatData.data.ownerId,
-              //       id: groupChatData.data.groupId,
-              //       name: groupChatData.data.groupName,
-              //       avatarUrl: groupChatData.data.avatarUrl, //默认群头像
-              //     ),
-              //   ),
-              // );
             },
             child: Text(
               "完成",

@@ -1,32 +1,42 @@
 import 'package:demo10/firebase_options.dart';
 import 'package:demo10/http/dio_instance.dart';
-import 'package:demo10/manager/ChatDBManager.dart';
+import 'package:demo10/manager/FirebaseMessageManager.dart';
+import 'package:demo10/pages/friend/friendChatList_vm.dart';
 import 'package:demo10/pages/social/store/timeline_vm.dart';
+import 'package:demo10/pages/tab_vm.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
 import 'app.dart';
 
-void main() async {
-  DioInstance.instance().initDio(
-    //baseUrl: "http://10.0.2.2:8080/",
-    baseUrl: "http://192.168.0.12:8080/",
-    //headers: {
-    //  'Authorization': 'Bearer $token',
-  );
+@pragma('vm:entry-point')
+Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  print('后台收到推送,type=${message.data['type']}');
+}
 
+void main() async {
+  DioInstance.instance().initDio(baseUrl: "http://192.168.0.12:8080/");
+
+  //FireBase
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform, //
   );
+  FirebaseMessageManager.instance.init();
+
+  FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(
-          create: (_) => TimelineViewModel()
-        ),
+        //tabview
+        ChangeNotifierProvider(create: (_) => TabViewModel()),
+        //timeline
+        ChangeNotifierProvider(create: (_) => TimelineViewModel()),
+        //friendchatlist
+        ChangeNotifierProvider(create: (_) => FriendChatListViewModel()),
       ],
       child: MyApp(),
     ),

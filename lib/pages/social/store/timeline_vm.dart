@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:demo10/constants.dart';
+import 'package:demo10/manager/FirebaseMessageManager.dart';
 import 'package:demo10/manager/LoginSuccessManager.dart';
-import 'package:demo10/pages/social/store/timeline_data.dart';
 import 'package:demo10/repository/api.dart';
 import 'package:demo10/repository/datas/timeline/timlinePost_data.dart';
 import 'package:demo10/utils/sp_utils.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 
 class TimelineViewModel extends ChangeNotifier {
@@ -24,6 +27,24 @@ class TimelineViewModel extends ChangeNotifier {
   //用户id对应头像url
   Map<int, String> userAvatarMap = {};
 
+  late final StreamSubscription _sub;
+
+  TimelineViewModel() {
+    _sub = FirebaseMessageManager.instance.stream.listen(_onMessage);
+  }
+
+  void _onMessage(RemoteMessage msg) {
+    final type = msg.data['type'];
+    if (type == 'gettimeline') {
+      load();
+    }
+  }
+
+  //清空timeline
+  Future<void> clear() async {
+    timelinePosts = [];
+  }
+
   //刷新获取timeline内容
   Future<void> load() async {
     timelinePosts = await Api.instance.getTimelinePost();
@@ -36,7 +57,7 @@ class TimelineViewModel extends ChangeNotifier {
       //大爱心
       if (post.hasLikedByMe) {
         heartColorChange[i] = true;
-      }else{
+      } else {
         heartColorChange[i] = false;
         print("${i}为false");
       }
@@ -60,7 +81,7 @@ class TimelineViewModel extends ChangeNotifier {
     //总点赞数+1
     totalLikeCount[postId] = (totalLikeCount[postId] ?? 0) + 1;
     //没点赞的话，爱心变红
-    heartColorChange[postId] ??= true;
+    heartColorChange[postId] = true;
     //如果次数超过当前avatar map次数最少的那个人，或者map大小不到20,就加入avatar map里(或增加点赞数)
     final values = avatars[postId]?.values ?? const [];
     int minValue = values.isEmpty

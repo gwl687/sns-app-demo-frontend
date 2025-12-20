@@ -1,10 +1,12 @@
 import 'dart:io';
+import 'package:demo10/pages/social/store/timeline_vm.dart';
 import 'package:demo10/repository/api.dart';
 import 'package:demo10/constants.dart';
 import 'package:demo10/utils/sp_utils.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
 
 class TimelinePublishPage extends StatefulWidget {
   @override
@@ -14,7 +16,6 @@ class TimelinePublishPage extends StatefulWidget {
 class _TimelinePublishPage extends State<TimelinePublishPage> {
   final TextEditingController _controller = TextEditingController();
   final ImagePicker _picker = ImagePicker();
-
   List<XFile> _images = []; // 选中的图片文件
 
   // 选择多张图片
@@ -26,7 +27,11 @@ class _TimelinePublishPage extends State<TimelinePublishPage> {
       });
     }
   }
+  @override
+  void initState() {
+    super.initState();
 
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -115,7 +120,7 @@ class _TimelinePublishPage extends State<TimelinePublishPage> {
               onPressed: () async {
                 int? id = await SpUtils.getInt(Constants.SP_User_Id);
 
-                /// 图片不上传，所以传空列表
+                /// 图片不上传
                 List<String> imgUrls = [];
 
                 await Api.instance.postTimeline(
@@ -124,8 +129,10 @@ class _TimelinePublishPage extends State<TimelinePublishPage> {
                   _images,
                   DateTime.now().toString(),
                 );
-
-                Navigator.pop(context, _controller.text);
+                await context.read<TimelineViewModel>().load();
+                if(mounted){
+                  Navigator.pop(context, true);
+                }
               },
               child: Text("Post"),
             ),

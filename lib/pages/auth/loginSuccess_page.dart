@@ -1,15 +1,14 @@
 import 'dart:io';
 import 'dart:math';
 
-import 'package:demo10/constants.dart';
-import 'package:demo10/http/dio_instance.dart';
-import 'package:demo10/manager/ChatFriendManager.dart';
+import 'package:demo10/pages/social/store/timeline_vm.dart';
 import 'package:demo10/manager/ChatListManager.dart';
 import 'package:demo10/manager/FriendListManager.dart';
 import 'package:demo10/manager/LoginSuccessManager.dart';
 import 'package:demo10/manager/TabPageManager.dart';
 import 'package:demo10/manager/WebSocketManager.dart';
 import 'package:demo10/pages/auth/login_page.dart';
+import 'package:demo10/pages/friend/friendChatList_vm.dart';
 import 'package:demo10/pages/tab_page.dart';
 import 'package:demo10/repository/api.dart';
 import 'package:demo10/repository/datas/user/updateUserInfo_data.dart';
@@ -18,6 +17,8 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart';
+import 'package:demo10/manager/FirebaseMessageManager.dart';
+import 'package:provider/provider.dart';
 
 class LoginSuccessPage extends StatefulWidget {
   @override
@@ -66,7 +67,8 @@ class _LoginSuccessPage extends State<LoginSuccessPage> {
             // 退出按钮
             ElevatedButton(
               onPressed: () {
-                //
+                context.read<FriendChatListViewModel>().clear();
+                context.read<TimelineViewModel>().clear();
                 logout();
               },
               child: Text('退出登录'),
@@ -85,7 +87,6 @@ class _LoginSuccessPage extends State<LoginSuccessPage> {
     //关闭websocket
     WebSocketManager.instance.close();
     //清空各种界面
-
     //聊天页面
     Chatlistmanager.instance.clearChatFriendList();
     //朋友页面
@@ -93,6 +94,7 @@ class _LoginSuccessPage extends State<LoginSuccessPage> {
     //我的页面
     _clearLoginSuccess();
     TabPageManager.loginNotifier.value = 0;
+    FirebaseMessageManager.instance.loggedIn = false;
   }
 
   /// 从相册选择图片
