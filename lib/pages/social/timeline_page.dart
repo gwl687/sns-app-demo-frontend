@@ -68,10 +68,12 @@ class _TimelinePage extends State<TimelinePage> {
                     : null;
                 return GestureDetector(
                   onTap: () {
+                    final timelineId = posts[index].timelineId;
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => TimelinePageIntered(postIndex: index),
+                        builder: (_) =>
+                            TimelinePageIntered(timelindId: timelineId),
                       ),
                     );
                   },

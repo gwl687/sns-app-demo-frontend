@@ -329,8 +329,9 @@ class Api {
   Future<TimelinePost> getTimelinePostById(int timelineId) async {
     Response response = await DioInstance.instance().get(
       path: "/timeline/gettimelinepostbytimelindid",
+      param: {"timelineId": timelineId},
     );
-    return response.data['data'];
+    return TimelinePost.fromJson(response.data['data']);
   }
 
   //给帖子点赞

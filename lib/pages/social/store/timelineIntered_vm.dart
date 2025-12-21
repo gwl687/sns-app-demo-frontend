@@ -10,7 +10,7 @@ import 'package:flutter/cupertino.dart';
 class TimelineInteredViewModel extends ChangeNotifier {
   int timelineId;
 
-  late TimelinePost timelinePost;
+  TimelinePost? timelinePost;
 
   //自己的点赞数
   int heartLikeCount = 0;
@@ -35,17 +35,17 @@ class TimelineInteredViewModel extends ChangeNotifier {
   Future<void> load() async {
     timelinePost = await Api.instance.getTimelinePostById(timelineId);
     //自己的点赞
-    heartLikeCount = timelinePost.likedByMeCount;
+    heartLikeCount = timelinePost!.likedByMeCount;
     //总点赞
-    totalLikeCount = timelinePost.totalLikeCount;
+    totalLikeCount = timelinePost!.totalLikeCount;
     //大爱心
-    if (timelinePost.hasLikedByMe) {
+    if (timelinePost!.hasLikedByMe) {
       heartColorChange = true;
     } else {
       heartColorChange = false;
     }
     avatars = {};
-    for (final user in timelinePost.topLikeUsers) {
+    for (final user in timelinePost!.topLikeUsers) {
       //用户id对应点赞数
       avatars![user.userId] = user.userLikeCount;
       //用户id对应头像url
@@ -57,7 +57,7 @@ class TimelineInteredViewModel extends ChangeNotifier {
   }
 
   //点赞
-  Future<void> likeHit(int postId, int timelineId) async {
+  Future<void> likeHit(int timelineId) async {
     //自己的点赞数+1
     heartLikeCount++;
     //总点赞数+1

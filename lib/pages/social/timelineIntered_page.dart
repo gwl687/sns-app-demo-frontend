@@ -7,9 +7,9 @@ import 'package:demo10/repository/api.dart';
 import 'package:demo10/constants.dart';
 
 class TimelinePageIntered extends StatefulWidget {
-  final int postIndex;
+  final int timelindId;
 
-  const TimelinePageIntered({required this.postIndex, super.key});
+  const TimelinePageIntered({required this.timelindId, super.key});
 
   @override
   State<TimelinePageIntered> createState() => _TimelinePageIntered();
@@ -27,17 +27,18 @@ class _TimelinePageIntered extends State<TimelinePageIntered> {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (_) => TimelineInteredViewModel(
-        timelineId: context
-            .read<TimelineViewModel>()
-            .timelinePosts[widget.postIndex]
-            .timelineId,
+        timelineId: widget.timelindId
       )..load(),
       child: Scaffold(
         appBar: AppBar(title: const Text("Timeline Detail")),
         body: Consumer<TimelineInteredViewModel>(
           builder: (context, vm, child) {
-            final post = vm.timelinePost;
-            final index = widget.postIndex;
+            if (vm.timelinePost == null) {
+              return const Center(
+                child: CircularProgressIndicator(),
+              );
+            }
+            final post = vm.timelinePost!;
             final hasLikedByMe = vm.heartColorChange == true;
             //根据点赞数排序后的postId:<imageprovider:likeCount>map
             final sortedAvatars = vm.avatars!.entries.toList()
@@ -123,7 +124,7 @@ class _TimelinePageIntered extends State<TimelinePageIntered> {
                                               : Colors.grey,
                                         ),
                                         onPressed: () {
-                                          vm.likeHit(index, post.timelineId);
+                                          vm.likeHit(post.timelineId);
                                         },
                                       ),
                                     ],
