@@ -4,6 +4,7 @@ import 'package:demo10/pages/social/timelineIntered_page.dart';
 import 'package:demo10/pages/social/timelinePublish_page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class TimelinePage extends StatefulWidget {
@@ -82,9 +83,26 @@ class _TimelinePage extends State<TimelinePage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           /// 发帖人名字
-                          Text(
-                            posts[index].userName,
-                            style: TextStyle(fontSize: 16),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                posts[index].userName,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              Text(
+                                DateFormat(
+                                  'yyyy-MM-dd HH:mm',
+                                ).format(posts[index].createdAt),
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                            ],
                           ),
                           const SizedBox(height: 12),
 

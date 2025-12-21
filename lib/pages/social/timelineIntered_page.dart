@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import 'package:demo10/pages/social/store/timeline_vm.dart';
@@ -26,6 +27,9 @@ class _TimelinePageIntered extends State<TimelinePageIntered> {
           final post = vm.timelinePosts[widget.postIndex];
           final index = widget.postIndex;
           final hasLikedByMe = vm.heartColorChange[index] == true;
+          //根据点赞数排序后的postId:<imageprovider:likeCount>map
+          final sortedAvatars = vm.avatars[index]!.entries.toList()
+            ..sort((a, b) => b.value.compareTo(a.value));
 
           return Column(
             children: [
@@ -119,21 +123,36 @@ class _TimelinePageIntered extends State<TimelinePageIntered> {
                                 Wrap(
                                   spacing: 8,
                                   runSpacing: 8,
-                                  children: vm.avatars[index]!.entries.map((e) {
-                                    final userId = e.key;
-                                    return CircleAvatar(
-                                      radius: 14,
-                                      backgroundImage:
-                                          (vm.userAvatarMap[userId] != null &&
-                                              vm
-                                                  .userAvatarMap[userId]!
-                                                  .isNotEmpty)
-                                          ? NetworkImage(
-                                              vm.userAvatarMap[userId]!,
-                                            )
-                                          : NetworkImage(
-                                              Constants.DefaultAvatarurl,
-                                            ),
+                                  children: sortedAvatars.map((entry) {
+                                    final userId = entry.key;
+                                    final likeCount = entry.value;
+                                    return Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        CircleAvatar(
+                                          radius: 16,
+                                          backgroundImage:
+                                              (vm.userAvatarMap[userId] !=
+                                                      null &&
+                                                  vm
+                                                      .userAvatarMap[userId]!
+                                                      .isNotEmpty)
+                                              ? NetworkImage(
+                                                  vm.userAvatarMap[userId]!,
+                                                )
+                                              : NetworkImage(
+                                                  Constants.DefaultAvatarurl,
+                                                ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          likeCount.toString(),
+                                          style: const TextStyle(
+                                            fontSize: 12,
+                                            color: Colors.black,
+                                          ),
+                                        ),
+                                      ],
                                     );
                                   }).toList(),
                                 ),
@@ -194,7 +213,9 @@ class _TimelinePageIntered extends State<TimelinePageIntered> {
                                         ),
                                         const SizedBox(height: 2),
                                         Text(
-                                          c.createdAt.toString(),
+                                          DateFormat(
+                                            'yyyy-MM-dd HH:mm',
+                                          ).format(c.createdAt),
                                           style: const TextStyle(
                                             fontSize: 11,
                                             color: Colors.grey,
