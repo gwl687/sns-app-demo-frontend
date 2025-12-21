@@ -1,6 +1,9 @@
 import 'package:demo10/firebase_options.dart';
 import 'package:demo10/http/dio_instance.dart';
+import 'package:demo10/manager/ChatDBManager.dart';
 import 'package:demo10/manager/FirebaseMessageManager.dart';
+import 'package:demo10/pages/chat/groupChat_vm.dart';
+import 'package:demo10/pages/chat/userProfile_vm.dart';
 import 'package:demo10/pages/friend/friendChatList_vm.dart';
 import 'package:demo10/pages/social/store/timeline_vm.dart';
 import 'package:demo10/pages/tab_vm.dart';
@@ -28,6 +31,9 @@ void main() async {
 
   FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
 
+  //测试用删除群消息
+  //ChatDbManager.deleteFromTable("group_messages");
+
   runApp(
     MultiProvider(
       providers: [
@@ -37,6 +43,10 @@ void main() async {
         ChangeNotifierProvider(create: (_) => TimelineViewModel()),
         //friendchatlist
         ChangeNotifierProvider(create: (_) => FriendChatListViewModel()),
+        //groupchat
+        ChangeNotifierProvider(create: (_) => GroupChatViewModel()),
+        //userprofile
+        ChangeNotifierProvider(create: (_) => UserProfileViewModel()),
       ],
       child: MyApp(),
     ),

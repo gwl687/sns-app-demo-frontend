@@ -41,7 +41,6 @@ class ChatMessageManager {
             groupMessage.content,
           );
         }
-        groupMessages = await ChatDbManager.getGroupMessages(groupId);
       });
     }
   }

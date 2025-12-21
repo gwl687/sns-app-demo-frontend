@@ -1,19 +1,13 @@
-import 'package:demo10/constants.dart';
-import 'package:demo10/http/dio_instance.dart';
-import 'package:demo10/manager/ChatDBManager.dart';
-import 'package:demo10/manager/ChatMessageManager.dart';
+import 'package:demo10/manager/LoginSuccessManager.dart';
 import 'package:demo10/manager/MessageReceiveManager.dart';
-import 'package:demo10/manager/WebSocketManager.dart';
+import 'package:demo10/pages/chat/groupChat_vm.dart';
 import 'package:demo10/pages/chat/groupVideoChat_page.dart';
-import 'package:demo10/pages/chat/videoChat_page.dart';
+import 'package:demo10/pages/chat/userProfile_vm.dart';
 import 'package:demo10/pages/friend/addGroupMember_page.dart';
 import 'package:demo10/pages/tab_page.dart';
 import 'package:demo10/repository/api.dart';
-import 'package:demo10/repository/datas/groupMessageData_data.dart';
-import 'package:demo10/utils/sp_utils.dart';
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:demo10/pages/chat/videoChat_page.dart';
+import 'package:provider/provider.dart';
 
 class GroupChatPage extends StatefulWidget {
   final int id;
@@ -38,53 +32,20 @@ class GroupChatPage extends StatefulWidget {
 
 class _GroupChatPage extends State<GroupChatPage> {
   final TextEditingController _controller = TextEditingController();
-  List<Map<String, dynamic>> _messages = [];
-  int myId = -1;
 
   @override
   void initState() {
+    context.read<GroupChatViewModel>().load(widget.id);
+    widget.memberIds.forEach(
+      (userId) => context.read<UserProfileViewModel>().load(userId),
+    );
     super.initState();
-    MessageReceiveManager.instance.chatPageGroupMessage = () {
-      _loadMessages();
-    };
-    _loadMessages();
-    //重置群名
   }
 
   @override
   void dispose() {
     MessageReceiveManager.instance.chatPagePrivateMessage = null;
     super.dispose();
-  }
-
-  //MessageReceiveManager.instance;
-
-  //重新加载消息
-  Future<void> _loadMessages() async {
-    myId = await SpUtils.getInt(Constants.SP_User_Id) ?? 0;
-    //final msgs = await ChatDbManager.getGroupMessages(widget.id);
-    final msgs = ChatMessageManager.instance.groupMessages;
-    setState(() {
-      _messages = msgs;
-    });
-    //print("fromeuser=${msgs[msgs.length - 1]['fromUser']}myId=${myId}");
-  }
-
-  //发送群消息
-  void _sendGroupMessage(String text) async {
-    if (text.isEmpty) return;
-
-    //发送消息到服务器
-    WebSocketManager.instance.sendGroupMessage(widget.id, text);
-
-    // 保存到本地数据库
-    await ChatDbManager.insertGroupMessage(myId, widget.id, text);
-    //保存到缓存
-
-    // 重新加载消息
-    _loadMessages();
-
-    _controller.clear();
   }
 
   @override
@@ -143,7 +104,7 @@ class _GroupChatPage extends State<GroupChatPage> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => GroupVideoChatPage(token: token)
+                    builder: (_) => GroupVideoChatPage(token: token),
                   ),
                 );
               },
@@ -153,25 +114,70 @@ class _GroupChatPage extends State<GroupChatPage> {
         body: Column(
           children: [
             Expanded(
-              child: ListView.builder(
-                padding: EdgeInsets.all(8),
-                itemCount: _messages.length,
-                itemBuilder: (context, index) {
-                  final msg = _messages[index];
-                  final isMe = int.parse(msg['fromUser']) == myId;
-                  return Align(
-                    alignment: isMe
-                        ? Alignment.centerRight
-                        : Alignment.centerLeft,
-                    child: Container(
-                      margin: EdgeInsets.symmetric(vertical: 4),
-                      padding: EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: isMe ? Colors.green[200] : Colors.grey[300],
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(msg['content']),
-                    ),
+              child: Consumer<GroupChatViewModel>(
+                builder: (context, vm, child) {
+                  final messages = vm.groupMessages;
+                  return ListView.builder(
+                    padding: EdgeInsets.all(8),
+                    itemCount: messages.length,
+                    itemBuilder: (context, index) {
+                      final msg = messages[index];
+                      final int fromUserId = int.parse(msg['fromUser']);
+                      final bool isMe = fromUserId == vm.myId;
+                      return Row(
+                        mainAxisAlignment: isMe
+                            ? MainAxisAlignment.end
+                            : MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // 左侧头像（别人）
+                          if (!isMe)
+                            Padding(
+                              padding: const EdgeInsets.only(right: 6),
+                              child: Consumer<UserProfileViewModel>(
+                                builder: (context, avatarVm, child) {
+                                  final avatarUrl = avatarVm.getAvatar(
+                                    fromUserId,
+                                  );
+                                  return CircleAvatar(
+                                    radius: 18,
+                                    backgroundImage: NetworkImage(avatarUrl!),
+                                  );
+                                },
+                              ),
+                            ),
+
+                          // 消息气泡
+                          Container(
+                            constraints: BoxConstraints(
+                              maxWidth:
+                                  MediaQuery.of(context).size.width * 0.65,
+                            ),
+                            margin: const EdgeInsets.symmetric(vertical: 4),
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: isMe
+                                  ? Colors.green[200]
+                                  : Colors.grey[300],
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(msg['content']),
+                          ),
+
+                          // 右侧头像（自己）
+                          if (isMe)
+                            Padding(
+                              padding: const EdgeInsets.only(left: 6),
+                              child: CircleAvatar(
+                                radius: 18,
+                                backgroundImage: NetworkImage(
+                                  LoginSuccessManager.instance.avatarFileUrl!,
+                                ),
+                              ),
+                            ),
+                        ],
+                      );
+                    },
                   );
                 },
               ),
@@ -193,7 +199,11 @@ class _GroupChatPage extends State<GroupChatPage> {
                   ),
                   IconButton(
                     icon: Icon(Icons.send, color: Colors.green),
-                    onPressed: () => _sendGroupMessage(_controller.text),
+                    onPressed: () {
+                      final vm = context.read<GroupChatViewModel>();
+                      vm.sendGroupMessage(vm.myId, widget.id, _controller.text);
+                      _controller.clear();
+                    },
                   ),
                 ],
               ),

@@ -332,4 +332,21 @@ class Api {
       data: timelineId,
     );
   }
+
+  //给帖子评论
+  Future<void> postComment(int timelineId, String comment) async {
+    Response response = await DioInstance.instance().post(
+      path: "/timeline/hitlike",
+      data: {"timelineId", timelineId, "comment", comment},
+    );
+  }
+
+  //获取指定用户id的头像url
+  Future<String> getUserAvatarUrl(int userId) async {
+    Response response = await DioInstance.instance().get(
+      path: "/user/getuseravatar",
+      param: {"userId": userId},
+    );
+    return response.data['data'].toString();
+  }
 }

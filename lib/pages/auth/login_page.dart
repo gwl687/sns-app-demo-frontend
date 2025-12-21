@@ -7,6 +7,7 @@ import 'package:demo10/manager/FriendListManager.dart';
 import 'package:demo10/manager/LoginSuccessManager.dart';
 import 'package:demo10/manager/TabPageManager.dart';
 import 'package:demo10/manager/WebSocketManager.dart';
+import 'package:demo10/pages/chat/groupChat_vm.dart';
 import 'package:demo10/pages/friend/friendChatList_vm.dart';
 import 'package:demo10/pages/social/store/timeline_vm.dart';
 import 'package:demo10/repository/api.dart';
@@ -79,7 +80,7 @@ class _LoginPageState extends State<LoginPage> {
       platform = 'other';
     }
     if (loginInfo.name != null && loginInfo.password != null) {
-      // 调你的接口
+      //
       LoginData data = await Api.instance.login(
         emailaddress: loginInfo.name,
         password: loginInfo.password,
@@ -101,8 +102,7 @@ class _LoginPageState extends State<LoginPage> {
         await context.read<FriendChatListViewModel>().load();
         //load timeline
         await context.read<TimelineViewModel>().load();
-        //await timelineViewModel.load();
-        //加载离线时收到的消息
+        //增量读取离线时收到的消息，存入本地数据库
         await ChatMessageManager.instance.loadMessages();
         return true;
       }

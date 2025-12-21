@@ -1,19 +1,22 @@
 import 'dart:convert';
 
+import 'package:demo10/repository/datas/comment_data.dart';
+
 TimelinePost timelinePostFromJson(String str) =>
     TimelinePost.fromJson(json.decode(str));
 
-String timelinePostToJson(TimelinePost data) =>
-    json.encode(data.toJson());
+String timelinePostToJson(TimelinePost data) => json.encode(data.toJson());
 
 class TimelinePost {
   /// 时间线帖子ID（后端字段：timelineId）
   int timelineId;
-
   String userName;
   String context;
   DateTime createdAt;
   List<String> imgUrls;
+
+  /// 评论列表
+  List<Comment> comments;
 
   /// 总点赞数
   int totalLikeCount;
@@ -30,6 +33,7 @@ class TimelinePost {
     required this.context,
     required this.createdAt,
     required this.imgUrls,
+    required this.comments,
     required this.totalLikeCount,
     required this.likedByMeCount,
     required this.topLikeUsers,
@@ -41,15 +45,23 @@ class TimelinePost {
       userName: json['userName'] ?? '',
       context: json['context'] ?? '',
       createdAt: DateTime.parse(json['createdAt']),
-      imgUrls: (json['imgUrls'] as List?)
-          ?.map((e) => e.toString())
-          .toList() ??
+
+      imgUrls:
+          (json['imgUrls'] as List?)?.map((e) => e.toString()).toList() ?? [],
+
+      comments:
+          (json['comments'] as List?)
+              ?.map((e) => Comment.fromJson(e))
+              .toList() ??
           [],
+
       totalLikeCount: json['totalLikeCount'] ?? 0,
       likedByMeCount: json['likedByMeCount'] ?? 0,
-      topLikeUsers: (json['topLikeUsers'] as List?)
-          ?.map((e) => LikeUser.fromJson(e))
-          .toList() ??
+
+      topLikeUsers:
+          (json['topLikeUsers'] as List?)
+              ?.map((e) => LikeUser.fromJson(e))
+              .toList() ??
           [],
     );
   }
@@ -60,6 +72,10 @@ class TimelinePost {
     "context": context,
     "createdAt": createdAt.toIso8601String(),
     "imgUrls": imgUrls,
+
+    /// ⭐ 评论序列化
+    "comments": comments.map((e) => e.toJson()).toList(),
+
     "totalLikeCount": totalLikeCount,
     "likedByMeCount": likedByMeCount,
     "topLikeUsers": topLikeUsers.map((e) => e.toJson()).toList(),

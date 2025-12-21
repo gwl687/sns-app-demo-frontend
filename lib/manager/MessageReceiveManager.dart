@@ -24,19 +24,12 @@ class MessageReceiveManager {
 
   //对应page的收消息方法
 
-  //chatPage收到私聊消息
+  //收到私聊消息
   void Function()? chatPagePrivateMessage = null;
 
-  //chatPage收到群聊消息
-  void Function()? chatPageGroupMessage = null;
+  //收到群聊消息
+  void Function(int groupId)? receiveGroupMessage = null;
 
-  // void Function()  chatPagePrivateMessage(Map<String, dynamic> data) async {
-  //   final int fromUser = data['fromUser'];
-  //   final String content = data['content'];
-  //   final int toUser = await SpUtils.getString(Constants.SP_User_Id) ?? "";
-  //   //保存到本地数据库
-  //   await ChatDbManager.insertMessage(fromUser, toUser, content);
-  // }
 
   //全局receiveMessage方法
   //收到私聊消息
@@ -59,8 +52,8 @@ class MessageReceiveManager {
     //保存到本地数据库
     await ChatDbManager.insertGroupMessage(fromUser, toUser, content);
     //当前页面为聊天页面,调用聊天页面的收消息方法
-    if (chatPageGroupMessage != null) {
-      chatPageGroupMessage!();
+    if (receiveGroupMessage != null) {
+      receiveGroupMessage!(toUser);
     }
     print("收到群聊消息: $data");
   }

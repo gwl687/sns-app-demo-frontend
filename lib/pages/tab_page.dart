@@ -62,7 +62,7 @@ class _TabPageState extends State<TabPage> {
       FriendChatList_page(),
       loginPages[TabPageManager.loginNotifier.value],
     ];
-    labels = ["首页", "好友", "聊天", "我的"];
+    labels = ["timeline", "friend", "chat", "userinfo"];
     icons = [
       Image.asset(
         "assets/images/icon_home_grey.png",

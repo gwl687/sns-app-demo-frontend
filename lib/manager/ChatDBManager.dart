@@ -171,6 +171,7 @@ class ChatDbManager {
     int? groupId,
   ) async {
     //本地获取
+    print("获取群 ${groupId} 的消息");
     final db = await getDb();
     return await db.query(
       'group_messages',
