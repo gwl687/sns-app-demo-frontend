@@ -61,6 +61,10 @@ class _TimelinePage extends State<TimelinePage> {
                     vm.heartColorChange[index] == true) {
                   hasLikedByme = true;
                 }
+                final lastCommentUserId =
+                    posts[index].comments?.isNotEmpty == true
+                    ? posts[index].comments!.last.userId
+                    : null;
                 return GestureDetector(
                   onTap: () {
                     Navigator.push(
@@ -199,12 +203,28 @@ class _TimelinePage extends State<TimelinePage> {
                               ),
                             ),
                           ],
-                          if (posts[index].comments.isNotEmpty) ...[
+
+                          /// 如果有评论，显示最新一条
+                          if (posts[index].comments.isNotEmpty &&
+                              lastCommentUserId != null) ...[
                             const Divider(),
                             Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const CircleAvatar(radius: 12),
+                                CircleAvatar(
+                                  backgroundImage:
+                                      (vm.userAvatarMap[lastCommentUserId] !=
+                                              null &&
+                                          vm
+                                              .userAvatarMap[lastCommentUserId]!
+                                              .isNotEmpty)
+                                      ? NetworkImage(
+                                          vm.userAvatarMap[lastCommentUserId]!,
+                                        )
+                                      : NetworkImage(
+                                          Constants.DefaultAvatarurl,
+                                        ),
+                                ),
                                 const SizedBox(width: 8),
                                 Expanded(
                                   child: Column(

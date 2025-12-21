@@ -147,7 +147,7 @@ class _TimelinePageIntered extends State<TimelinePageIntered> {
 
                       /// ===== 评论区 =====
                       const Text(
-                        "评论",
+                        "comment",
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -156,16 +156,32 @@ class _TimelinePageIntered extends State<TimelinePageIntered> {
                       const SizedBox(height: 8),
 
                       if (post.comments.isEmpty)
-                        const Text("暂无评论", style: TextStyle(color: Colors.grey))
+                        const Text(
+                          "no comment",
+                          style: TextStyle(color: Colors.grey),
+                        )
                       else
                         Column(
                           children: post.comments.map((c) {
+                            final avatarUrl = vm.userAvatarMap[c.userId];
                             return Padding(
                               padding: const EdgeInsets.symmetric(vertical: 6),
                               child: Row(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const CircleAvatar(radius: 14),
+                                  CircleAvatar(
+                                    backgroundImage:
+                                        (vm.userAvatarMap[c.userId] != null &&
+                                            vm
+                                                .userAvatarMap[c.userId]!
+                                                .isNotEmpty)
+                                        ? NetworkImage(
+                                            vm.userAvatarMap[c.userId]!,
+                                          )
+                                        : NetworkImage(
+                                            Constants.DefaultAvatarurl,
+                                          ),
+                                  ),
                                   const SizedBox(width: 8),
                                   Expanded(
                                     child: Column(
@@ -207,7 +223,7 @@ class _TimelinePageIntered extends State<TimelinePageIntered> {
                         child: TextField(
                           controller: _commentController,
                           decoration: const InputDecoration(
-                            hintText: "写评论...",
+                            hintText: "write your comment...",
                             isDense: true,
                             border: OutlineInputBorder(),
                           ),

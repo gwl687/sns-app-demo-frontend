@@ -90,12 +90,13 @@ class TimelineViewModel extends ChangeNotifier {
     if (heartLikeCount.length < 20 || heartLikeCount[postId]! >= minValue) {
       int myId = await SpUtils.getInt(Constants.SP_User_Id) ?? 0;
       //如果我还没点过，把我加进去toplikeusers
-      if (userAvatarMap.containsKey(myId)) {
+      if (!userAvatarMap.containsKey(myId)) {
         final avatarUrl = LoginSuccessManager.instance.avatarFileUrl;
 
         userAvatarMap[myId] = (avatarUrl != null && avatarUrl.isNotEmpty)
             ? avatarUrl
             : Constants.DefaultAvatarurl;
+        print("用户id:头像map,userAvatarMap[myId]=${userAvatarMap[myId]}");
       }
       avatars[postId]![myId] = heartLikeCount[postId]!;
     }

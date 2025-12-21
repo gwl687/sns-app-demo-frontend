@@ -336,8 +336,11 @@ class Api {
   //给帖子评论
   Future<void> postComment(int timelineId, String comment) async {
     Response response = await DioInstance.instance().post(
-      path: "/timeline/hitlike",
-      data: {"timelineId", timelineId, "comment", comment},
+      path: "/timeline/postcomment",
+      data: {
+        "timelineId": timelineId,
+        "comment": comment
+      }
     );
   }
 
