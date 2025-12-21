@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:demo10/constants.dart';
 import 'package:demo10/repository/api.dart';
 import 'package:demo10/repository/datas/user/userInfo_data.dart';
-import 'package:demo10/utils/sp_utils.dart';
+import 'package:provider/provider.dart';
 import 'package:flutter/cupertino.dart';
 
 class LoginSuccessManager{
@@ -18,6 +18,7 @@ class LoginSuccessManager{
     //获取用户信息
     userInfoData = await Api.instance.getUserInfo();
     avatarFileUrl = userInfoData?.avatarurl;
+    print("我的头像为:${avatarFileUrl}");
     //缓存头像
     avatarImage = avatarFile != null
         ? FileImage(avatarFile!) // 用户选择的本地图片

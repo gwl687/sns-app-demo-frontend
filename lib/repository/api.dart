@@ -325,6 +325,14 @@ class Api {
     return list.map((json) => TimelinePost.fromJson(json)).toList();
   }
 
+  //获取指定帖子数据
+  Future<TimelinePost> getTimelinePostById(int timelineId) async {
+    Response response = await DioInstance.instance().get(
+      path: "/timeline/gettimelinepostbytimelindid",
+    );
+    return response.data['data'];
+  }
+
   //给帖子点赞
   Future<void> timelineHitLike(int timelineId) async {
     Response response = await DioInstance.instance().post(
@@ -337,10 +345,7 @@ class Api {
   Future<void> postComment(int timelineId, String comment) async {
     Response response = await DioInstance.instance().post(
       path: "/timeline/postcomment",
-      data: {
-        "timelineId": timelineId,
-        "comment": comment
-      }
+      data: {"timelineId": timelineId, "comment": comment},
     );
   }
 

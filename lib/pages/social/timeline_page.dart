@@ -260,8 +260,9 @@ class _TimelinePage extends State<TimelinePage> {
                                       ),
                                       const SizedBox(height: 2),
                                       Text(
-                                        posts[index].comments.last.createdAt
-                                            .toString(),
+                                        DateFormat('yyyy-MM-dd HH:mm').format(
+                                          posts[index].comments.last.createdAt,
+                                        ),
                                         style: const TextStyle(
                                           fontSize: 11,
                                           color: Colors.grey,

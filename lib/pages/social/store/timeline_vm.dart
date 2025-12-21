@@ -59,18 +59,17 @@ class TimelineViewModel extends ChangeNotifier {
         heartColorChange[i] = true;
       } else {
         heartColorChange[i] = false;
-        print("${i}为false");
       }
-
       avatars[i] = {};
       for (final user in timelinePosts[i].topLikeUsers) {
         //用户id对应点赞数
         avatars[i]![user.userId] = user.userLikeCount;
         //用户id对应头像url
-        userAvatarMap[user.userId] = user.avatarUrl;
+        if (!userAvatarMap.containsKey(user.userId)) {
+          userAvatarMap[user.userId] = user.avatarUrl;
+        }
       }
     }
-
     notifyListeners();
   }
 
@@ -87,16 +86,16 @@ class TimelineViewModel extends ChangeNotifier {
     int minValue = values.isEmpty
         ? 0
         : values.fold<int>(values.first, (a, b) => a < b ? a : b);
-    if (heartLikeCount.length < 20 || heartLikeCount[postId]! >= minValue) {
+    if (avatars[postId]!.length < 20 || heartLikeCount[postId]! >= minValue) {
       int myId = await SpUtils.getInt(Constants.SP_User_Id) ?? 0;
       //如果我还没点过，把我加进去toplikeusers
-      if (!userAvatarMap.containsKey(myId)) {
+      if (!avatars[postId]!.containsKey(myId)) {
         final avatarUrl = LoginSuccessManager.instance.avatarFileUrl;
 
         userAvatarMap[myId] = (avatarUrl != null && avatarUrl.isNotEmpty)
             ? avatarUrl
             : Constants.DefaultAvatarurl;
-        print("用户id:头像map,userAvatarMap[myId]=${userAvatarMap[myId]}");
+        print("添加到用户id:头像map,userAvatarMap[${myId}]=${userAvatarMap[myId]}");
       }
       avatars[postId]![myId] = heartLikeCount[postId]!;
     }
