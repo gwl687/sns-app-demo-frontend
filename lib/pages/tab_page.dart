@@ -130,10 +130,10 @@ class _TabPageState extends State<TabPage> {
         currentIndex: currentIndex,
         type: BottomNavigationBarType.fixed, // 超过3个要加这个
         items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: "首页"),
-          BottomNavigationBarItem(icon: Icon(Icons.people), label: "朋友"),
-          BottomNavigationBarItem(icon: Icon(Icons.chat), label: "聊天"),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: "我的"),
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: "timeline"),
+          BottomNavigationBarItem(icon: Icon(Icons.people), label: "friend"),
+          BottomNavigationBarItem(icon: Icon(Icons.chat), label: "chat"),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: "mine"),
         ],
         onTap: (index) {
           setState(() {

@@ -25,12 +25,12 @@ class _FriendPageState extends State<FriendPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('好友'),
+        title: Text('friends'),
         centerTitle: true,
         actions: [
           IconButton(
             icon: Icon(Icons.person_add),
-            tooltip: '加好友',
+            tooltip: 'add a new friend',
             onPressed: () {
               //点击跳转到加好友页面
               Navigator.push(
@@ -41,7 +41,7 @@ class _FriendPageState extends State<FriendPage> {
           ),
           IconButton(
             icon: Icon(Icons.group_add),
-            tooltip: '建群',
+            tooltip: 'create a group',
             onPressed: () {
               // 点击跳转到建群页面
               Navigator.push(

@@ -56,6 +56,9 @@ class TimelineInteredViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+
+
+
   //点赞
   Future<void> likeHit(int timelineId) async {
     //自己的点赞数+1

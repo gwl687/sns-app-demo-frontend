@@ -47,6 +47,7 @@ class _TimelinePage extends State<TimelinePage> {
       body: Consumer<TimelineViewModel>(
         builder: (context, vm, child) {
           final posts = vm.timelinePosts;
+          final postMap = vm.timelinePostsMap;
           return RefreshIndicator(
             onRefresh: () async {
               await vm.load();
@@ -55,20 +56,20 @@ class _TimelinePage extends State<TimelinePage> {
               itemCount: posts.length,
               itemBuilder: (context, index) {
                 bool hasLikedByme = false;
+                int timelineId = posts[index].timelineId;
                 //根据点赞数排序后的postId:<imageprovider:likeCount>map
-                final sortedAvatars = vm.avatars[index]!.entries.toList()
+                final sortedAvatars = vm.avatars[timelineId]!.entries.toList()
                   ..sort((a, b) => b.value.compareTo(a.value));
-                if (vm.heartColorChange.containsKey(index) &&
-                    vm.heartColorChange[index] == true) {
+                if (vm.heartColorChange.containsKey(timelineId) &&
+                    vm.heartColorChange[timelineId] == true) {
                   hasLikedByme = true;
                 }
                 final lastCommentUserId =
-                    posts[index].comments?.isNotEmpty == true
-                    ? posts[index].comments!.last.userId
+                    posts[index].comments.isNotEmpty
+                    ? posts[index].comments.last.userId
                     : null;
                 return GestureDetector(
                   onTap: () {
-                    final timelineId = posts[index].timelineId;
                     Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -110,17 +111,17 @@ class _TimelinePage extends State<TimelinePage> {
 
                           /// 帖子内容
                           Text(
-                            posts[index].context,
+                            postMap[timelineId]!.context,
                             style: TextStyle(fontSize: 16),
                           ),
                           const SizedBox(height: 12),
 
                           /// 图片区域
-                          if (posts[index].imgUrls.isNotEmpty)
+                          if (postMap[timelineId]!.imgUrls.isNotEmpty)
                             GridView.builder(
                               shrinkWrap: true,
                               physics: const NeverScrollableScrollPhysics(),
-                              itemCount: posts[index].imgUrls.length,
+                              itemCount: postMap[timelineId]!.imgUrls.length,
                               gridDelegate:
                                   const SliverGridDelegateWithFixedCrossAxisCount(
                                     crossAxisCount: 3,
@@ -131,7 +132,7 @@ class _TimelinePage extends State<TimelinePage> {
                                 return ClipRRect(
                                   borderRadius: BorderRadius.circular(8),
                                   child: Image.network(
-                                    posts[index].imgUrls[i],
+                                    postMap[timelineId]!.imgUrls[i],
                                     fit: BoxFit.cover,
                                   ),
                                 );
@@ -144,7 +145,7 @@ class _TimelinePage extends State<TimelinePage> {
                             children: [
                               /// 爱心上面的次数
                               Text(
-                                (vm.heartLikeCount[index] ?? 0).toString(),
+                                (vm.heartLikeCount[timelineId] ?? 0).toString(),
                                 style: TextStyle(
                                   fontSize: 20,
                                   color: Colors.red,
@@ -166,7 +167,7 @@ class _TimelinePage extends State<TimelinePage> {
                                     size: 28,
                                   ),
                                   onPressed: () {
-                                    vm.likeHit(index, posts[index].timelineId);
+                                    vm.likeHit(postMap[timelineId]!.timelineId);
                                   },
                                 ),
                               ),
@@ -216,7 +217,7 @@ class _TimelinePage extends State<TimelinePage> {
                             const SizedBox(height: 6),
                             //总点赞数
                             Text(
-                              "TOTALLIKES: ${vm.totalLikeCount[index] ?? 0}",
+                              "TOTALLIKES: ${vm.totalLikeCount[timelineId] ?? 0}",
                               style: const TextStyle(
                                 fontSize: 13,
                                 color: Colors.black,
@@ -225,7 +226,7 @@ class _TimelinePage extends State<TimelinePage> {
                           ],
 
                           /// 如果有评论，显示最新一条
-                          if (posts[index].comments.isNotEmpty &&
+                          if (postMap[timelineId]!.comments.isNotEmpty &&
                               lastCommentUserId != null) ...[
                             const Divider(),
                             Row(
@@ -252,7 +253,7 @@ class _TimelinePage extends State<TimelinePage> {
                                         CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        posts[index].comments.last.comment,
+                                        postMap[timelineId]!.comments.last.comment,
                                         maxLines: 2,
                                         overflow: TextOverflow.ellipsis,
                                         style: const TextStyle(
@@ -263,7 +264,7 @@ class _TimelinePage extends State<TimelinePage> {
                                       const SizedBox(height: 2),
                                       Text(
                                         DateFormat('yyyy-MM-dd HH:mm').format(
-                                          posts[index].comments.last.createdAt,
+                                          postMap[timelineId]!.comments.last.createdAt,
                                         ),
                                         style: const TextStyle(
                                           fontSize: 11,

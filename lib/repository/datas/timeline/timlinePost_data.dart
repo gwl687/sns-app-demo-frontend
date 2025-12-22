@@ -73,7 +73,7 @@ class TimelinePost {
     "createdAt": createdAt.toIso8601String(),
     "imgUrls": imgUrls,
 
-    /// ⭐ 评论序列化
+    ///评论序列化
     "comments": comments.map((e) => e.toJson()).toList(),
 
     "totalLikeCount": totalLikeCount,

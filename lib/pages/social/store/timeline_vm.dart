@@ -12,6 +12,8 @@ import 'package:flutter/material.dart';
 class TimelineViewModel extends ChangeNotifier {
   List<TimelinePost> timelinePosts = [];
 
+  Map<int, TimelinePost> timelinePostsMap = {};
+
   //自己的点赞数
   Map<int, int> heartLikeCount = {};
 
@@ -50,20 +52,23 @@ class TimelineViewModel extends ChangeNotifier {
     timelinePosts = await Api.instance.getTimelinePost();
     for (int i = 0; i < timelinePosts.length; i++) {
       final post = timelinePosts[i];
+      int timelineId = post.timelineId;
+      //
+      timelinePostsMap[timelineId] = timelinePosts[i];
       //自己的点赞
-      heartLikeCount[i] = post.likedByMeCount;
+      heartLikeCount[timelineId] = post.likedByMeCount;
       //总点赞
-      totalLikeCount[i] = post.totalLikeCount;
+      totalLikeCount[timelineId] = post.totalLikeCount;
       //大爱心
       if (post.hasLikedByMe) {
-        heartColorChange[i] = true;
+        heartColorChange[timelineId] = true;
       } else {
-        heartColorChange[i] = false;
+        heartColorChange[timelineId] = false;
       }
-      avatars[i] = {};
+      avatars[timelineId] = {};
       for (final user in timelinePosts[i].topLikeUsers) {
         //用户id对应点赞数
-        avatars[i]![user.userId] = user.userLikeCount;
+        avatars[timelineId]![user.userId] = user.userLikeCount;
         //用户id对应头像url
         if (!userAvatarMap.containsKey(user.userId)) {
           userAvatarMap[user.userId] = user.avatarUrl;
@@ -73,23 +78,51 @@ class TimelineViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  //刷新单条timeline内容
+  Future<void> loadByTimelineId(int timelineId) async {
+    timelinePosts[timelineId] = await Api.instance.getTimelinePostById(
+      timelineId,
+    );
+    //自己的点赞
+    heartLikeCount[timelineId] = timelinePosts[timelineId].likedByMeCount;
+    //总点赞
+    totalLikeCount[timelineId] = timelinePosts[timelineId].totalLikeCount;
+    //大爱心
+    if (timelinePosts[timelineId]!.hasLikedByMe) {
+      heartColorChange[timelineId] = true;
+    } else {
+      heartColorChange[timelineId] = false;
+    }
+    avatars = {};
+    for (final user in timelinePosts[timelineId].topLikeUsers) {
+      //用户id对应点赞数
+      avatars[timelineId]![user.userId] = user.userLikeCount;
+      //用户id对应头像url
+      if (!userAvatarMap.containsKey(user.userId)) {
+        userAvatarMap[user.userId] = user.avatarUrl;
+      }
+    }
+    notifyListeners();
+  }
+
   //点赞
-  Future<void> likeHit(int postId, int timelineId) async {
+  Future<void> likeHit(int timelineId) async {
     //自己的点赞数+1
-    heartLikeCount[postId] = (heartLikeCount[postId] ?? 0) + 1;
+    heartLikeCount[timelineId] = (heartLikeCount[timelineId] ?? 0) + 1;
     //总点赞数+1
-    totalLikeCount[postId] = (totalLikeCount[postId] ?? 0) + 1;
+    totalLikeCount[timelineId] = (totalLikeCount[timelineId] ?? 0) + 1;
     //没点赞的话，爱心变红
-    heartColorChange[postId] = true;
+    heartColorChange[timelineId] = true;
     //如果次数超过当前avatar map次数最少的那个人，或者map大小不到20,就加入avatar map里(或增加点赞数)
-    final values = avatars[postId]?.values ?? const [];
+    final values = avatars[timelineId]?.values ?? const [];
     int minValue = values.isEmpty
         ? 0
         : values.fold<int>(values.first, (a, b) => a < b ? a : b);
-    if (avatars[postId]!.length < 20 || heartLikeCount[postId]! >= minValue) {
+    if (avatars[timelineId]!.length < 20 ||
+        heartLikeCount[timelineId]! >= minValue) {
       int myId = await SpUtils.getInt(Constants.SP_User_Id) ?? 0;
       //如果我还没点过，把我加进去toplikeusers
-      if (!avatars[postId]!.containsKey(myId)) {
+      if (!avatars[timelineId]!.containsKey(myId)) {
         final avatarUrl = LoginSuccessManager.instance.avatarFileUrl;
 
         userAvatarMap[myId] = (avatarUrl != null && avatarUrl.isNotEmpty)
@@ -97,7 +130,7 @@ class TimelineViewModel extends ChangeNotifier {
             : Constants.DefaultAvatarurl;
         print("添加到用户id:头像map,userAvatarMap[${myId}]=${userAvatarMap[myId]}");
       }
-      avatars[postId]![myId] = heartLikeCount[postId]!;
+      avatars[timelineId]![myId] = heartLikeCount[timelineId]!;
     }
     notifyListeners();
     await Api.instance.timelineHitLike(timelineId);
