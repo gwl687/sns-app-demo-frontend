@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:livekit_client/livekit_client.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -6,10 +7,12 @@ import 'package:permission_handler/permission_handler.dart';
 class GroupVideoChatPage extends StatefulWidget {
   final String livekitUrl = "ws://3.112.54.245:7880";
   final String token;
+  final String userName;
 
   const GroupVideoChatPage({
     super.key,
     required this.token,
+    required this.userName,
   });
 
   @override
@@ -54,25 +57,32 @@ class _GroupVideoChatPageState extends State<GroupVideoChatPage> {
   }
 
   Widget _buildVideo(Participant participant) {
-    // 获取可用的视频 publication
     final pub = participant.videoTrackPublications
         .where((p) => p.subscribed && !p.muted)
         .firstOrNull;
     final track = pub?.track as VideoTrack?;
 
-    if (track == null) {
-      return Container(
-        color: Colors.black,
-        child: Center(
-          child: Text(
-            participant.identity,
-            style: const TextStyle(color: Colors.white),
-          ),
+    return Stack(
+      children: [
+        /// 底层：视频或占位
+        Positioned.fill(
+          child: track == null
+              ? Container(
+                  color: Colors.black,
+                  child: Center(
+                    child: Text(
+                      participant.identity,
+                      style: const TextStyle(color: Colors.white),
+                    ),
+                  ),
+                )
+              : VideoTrackRenderer(track, fit: VideoViewFit.cover),
         ),
-      );
-    }
 
-    return VideoTrackRenderer(track, fit: VideoViewFit.cover);
+        /// 右下角用户名
+        Positioned(right: 8, bottom: 8, child: _buildUserName(participant)),
+      ],
+    );
   }
 
   @override
@@ -83,6 +93,7 @@ class _GroupVideoChatPageState extends State<GroupVideoChatPage> {
     ];
 
     return Scaffold(
+      backgroundColor: Colors.black,
       appBar: AppBar(title: const Text("Group Video Chat")),
       body: GridView.builder(
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -110,5 +121,35 @@ class _GroupVideoChatPageState extends State<GroupVideoChatPage> {
         child: const Icon(Icons.call_end),
       ),
     );
+  }
+
+  Widget _buildUserName(Participant participant) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: Colors.black.withOpacity(0.6),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Text(
+        getDisplayName(participant), // LiveKit 里通常就是 username
+        style: const TextStyle(color: Colors.white, fontSize: 12),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
+    );
+  }
+
+  String getDisplayName(Participant participant) {
+    final metadata = participant.metadata;
+    if (metadata == null || metadata.isEmpty) {
+      return participant.identity; // 兜底
+    }
+
+    try {
+      final map = jsonDecode(metadata);
+      return map['username'] ?? participant.identity;
+    } catch (e) {
+      return participant.identity;
+    }
   }
 }

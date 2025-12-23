@@ -104,7 +104,11 @@ class _GroupChatPage extends State<GroupChatPage> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => GroupVideoChatPage(token: token),
+                    builder: (_) => GroupVideoChatPage(
+                      userName:
+                          LoginSuccessManager.instance.userInfoData!.username,
+                      token: token,
+                    ),
                   ),
                 );
               },
@@ -191,7 +195,7 @@ class _GroupChatPage extends State<GroupChatPage> {
                     child: TextField(
                       controller: _controller,
                       decoration: InputDecoration(
-                        hintText: "输入消息...",
+                        hintText: "insert message...",
                         border: InputBorder.none,
                       ),
                       //onSubmitted: _sendMessage,

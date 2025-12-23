@@ -26,7 +26,7 @@ class _CreateGroupPage extends State<CreateGroupPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("创建群聊"),
+        title: Text("create a chatgroup"),
         centerTitle: true,
         actions: [
           TextButton(
@@ -55,7 +55,7 @@ class _CreateGroupPage extends State<CreateGroupPage> {
               );
             },
             child: Text(
-              "完成",
+              "create",
               style: TextStyle(color: Colors.black, fontSize: 16),
             ),
           ),

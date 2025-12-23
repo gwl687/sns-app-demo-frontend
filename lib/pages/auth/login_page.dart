@@ -124,7 +124,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("登录")),
+      appBar: AppBar(title: const Text("loginpage")),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -135,7 +135,7 @@ class _LoginPageState extends State<LoginPage> {
             TextField(
               controller: _usernameController,
               decoration: const InputDecoration(
-                labelText: "用户名",
+                labelText: "username",
                 border: OutlineInputBorder(),
               ),
               onChanged: (value) {
@@ -147,7 +147,7 @@ class _LoginPageState extends State<LoginPage> {
             if (_historyAccounts.isNotEmpty) ...[
               const SizedBox(height: 8),
               Text(
-                "历史账号",
+                "history",
                 style: TextStyle(fontSize: 14, color: Colors.grey[600]),
               ),
               const SizedBox(height: 4),
@@ -175,7 +175,7 @@ class _LoginPageState extends State<LoginPage> {
             TextField(
               controller: _passwordController,
               decoration: const InputDecoration(
-                labelText: "密码",
+                labelText: "password",
                 border: OutlineInputBorder(),
               ),
               obscureText: true,
@@ -200,7 +200,7 @@ class _LoginPageState extends State<LoginPage> {
                     TabPageManager.loginNotifier.value = 1;
                   }
                 },
-                child: const Text("登录"),
+                child: const Text("login"),
               ),
             ),
           ],

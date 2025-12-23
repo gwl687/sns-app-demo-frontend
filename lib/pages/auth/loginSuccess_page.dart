@@ -42,7 +42,7 @@ class _LoginSuccessPage extends State<LoginSuccessPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('登录成功'), centerTitle: true),
+      appBar: AppBar(title: Text('mypage'), centerTitle: true),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -71,7 +71,7 @@ class _LoginSuccessPage extends State<LoginSuccessPage> {
                 context.read<TimelineViewModel>().clear();
                 logout();
               },
-              child: Text('退出登录'),
+              child: Text('log out'),
               style: ElevatedButton.styleFrom(
                 padding: EdgeInsets.symmetric(horizontal: 40, vertical: 12),
               ),
