@@ -1,12 +1,11 @@
-import 'package:demo10/constants.dart';
+import 'package:demo10/constant/base_constants.dart';
 import 'package:demo10/http/cookie_interceptor.dart';
 import 'package:demo10/http/print_log_interceptor.dart';
 import 'package:demo10/http/rsp_interceptor.dart';
 import 'package:demo10/utils/sp_utils.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:demo10/constants.dart';
-
+import 'package:oktoast/oktoast.dart';
 import 'http_method.dart';
 
 class DioInstance {
@@ -20,9 +19,6 @@ class DioInstance {
 
   final Dio _dio = Dio();
   final _defaultTime = const Duration(seconds: 30);
-
-  //token
-  //.SP_Token
 
   void initDio({
     required String baseUrl,
@@ -44,15 +40,79 @@ class DioInstance {
       contentType: contentType,
       headers: headers,
     );
-    //添加打印请求返回信息拦截器
-    // _dio.interceptors.add(PrintLogInterceptor());
-    //添加cookie拦截器
-    //_dio.interceptors.add(CookieInterceptor());
-    //添加统一返回值处理拦截器
-    //_dio.interceptors.add(ResponseInterceptor());
+
+    _addInterceptors();
   }
 
-  ///get请求方法
+  /// 拦截器
+  void _addInterceptors() {
+    _dio.interceptors.clear();
+
+    /// cookie
+    _dio.interceptors.add(CookieInterceptor());
+
+    /// 统一响应
+    _dio.interceptors.add(
+      InterceptorsWrapper(
+        onRequest: (options, handler) async {
+          final token = await SpUtils.getString(BaseConstants.SP_Token);
+          if (token != null && token.isNotEmpty) {
+            options.headers['Authorization'] = 'Bearer $token';
+          }
+          handler.next(options);
+        },
+
+        onResponse: (response, handler) {
+          final data = response.data;
+
+          if (data is Map && data.containsKey('code')) {
+            final code = data['code'];
+            final msg = data['msg'];
+
+            if (code != 1) {
+              /// 业务错误
+              if (msg != null) {
+                showToast(msg.toString());
+              }
+
+              /// 阻断后续
+              return handler.reject(
+                DioException(
+                  requestOptions: response.requestOptions,
+                  response: response,
+                  error: msg,
+                  type: DioExceptionType.badResponse,
+                ),
+              );
+            }
+          }
+
+          handler.next(response);
+        },
+
+        onError: (DioException e, handler) {
+          /// 网络
+          if (e.type == DioExceptionType.connectionTimeout ||
+              e.type == DioExceptionType.receiveTimeout) {
+            showToast('网络连接超时');
+          } else if (e.type == DioExceptionType.connectionError) {
+            showToast('网络连接失败');
+          } else if (e.message != null) {
+            showToast(e.message!);
+          }
+
+          handler.next(e);
+        },
+      ),
+    );
+  }
+
+  /// token失效
+  void _handleUnauthorized() {
+    SpUtils.remove(BaseConstants.SP_Token);
+  }
+
+  /// 请求方法
   Future<Response> get({
     required String path,
     Map<String, dynamic>? param,
@@ -62,19 +122,16 @@ class DioInstance {
     return await _dio.get(
       path,
       queryParameters: param,
-      options: Options(
-        method: HttpMethod.GET,
-        receiveTimeout: _defaultTime,
-        sendTimeout: _defaultTime,
-        headers: {
-          'Authorization':
-              'Bearer ${await SpUtils.getString(Constants.SP_Token)}',
-        },
-      ),
+      options: options ??
+          Options(
+            method: HttpMethod.GET,
+            receiveTimeout: _defaultTime,
+            sendTimeout: _defaultTime,
+          ),
       cancelToken: cancelToken,
     );
   }
-  ///put request
+
   Future<Response> put({
     required String path,
     required Object? data,
@@ -86,20 +143,16 @@ class DioInstance {
       path,
       queryParameters: param,
       data: data,
-      options: Options(
-        method: HttpMethod.PUT,
-        receiveTimeout: _defaultTime,
-        sendTimeout: _defaultTime,
-        headers: {
-          'Authorization':
-          'Bearer ${await SpUtils.getString(Constants.SP_Token)}',
-        },
-      ),
+      options: options ??
+          Options(
+            method: HttpMethod.PUT,
+            receiveTimeout: _defaultTime,
+            sendTimeout: _defaultTime,
+          ),
       cancelToken: cancelToken,
     );
   }
 
-  ///POST请求方法
   Future<Response> post({
     required String path,
     Object? data,
@@ -107,21 +160,14 @@ class DioInstance {
     Options? options,
     CancelToken? cancelToken,
   }) async {
-    String? myToken = await SpUtils.getString(Constants.SP_Token);
-    final headers = {'Content-Type': Headers.jsonContentType};
-    if (myToken != null) {
-      headers['Authorization'] = 'Bearer $myToken';
-    }
     return await _dio.post(
       path,
       queryParameters: queryParameters,
       data: data,
       cancelToken: cancelToken,
-      options:
-          options ??
+      options: options ??
           Options(
             method: HttpMethod.POST,
-            headers: headers,
             receiveTimeout: _defaultTime,
             sendTimeout: _defaultTime,
             contentType: Headers.jsonContentType,

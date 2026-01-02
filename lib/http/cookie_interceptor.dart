@@ -1,7 +1,5 @@
 import 'dart:io';
-
-import 'package:demo10/constants.dart';
-import 'package:demo10/http/rsp_interceptor.dart';
+import 'package:demo10/constant/base_constants.dart';
 import 'package:demo10/utils/sp_utils.dart';
 import 'package:dio/dio.dart';
 
@@ -9,7 +7,7 @@ class CookieInterceptor extends Interceptor {
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
     //取出本地cookie
-    SpUtils.getStringList(Constants.SP_COOKIE_List).then((cookieList) {
+    SpUtils.getStringList(BaseConstants.SP_COOKIE_List).then((cookieList) {
       //塞到请求头里
       options.headers[HttpHeaders.cookieHeader] = cookieList;
       //继续往下执行
@@ -29,7 +27,7 @@ class CookieInterceptor extends Interceptor {
           print("CookieInteceptor cookie=${cookie.toString()}");
         }
       }
-      SpUtils.saveStringList(Constants.SP_COOKIE_List, cookieList);
+      SpUtils.saveStringList(BaseConstants.SP_COOKIE_List, cookieList);
     }
     super.onResponse(response, handler);
   }

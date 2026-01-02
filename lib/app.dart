@@ -1,4 +1,5 @@
-import 'package:demo10/pages/home/home_page.dart';
+import 'package:demo10/pages/auth/auth_gate_page.dart';
+import 'package:demo10/pages/auth/login_page.dart';
 import 'package:demo10/pages/tab_page.dart';
 import 'package:demo10/route/route_utils.dart';
 import 'package:demo10/route/routes.dart';
@@ -23,7 +24,6 @@ Size get designSize {
 
 class MyApp extends StatelessWidget {
   MyApp({super.key});
-  static final TabPage tabPage = TabPage();
   @override
   Widget build(BuildContext context) {
     //toast提示必须为APP的顶层组件
@@ -33,15 +33,15 @@ class MyApp extends StatelessWidget {
           designSize: designSize,
           builder: (context, child) {
             return MaterialApp(
-              title: 'Flutter Demo',
-              theme: ThemeData(
-                colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-                useMaterial3: true,
-              ),
-              navigatorKey: RouteUtils.navigatorKey,
-              onGenerateRoute: Routes.generateRoute,
-              initialRoute: RoutePath.tab,
-              home: tabPage,
+              // title: 'Flutter Demo',
+              // theme: ThemeData(
+              //   colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+              //   useMaterial3: true,
+              // ),
+              // navigatorKey: RouteUtils.navigatorKey,
+              // onGenerateRoute: Routes.generateRoute,
+              // initialRoute: RoutePath.tab,
+              home: const AuthGatePage(),
             );
           },
         ));

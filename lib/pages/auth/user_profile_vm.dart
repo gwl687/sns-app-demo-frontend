@@ -1,0 +1,37 @@
+import 'package:camera/camera.dart';
+import 'package:demo10/repository/api.dart';
+import 'package:demo10/repository/datas/user/user_info_data.dart';
+import 'package:flutter/foundation.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:path/path.dart';
+
+///我的个人信息页面VM
+class UserProfileViewModel with ChangeNotifier {
+  UserInfoData? userInfo;
+  final ImagePicker _picker = ImagePicker();
+
+  UserProfileViewModel() {
+    load();
+  }
+
+  ///加载我的个人信息
+  Future<void> load() async {
+    userInfo = await Api.instance.getUserInfo();
+    notifyListeners();
+  }
+
+  /// 从相册选择头像并上传
+  Future<void> changeAvatar() async {
+    final XFile? pickedFile = await _picker.pickImage(
+      source: ImageSource.gallery,
+    );
+    if (pickedFile != null) {
+      final fileName = basename(pickedFile.path);
+      await Api.instance.uploadAvatar(pickedFile.path, fileName);
+    }
+  }
+  /// 改名
+  Future<void> changeName(String filePath) async {
+
+  }
+}

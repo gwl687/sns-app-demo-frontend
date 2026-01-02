@@ -1,15 +1,10 @@
 import 'dart:io';
-import 'package:demo10/constants.dart';
-import 'package:demo10/manager/ChatListManager.dart';
-import 'package:demo10/manager/ChatMessageManager.dart';
-import 'package:demo10/manager/FirebaseMessageManager.dart';
-import 'package:demo10/manager/FriendListManager.dart';
-import 'package:demo10/manager/LoginSuccessManager.dart';
-import 'package:demo10/manager/TabPageManager.dart';
-import 'package:demo10/manager/WebSocketManager.dart';
-import 'package:demo10/pages/chat/groupChat_vm.dart';
-import 'package:demo10/pages/friend/friendChatList_vm.dart';
-import 'package:demo10/pages/social/store/timeline_vm.dart';
+import 'package:demo10/manager/websocket_manager.dart';
+import 'package:demo10/pages/auth/auth_vm.dart';
+import 'package:demo10/pages/chat/group_chat_vm.dart';
+import 'package:demo10/pages/friend/chat_list_vm.dart';
+import 'package:demo10/pages/social/timeline_vm.dart';
+import 'package:demo10/pages/tab_page.dart';
 import 'package:demo10/repository/api.dart';
 import 'package:demo10/repository/datas/login_data.dart';
 import 'package:demo10/utils/sp_utils.dart';
@@ -34,7 +29,6 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   final LoginInfo loginInfo = LoginInfo();
-  TimelineViewModel timelineViewModel = new TimelineViewModel();
   WebSocket? _socket;
 
   final TextEditingController _passwordController = TextEditingController(
@@ -67,54 +61,6 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  /// 登录方法
-  Future<bool?> login() async {
-    FirebaseMessaging messaging = FirebaseMessaging.instance;
-    String? pushToken = await messaging.getToken();
-    String platform;
-    if (Platform.isAndroid) {
-      platform = 'android';
-    } else if (Platform.isIOS) {
-      platform = 'ios';
-    } else {
-      platform = 'other';
-    }
-    if (loginInfo.name != null && loginInfo.password != null) {
-      //
-      LoginData data = await Api.instance.login(
-        emailaddress: loginInfo.name,
-        password: loginInfo.password,
-        pushToken: platform + ':' + pushToken!,
-      );
-
-      if (data.data?.userName != null && data.data!.userName!.isNotEmpty) {
-        // 保存用户信息
-        SpUtils.saveInt(Constants.SP_User_Id, data.data?.id ?? 0);
-        SpUtils.saveString(Constants.SP_User_Name, data.data?.userName ?? "");
-        SpUtils.saveString(Constants.SP_Token, data.data?.token ?? "");
-
-        FirebaseMessageManager.instance.loggedIn = true;
-        //登录成功后建立 WebSocket 连接
-        await WebSocketManager.instance.connect();
-        //load friend list
-        await FriendListManager.instance.loadFriends();
-        //load chatFriend list
-        await context.read<FriendChatListViewModel>().load();
-        //load timeline
-        await context.read<TimelineViewModel>().load();
-        //增量读取离线时收到的消息，存入本地数据库
-        await ChatMessageManager.instance.loadMessages();
-        return true;
-      }
-
-      showToast("登录失败");
-      return false;
-    }
-
-    showToast("输入不能为空");
-    return false;
-  }
-
   @override
   void dispose() {
     _socket?.close();
@@ -123,89 +69,87 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text("loginpage")),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            /// 用户名输入框
-            TextField(
-              controller: _usernameController,
-              decoration: const InputDecoration(
-                labelText: "username",
-                border: OutlineInputBorder(),
-              ),
-              onChanged: (value) {
-                loginInfo.name = value;
-              },
-            ),
-
-            /// 历史账号列表（只在有历史时显示）
-            if (_historyAccounts.isNotEmpty) ...[
-              const SizedBox(height: 8),
-              Text(
-                "history",
-                style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-              ),
-              const SizedBox(height: 4),
-              SizedBox(
-                height: 120, // 最多显示的高度
-                child: ListView.builder(
-                  itemCount: _historyAccounts.length,
-                  itemBuilder: (context, index) {
-                    final account = _historyAccounts[index];
-                    return ListTile(
-                      title: Text(account),
-                      onTap: () {
-                        _usernameController.text = account;
-                        loginInfo.name = account;
-                      },
-                    );
+    return Consumer<AuthViewModel>(
+      builder: (context, vm, child) {
+        return Scaffold(
+          appBar: AppBar(title: const Text("Loginpage")),
+          body: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                /// 用户名输入框
+                TextField(
+                  controller: _usernameController,
+                  decoration: const InputDecoration(
+                    labelText: "username",
+                    border: OutlineInputBorder(),
+                  ),
+                  onChanged: (value) {
+                    loginInfo.name = value;
                   },
                 ),
-              ),
-            ],
 
-            const SizedBox(height: 16),
+                /// 历史账号列表
+                if (_historyAccounts.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    "history",
+                    style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                  ),
+                  const SizedBox(height: 4),
+                  SizedBox(
+                    height: 120, // 最多显示的高度
+                    child: ListView.builder(
+                      itemCount: _historyAccounts.length,
+                      itemBuilder: (context, index) {
+                        final account = _historyAccounts[index];
+                        return ListTile(
+                          title: Text(account),
+                          onTap: () {
+                            _usernameController.text = account;
+                            loginInfo.name = account;
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                ],
 
-            /// 密码输入框
-            TextField(
-              controller: _passwordController,
-              decoration: const InputDecoration(
-                labelText: "password",
-                border: OutlineInputBorder(),
-              ),
-              obscureText: true,
-              onChanged: (value) {
-                loginInfo.password = value;
-              },
+                const SizedBox(height: 16),
+
+                /// 密码输入框
+                TextField(
+                  controller: _passwordController,
+                  decoration: const InputDecoration(
+                    labelText: "password",
+                    border: OutlineInputBorder(),
+                  ),
+                  obscureText: true,
+                  onChanged: (value) {
+                    loginInfo.password = value;
+                  },
+                ),
+
+                const SizedBox(height: 32),
+
+                /// 登录
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      loginInfo.password = _passwordController.text;
+                      await vm.login(loginInfo);
+                    },
+                    child: const Text("login"),
+                  ),
+                ),
+              ],
             ),
-
-            const SizedBox(height: 32),
-
-            /// 登录按钮
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () async {
-                  loginInfo.password = _passwordController.text;
-                  bool? success = await login();
-                  if (success == true) {
-                    _saveAccount(_usernameController.text);
-                    //跳转到登录成功页
-                    await LoginSuccessManager.instance.init();
-                    TabPageManager.loginNotifier.value = 1;
-                  }
-                },
-                child: const Text("login"),
-              ),
-            ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }

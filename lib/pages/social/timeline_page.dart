@@ -1,7 +1,7 @@
-import 'package:demo10/constants.dart';
-import 'package:demo10/pages/social/store/timeline_vm.dart';
-import 'package:demo10/pages/social/timelineIntered_page.dart';
-import 'package:demo10/pages/social/timelinePublish_page.dart';
+import 'package:demo10/constant/base_constants.dart';
+import 'package:demo10/pages/social/timeline_vm.dart';
+import 'package:demo10/pages/social/timeline_detail_page.dart';
+import 'package:demo10/pages/social/timeline_publish_page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -24,9 +24,6 @@ class _TimelinePage extends State<TimelinePage> {
   @override
   void initState() {
     super.initState();
-    //final vm = context.read<TimelineViewModel>();
-    //context.read<TimelineViewModel>();
-    //vm.load();
   }
 
   @override
@@ -50,7 +47,7 @@ class _TimelinePage extends State<TimelinePage> {
           final postMap = vm.timelinePostsMap;
           return RefreshIndicator(
             onRefresh: () async {
-              await vm.load();
+              await vm.load(20, null);
             },
             child: ListView.builder(
               itemCount: posts.length,
@@ -64,8 +61,7 @@ class _TimelinePage extends State<TimelinePage> {
                     vm.heartColorChange[timelineId] == true) {
                   hasLikedByme = true;
                 }
-                final lastCommentUserId =
-                    posts[index].comments.isNotEmpty
+                final lastCommentUserId = posts[index].comments.isNotEmpty
                     ? posts[index].comments.last.userId
                     : null;
                 return GestureDetector(
@@ -197,7 +193,7 @@ class _TimelinePage extends State<TimelinePage> {
                                               vm.userAvatarMap[userId]!,
                                             )
                                           : NetworkImage(
-                                              Constants.DefaultAvatarurl,
+                                              BaseConstants.DefaultAvatarurl,
                                             ),
                                     ),
 
@@ -243,7 +239,7 @@ class _TimelinePage extends State<TimelinePage> {
                                           vm.userAvatarMap[lastCommentUserId]!,
                                         )
                                       : NetworkImage(
-                                          Constants.DefaultAvatarurl,
+                                          BaseConstants.DefaultAvatarurl,
                                         ),
                                 ),
                                 const SizedBox(width: 8),
@@ -253,7 +249,10 @@ class _TimelinePage extends State<TimelinePage> {
                                         CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        postMap[timelineId]!.comments.last.comment,
+                                        postMap[timelineId]!
+                                            .comments
+                                            .last
+                                            .comment,
                                         maxLines: 2,
                                         overflow: TextOverflow.ellipsis,
                                         style: const TextStyle(
@@ -264,7 +263,10 @@ class _TimelinePage extends State<TimelinePage> {
                                       const SizedBox(height: 2),
                                       Text(
                                         DateFormat('yyyy-MM-dd HH:mm').format(
-                                          postMap[timelineId]!.comments.last.createdAt,
+                                          postMap[timelineId]!
+                                              .comments
+                                              .last
+                                              .createdAt,
                                         ),
                                         style: const TextStyle(
                                           fontSize: 11,

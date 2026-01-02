@@ -1,26 +1,23 @@
-import 'dart:math';
+import 'dart:async';
 
-import 'package:demo10/constants.dart';
-import 'package:demo10/manager/FriendListManager.dart';
-import 'package:demo10/manager/TabPageManager.dart';
-import 'package:demo10/pages/Chat/chat_page.dart';
-import 'package:demo10/pages/Chat/chat_page.dart';
-import 'package:demo10/pages/auth/loginSuccess_page.dart';
-import 'package:demo10/pages/auth/login_page.dart';
-import 'package:demo10/pages/friend/friendChatList_page.dart';
+import 'package:demo10/manager/firebase_message_manager.dart';
+import 'package:demo10/manager/websocket_manager.dart';
+import 'package:demo10/pages/auth/user_profile_page.dart';
+import 'package:demo10/pages/auth/user_profile_vm.dart';
+import 'package:demo10/pages/chat/video_chat_page.dart';
+import 'package:demo10/pages/friend/chat_list_page.dart';
+import 'package:demo10/pages/friend/chat_list_vm.dart';
 import 'package:demo10/pages/friend/friend_page.dart';
-import 'package:demo10/pages/home/home_page.dart';
-import 'package:demo10/pages/home/home_page2.dart';
-import 'package:demo10/pages/hot_key/hot_key_page.dart';
-import 'package:demo10/pages/personal/personal_page.dart';
+import 'package:demo10/pages/friend/friend_vm.dart';
+import 'package:demo10/pages/social/timeline_vm.dart';
 import 'package:demo10/pages/social/timeline_page.dart';
-import 'package:demo10/utils/sp_utils.dart';
+import 'package:demo10/pages/tab_vm.dart';
+import 'package:demo10/repository/api.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-
-import '../common_ui/Navigation/navigation_bar_widget.dart';
+import 'package:provider/provider.dart';
 
 class TabPage extends StatefulWidget {
   const TabPage({super.key, this.initialIndex = 0});
@@ -28,18 +25,12 @@ class TabPage extends StatefulWidget {
   final int initialIndex;
 
   @override
-  State createState() {
-    Firebase.initializeApp();
-    return _TabPageState();
-  }
+  State createState() => _TabPageState();
 }
 
 class _TabPageState extends State<TabPage> {
   ///页面数组
   late List<Widget> pages;
-
-  ///每个页面对应的页面可能性
-  late List<Widget> loginPages;
 
   ///底部标题
   late List<String> labels;
@@ -49,19 +40,15 @@ class _TabPageState extends State<TabPage> {
 
   ///导航栏的icon数组:切换后
   late List<Widget> activeIcons;
+
   int currentIndex = 0;
 
+  late final StreamSubscription _sub;
+
+  //初始化界面
   void initTabData() {
-    loginPages = [LoginPage(), LoginSuccessPage()];
-    //监听页面状态
-    TabPageManager.loginNotifier.addListener(_handleLoginPage);
     currentIndex = widget.initialIndex;
-    pages = [
-      TimelinePage(),
-      FriendPage(),
-      FriendChatList_page(),
-      loginPages[TabPageManager.loginNotifier.value],
-    ];
+    pages = [TimelinePage(), FriendPage(), ChatListPage(), UserProfilePage()];
     labels = ["timeline", "friend", "chat", "userinfo"];
     icons = [
       Image.asset(
@@ -109,17 +96,37 @@ class _TabPageState extends State<TabPage> {
     ];
   }
 
+  //初始化公共弹窗事件监听
+  void initListenPublicEvent() {
+    context.read<TabViewModel>().onVideoInvite =
+        ({required int fromUserId, required String fromUserName}) {
+          return showVideoInviteDialog(
+            context: context,
+            fromUserId: fromUserId,
+            fromUserName: fromUserName,
+          );
+        };
+  }
+
   @override
   void initState() {
     super.initState();
-    initTabData();
-  }
-
-  ///登录界面内容更改
-  void _handleLoginPage() {
-    setState(() {
-      pages[3] = loginPages[TabPageManager.loginNotifier.value];
+    FirebaseMessageManager.instance.init();
+    //初始化firebase监听
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _sub = FirebaseMessageManager.instance.stream.listen((msg) {
+        //主页面
+        context.read<TabViewModel>().onPush(msg);
+        //时间线页面
+        context.read<TimelineViewModel>().onPush(msg);
+        //朋友页面
+        context.read<FriendViewModel>().onPush(msg);
+        //聊天页面
+        context.read<ChatListViewModel>().onPush(msg);
+      });
     });
+    initListenPublicEvent();
+    initTabData();
   }
 
   @override
@@ -128,7 +135,7 @@ class _TabPageState extends State<TabPage> {
       body: pages[currentIndex], // 根据下标显示不同页面
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: currentIndex,
-        type: BottomNavigationBarType.fixed, // 超过3个要加这个
+        type: BottomNavigationBarType.fixed,
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: "timeline"),
           BottomNavigationBarItem(icon: Icon(Icons.people), label: "friend"),
@@ -142,5 +149,72 @@ class _TabPageState extends State<TabPage> {
         },
       ),
     );
+  }
+
+  //公共弹窗事件实现
+  bool _videoInviteShowing = false;
+
+  Future<void> showVideoInviteDialog({
+    required BuildContext context,
+    required int fromUserId,
+    required String fromUserName,
+  }) async {
+    // 防止重复弹窗
+    if (_videoInviteShowing) return;
+    _videoInviteShowing = true;
+
+    final bool? accepted = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) {
+        return AlertDialog(
+          title: const Text("视频通话邀请"),
+          content: Text("$fromUserName 邀请你进行视频通话"),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(ctx).pop(false);
+              },
+              child: const Text("拒绝"),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(ctx).pop(true);
+              },
+              child: const Text("接受"),
+            ),
+          ],
+        );
+      },
+    );
+
+    _videoInviteShowing = false;
+
+    if (accepted == true) {
+      // 通知对方：接受
+      WebsocketManager.instance.sendMessage(
+        "VIDEO_CALL_ACCEPT",
+        fromUserId,
+        "VIDEO_CALL_ACCEPT",
+      );
+      String token = await Api.instance.getLivekitToken(fromUserId);
+      String myName = await context
+          .read<UserProfileViewModel>()
+          .userInfo!
+          .username;
+      // 跳转到视频页面
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => VideoChatPage(token: token, userName: myName),
+        ),
+      );
+    } else {
+      // 通知对方：拒绝
+      WebsocketManager.instance.sendMessage(
+        "VIDEO_CALL_REJECT",
+        fromUserId,
+        "VIDEO_CALL_REJECT",
+      );
+    }
   }
 }
