@@ -19,7 +19,6 @@ class FriendViewModel extends ChangeNotifier {
     if (!loaded && userProfileVm!.userInfo != null) {
       loaded = true;
       ///加载好友列表
-      print("朋友列表初始化");
       load();
     }
   }

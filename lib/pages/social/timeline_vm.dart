@@ -35,7 +35,6 @@ class TimelineViewModel extends ChangeNotifier {
     if (!loaded && userProfileVm!.userInfo != null) {
       loaded = true;
       ///加载timeline
-      print("timeline初始化");
       load(1000, null);
     }
   }

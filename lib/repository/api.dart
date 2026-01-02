@@ -119,10 +119,8 @@ class Api {
       if (e != null) {
         if (e['id'] != null) {
           result.add(PrivateChatData.fromJson(e));
-          print("是私聊，添加到聊天列表");
         } else {
           result.add(GroupChatData.fromJson(e));
-          print("是群聊，添加到聊天列表");
         }
       }
     });

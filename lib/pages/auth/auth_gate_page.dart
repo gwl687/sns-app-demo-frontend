@@ -23,12 +23,12 @@ class AuthGatePage extends StatelessWidget {
     // 已登录
     return MultiProvider(
       providers: [
-
         ChangeNotifierProvider(
           create: (_) => UserProfileViewModel(),
         ),
 
         ChangeNotifierProxyProvider<UserProfileViewModel, ChatListViewModel>(
+          lazy: false,
           create: (_) => ChatListViewModel(),
           update: (_, userVm, chatVm) {
             chatVm!.init(userVm);
@@ -37,6 +37,7 @@ class AuthGatePage extends StatelessWidget {
         ),
 
         ChangeNotifierProxyProvider<UserProfileViewModel, TabViewModel>(
+          lazy: false,
           create: (_) => TabViewModel(),
           update: (_, userVm, tabVm) {
             tabVm!.init(userVm);
@@ -45,6 +46,7 @@ class AuthGatePage extends StatelessWidget {
         ),
 
         ChangeNotifierProxyProvider<UserProfileViewModel, TimelineViewModel>(
+          lazy: false,
           create: (_) => TimelineViewModel(),
           update: (_, userVm, timelineVm) {
             timelineVm!.init(userVm);
@@ -53,6 +55,7 @@ class AuthGatePage extends StatelessWidget {
         ),
 
         ChangeNotifierProxyProvider<UserProfileViewModel, FriendViewModel>(
+          lazy: false,
           create: (_) => FriendViewModel(),
           update: (_, userVm, friendVm) {
             friendVm!.init(userVm);
