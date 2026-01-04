@@ -16,8 +16,12 @@ class ChatMessageManager {
       "group": groupMessage,
       //私人视频通话请求
       "videochatrequest": vedioChatRequest,
-      //加入多人视频通话
-      "joingroupvideochat": joingroupvideochat,
+      //私人视频通话发起方请求取消
+      "videochatrequestcancel": vedioChatRequestCancel,
+      //对方对视频请求的回复
+      "videochatrequestresponse": vedioChatRequestResponse,
+      //对方挂断
+      //"videochatcancel": videoChatCancel,
     };
   }
 
@@ -32,6 +36,15 @@ class ChatMessageManager {
 
   //私人视频通话请求
   void Function(int fromUser, String fromUserName)? vedioChatRequest_vm = null;
+
+  //私人视频通话请求取消
+  void Function()? vedioChatRequestCancel_vm = null;
+
+  //对方接受或拒绝了我的视频请求
+  void Function(int fromUser, int accept)? vedioChatRequestReponse_vm = null;
+
+  //对方挂断
+  void Function()? videoChatCancel_vm = null;
 
   //全局消息处理
   //收到私聊消息
@@ -65,16 +78,40 @@ class ChatMessageManager {
   //收到视频通话请求消息
   void vedioChatRequest(Map<String, dynamic> data) async {
     final int fromUser = data['fromUser'];
-    final String fromUserName = data['fromUserName'];
+    final String fromUserName = data['content'];
     if (vedioChatRequest_vm != null) {
       vedioChatRequest_vm!(fromUser, fromUserName);
+    }
+  }
+
+  //发起方取消了视频请求
+  void vedioChatRequestCancel(Map<String, dynamic> data) async {
+    if (vedioChatRequestCancel_vm != null) {
+      vedioChatRequestCancel_vm!();
+    }
+  }
+
+  //对方对视频请求的回复
+  void vedioChatRequestResponse(Map<String, dynamic> data) async {
+    final int fromUser = data['fromUser'];
+    final int accept = int.parse(data['content']);
+    //accept=1,接受
+    if (vedioChatRequestReponse_vm != null) {
+      vedioChatRequestReponse_vm!(fromUser, accept);
+    }
+  }
+
+  //对方挂断
+  void videoChatCancel(Map<String, dynamic> data) async {
+    if (videoChatCancel_vm != null) {
+      videoChatCancel_vm!();
     }
   }
 
   //群里有人加入多人视频通话
   void joingroupvideochat(Map<String, dynamic> data) async {}
 
-  //增量更新本地sql
+  //加载进本地sql
   Future<void> loadMessages() async {
     //简单处理，登录时先清空本地数据
     await ChatDbManager.deleteFromTable("group_messages");
@@ -82,13 +119,16 @@ class ChatMessageManager {
     //私聊
     List<PrivateMessageData> privateMessages = await Api.instance
         .getPrivateMessages();
-    privateMessages.map(
-      (msg) => ChatDbManager.insertMessage(
+    for (final msg in privateMessages) {
+      DateTime localTime = msg.createTime.toLocal();
+      print("localTime=${localTime}");
+      await ChatDbManager.insertMessage(
         msg.senderId,
         msg.receiverId,
         msg.content,
-      ),
-    );
+        createTime: localTime.toIso8601String(),
+      );
+    }
     //群聊
   }
 }

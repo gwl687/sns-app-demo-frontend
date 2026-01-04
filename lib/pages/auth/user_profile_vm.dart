@@ -11,7 +11,7 @@ class UserProfileViewModel with ChangeNotifier {
   final ImagePicker _picker = ImagePicker();
 
   UserProfileViewModel() {
-    load();
+    //load();
   }
 
   ///加载我的个人信息
@@ -28,10 +28,13 @@ class UserProfileViewModel with ChangeNotifier {
     if (pickedFile != null) {
       final fileName = basename(pickedFile.path);
       await Api.instance.uploadAvatar(pickedFile.path, fileName);
+      await load();
     }
   }
-  /// 改名
-  Future<void> changeName(String filePath) async {
 
+  /// 改名
+  Future<void> changeName(String newUserName) async {
+    await Api.instance.changeUserName(newUserName);
+    await load();
   }
 }

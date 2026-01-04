@@ -1,7 +1,10 @@
 import 'package:demo10/constant/base_constants.dart';
+import 'package:demo10/pages/auth/user_profile_vm.dart';
+import 'package:demo10/pages/friend/friend_vm.dart';
 import 'package:demo10/pages/social/timeline_vm.dart';
 import 'package:demo10/pages/social/timeline_detail_page.dart';
 import 'package:demo10/pages/social/timeline_publish_page.dart';
+import 'package:demo10/repository/api.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -23,6 +26,7 @@ class _TimelinePage extends State<TimelinePage> {
 
   @override
   void initState() {
+    context.read<TimelineViewModel>().load(200, null);
     super.initState();
   }
 
@@ -41,8 +45,8 @@ class _TimelinePage extends State<TimelinePage> {
           );
         },
       ),
-      body: Consumer<TimelineViewModel>(
-        builder: (context, vm, child) {
+      body: Consumer3<TimelineViewModel, FriendViewModel, UserProfileViewModel>(
+        builder: (context, vm, friendVm, userProfileVm, child) {
           final posts = vm.timelinePosts;
           final postMap = vm.timelinePostsMap;
           return RefreshIndicator(
@@ -55,8 +59,9 @@ class _TimelinePage extends State<TimelinePage> {
                 bool hasLikedByme = false;
                 int timelineId = posts[index].timelineId;
                 //根据点赞数排序后的postId:<imageprovider:likeCount>map
-                final sortedAvatars = vm.avatars[timelineId]!.entries.toList()
-                  ..sort((a, b) => b.value.compareTo(a.value));
+                final sortedAvatars =
+                    vm.userLikeMap[timelineId]!.entries.toList()
+                      ..sort((a, b) => b.value.compareTo(a.value));
                 if (vm.heartColorChange.containsKey(timelineId) &&
                     vm.heartColorChange[timelineId] == true) {
                   hasLikedByme = true;
@@ -171,7 +176,7 @@ class _TimelinePage extends State<TimelinePage> {
                           ),
 
                           /// 如果有点赞才显示头像 + 次数区域
-                          if (vm.avatars.length > 0) ...[
+                          if (vm.userLikeMap.length > 0) ...[
                             const Divider(),
                             Wrap(
                               spacing: 8,
@@ -179,22 +184,18 @@ class _TimelinePage extends State<TimelinePage> {
                               children: sortedAvatars.map((entry) {
                                 final userId = entry.key;
                                 final likeCount = entry.value;
+                                final avatarUrl = vm.userAvatarMap?[userId];
                                 return Column(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     CircleAvatar(
                                       radius: 16,
-                                      backgroundImage:
-                                          (vm.userAvatarMap[userId] != null &&
-                                              vm
-                                                  .userAvatarMap[userId]!
-                                                  .isNotEmpty)
-                                          ? NetworkImage(
-                                              vm.userAvatarMap[userId]!,
-                                            )
-                                          : NetworkImage(
-                                              BaseConstants.DefaultAvatarurl,
-                                            ),
+                                      backgroundImage: NetworkImage(
+                                        (avatarUrl != null &&
+                                                avatarUrl.isNotEmpty)
+                                            ? avatarUrl
+                                            : BaseConstants.DefaultAvatarurl,
+                                      ),
                                     ),
 
                                     const SizedBox(height: 4),

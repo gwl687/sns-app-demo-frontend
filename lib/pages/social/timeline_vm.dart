@@ -3,6 +3,7 @@ import 'package:demo10/constant/base_constants.dart';
 import 'package:demo10/manager/firebase_message_manager.dart';
 import 'package:demo10/pages/auth/user_profile_vm.dart';
 import 'package:demo10/repository/api.dart';
+import 'package:demo10/repository/datas/push_event_data.dart';
 import 'package:demo10/repository/datas/timeline/timline_post_data.dart';
 import 'package:demo10/utils/sp_utils.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -11,6 +12,7 @@ import 'package:flutter/material.dart';
 class TimelineViewModel extends ChangeNotifier {
   UserProfileViewModel? userProfileVm;
   bool loaded = false;
+  StreamSubscription? _sub;
   List<TimelinePostData> timelinePosts = [];
 
   Map<int, TimelinePostData> timelinePostsMap = {};
@@ -25,25 +27,31 @@ class TimelineViewModel extends ChangeNotifier {
   Map<int, int> totalLikeCount = {};
 
   //用户id对应点赞数
-  Map<int, Map<int, int>> avatars = {};
+  Map<int, Map<int, int>> userLikeMap = {};
 
   //用户id对应头像url
   Map<int, String> userAvatarMap = {};
+
+  TimelineViewModel() {
+    _sub = FirebaseMessageManager.instance.stream.listen(onPush);
+    load(20, null);
+  }
 
   void init(UserProfileViewModel vm) {
     userProfileVm ??= vm;
     if (!loaded && userProfileVm!.userInfo != null) {
       loaded = true;
+
       ///加载timeline
-      load(1000, null);
+      load(20, null);
     }
   }
 
   //处理firebase推送的消息
-  void onPush(RemoteMessage msg) {
-    final type = msg.data['type'];
+  void onPush(PushEventData msg) {
+    final type = msg.message.data['type'];
     if (type == 'timelinepost') {
-      load(1000, null);
+      load(20, null);
     }
   }
 
@@ -70,10 +78,10 @@ class TimelineViewModel extends ChangeNotifier {
       } else {
         heartColorChange[timelineId] = false;
       }
-      avatars[timelineId] = {};
+      userLikeMap[timelineId] = {};
       for (final user in timelinePosts[i].topLikeUsers) {
         //用户id对应点赞数
-        avatars[timelineId]![user.userId] = user.userLikeCount;
+        userLikeMap[timelineId]![user.userId] = user.userLikeCount;
         //用户id对应头像url
         if (!userAvatarMap.containsKey(user.userId)) {
           userAvatarMap[user.userId] = user.avatarUrl;
@@ -98,10 +106,10 @@ class TimelineViewModel extends ChangeNotifier {
     } else {
       heartColorChange[timelineId] = false;
     }
-    avatars = {};
+    userLikeMap = {};
     for (final user in timelinePosts[timelineId].topLikeUsers) {
       //用户id对应点赞数
-      avatars[timelineId]![user.userId] = user.userLikeCount;
+      userLikeMap[timelineId]![user.userId] = user.userLikeCount;
       //用户id对应头像url
       if (!userAvatarMap.containsKey(user.userId)) {
         userAvatarMap[user.userId] = user.avatarUrl;
@@ -119,25 +127,30 @@ class TimelineViewModel extends ChangeNotifier {
     //没点赞的话，爱心变红
     heartColorChange[timelineId] = true;
     //如果次数超过当前avatar map次数最少的那个人，或者map大小不到20,就加入avatar map里(或增加点赞数)
-    final values = avatars[timelineId]?.values ?? const [];
+    final values = userLikeMap[timelineId]?.values ?? const [];
     int minValue = values.isEmpty
         ? 0
         : values.fold<int>(values.first, (a, b) => a < b ? a : b);
-    if (avatars[timelineId]!.length < 20 ||
+    if (userLikeMap[timelineId]!.length < 20 ||
         heartLikeCount[timelineId]! >= minValue) {
       int myId = await SpUtils.getInt(BaseConstants.SP_User_Id) ?? 0;
       //如果我还没点过，把我加进去toplikeusers
-      if (!avatars[timelineId]!.containsKey(myId)) {
+      if (!userLikeMap[timelineId]!.containsKey(myId)) {
         final avatarUrl = userProfileVm!.userInfo!.avatarurl;
-
         userAvatarMap[myId] = (avatarUrl != null && avatarUrl.isNotEmpty)
             ? avatarUrl
             : BaseConstants.DefaultAvatarurl;
         print("添加到用户id:头像map,userAvatarMap[${myId}]=${userAvatarMap[myId]}");
       }
-      avatars[timelineId]![myId] = heartLikeCount[timelineId]!;
+      userLikeMap[timelineId]![myId] = heartLikeCount[timelineId]!;
     }
     notifyListeners();
     await Api.instance.timelineHitLike(timelineId);
+  }
+
+  @override
+  void dispose() {
+    _sub?.cancel();
+    super.dispose();
   }
 }

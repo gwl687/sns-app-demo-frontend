@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'package:demo10/manager/websocket_manager.dart';
 import 'package:demo10/pages/auth/auth_vm.dart';
+import 'package:demo10/pages/auth/register_page.dart';
+import 'package:demo10/pages/auth/register_vm.dart';
 import 'package:demo10/pages/chat/group_chat_vm.dart';
 import 'package:demo10/pages/friend/chat_list_vm.dart';
 import 'package:demo10/pages/social/timeline_vm.dart';
@@ -60,6 +62,7 @@ class _LoginPageState extends State<LoginPage> {
       await SpUtils.saveStringList("login_history", list);
     }
   }
+
 
   @override
   void dispose() {
@@ -143,6 +146,18 @@ class _LoginPageState extends State<LoginPage> {
                       await vm.login(loginInfo);
                     },
                     child: const Text("login"),
+                  ),
+                ),
+
+                /// 注册
+                Center(
+                  child: TextButton(
+                    onPressed: () {
+                      Navigator.of(
+                        context,
+                      ).push(MaterialPageRoute(builder: (_) => RegisterPage()));
+                    },
+                    child: const Text("register"),
                   ),
                 ),
               ],

@@ -74,16 +74,16 @@ class DioInstance {
               if (msg != null) {
                 showToast(msg.toString());
               }
-
+              return handler.next(response);
               /// 阻断后续
-              return handler.reject(
-                DioException(
-                  requestOptions: response.requestOptions,
-                  response: response,
-                  error: msg,
-                  type: DioExceptionType.badResponse,
-                ),
-              );
+              // return handler.reject(
+              //   DioException(
+              //     requestOptions: response.requestOptions,
+              //     response: response,
+              //     error: msg,
+              //     type: DioExceptionType.badResponse,
+              //   ),
+              // );
             }
           }
 

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:demo10/constant/base_constants.dart';
 import 'package:demo10/pages/auth/user_profile_vm.dart';
+import 'package:demo10/pages/friend/friend_vm.dart';
 import 'package:demo10/repository/api.dart';
 import 'package:demo10/repository/datas/timeline/timline_post_data.dart';
 import 'package:demo10/utils/sp_utils.dart';
@@ -9,6 +10,10 @@ import 'package:path/path.dart';
 
 class TimelineDetailViewModel extends ChangeNotifier {
   UserProfileViewModel userProfileVm;
+
+  TimelineDetailViewModel timelineDetailViewModel;
+
+  FriendViewModel friendViewModel;
 
   int timelineId;
 
@@ -31,7 +36,12 @@ class TimelineDetailViewModel extends ChangeNotifier {
 
   late final StreamSubscription _sub;
 
-  TimelineDetailViewModel({required this.timelineId,required this.userProfileVm});
+  TimelineDetailViewModel({
+    required this.timelineId,
+    required this.friendViewModel,
+    required this.userProfileVm,
+    required this.timelineDetailViewModel,
+  });
 
   //刷新
   Future<void> load() async {
@@ -57,7 +67,6 @@ class TimelineDetailViewModel extends ChangeNotifier {
     }
     notifyListeners();
   }
-
 
   //点赞
   Future<void> likeHit(int timelineId) async {

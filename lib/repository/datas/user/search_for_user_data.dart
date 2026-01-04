@@ -7,7 +7,7 @@ List<SearchForUserData> searchForUserDataListFromJson(String str) =>
 
 class SearchForUserData {
   int userId;
-  int sex;
+  int? sex;
   String username;
   String? avatarurl;
   String? emailaddress;

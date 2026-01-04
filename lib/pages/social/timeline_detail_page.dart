@@ -35,7 +35,7 @@ class _TimelinePageIntered extends State<TimelinePageIntered> {
           final post = vm.timelinePostsMap[widget.timelindId]!;
           final hasLikedByMe = vm.heartColorChange[widget.timelindId]!;
           //根据点赞数排序后的postId:<imageprovider:likeCount>map
-          final sortedAvatars = vm.avatars[widget.timelindId]!.entries.toList()
+          final sortedAvatars = vm.userLikeMap[widget.timelindId]!.entries.toList()
             ..sort((a, b) => b.value.compareTo(a.value));
 
           return Column(
@@ -135,7 +135,7 @@ class _TimelinePageIntered extends State<TimelinePageIntered> {
                               ),
 
                               /// 点赞头像
-                              if (vm.avatars?.isNotEmpty == true) ...[
+                              if (vm.userLikeMap?.isNotEmpty == true) ...[
                                 const Divider(),
                                 Wrap(
                                   spacing: 8,

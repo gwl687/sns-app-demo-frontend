@@ -39,6 +39,7 @@ class AuthViewModel with ChangeNotifier {
 
       ///初始化FCM
       FirebaseMessageManager.instance.init();
+
       isLoggedIn = true;
       notifyListeners();
     } else {

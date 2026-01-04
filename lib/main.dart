@@ -3,6 +3,8 @@ import 'package:demo10/options/firebase_options.dart';
 import 'package:demo10/http/dio_instance.dart';
 import 'package:demo10/manager/firebase_message_manager.dart';
 import 'package:demo10/pages/auth/auth_vm.dart';
+import 'package:demo10/pages/auth/register_vm.dart';
+import 'package:demo10/pages/auth/user_profile_vm.dart';
 import 'package:demo10/pages/friend/chat_list_vm.dart';
 import 'package:demo10/pages/friend/friend_vm.dart';
 import 'package:demo10/pages/social/timeline_vm.dart';
@@ -30,6 +32,9 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthViewModel()),
+        ChangeNotifierProvider(create: (_) => RegisterViewModel()),
+        ChangeNotifierProvider(create: (_) => UserProfileViewModel()),
+        ChangeNotifierProvider(create: (_) => TimelineViewModel()),
       ],
       child: MyApp(),
     ),

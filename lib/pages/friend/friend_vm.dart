@@ -1,23 +1,33 @@
 import 'dart:async';
 
+import 'package:demo10/constant/base_constants.dart';
 import 'package:demo10/manager/firebase_message_manager.dart';
 import 'package:demo10/pages/auth/user_profile_vm.dart';
 import 'package:demo10/repository/api.dart';
+import 'package:demo10/repository/datas/push_event_data.dart';
 import 'package:demo10/repository/datas/user/search_for_user_data.dart';
 import 'package:demo10/repository/datas/user/user_info_data.dart';
+import 'package:demo10/utils/sp_utils.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 
 class FriendViewModel extends ChangeNotifier {
   UserProfileViewModel? userProfileVm;
   List<UserInfoData> friends = [];
+  Map<int, UserInfoData> friendMap = {};
   List<SearchForUserData> requestFriends = [];
   bool loaded = false;
+  StreamSubscription? _sub;
+
+  FriendViewModel() {
+    _sub = FirebaseMessageManager.instance.stream.listen(onPush);
+  }
 
   void init(UserProfileViewModel vm) {
     userProfileVm ??= vm;
     if (!loaded && userProfileVm!.userInfo != null) {
       loaded = true;
+
       ///加载好友列表
       load();
     }
@@ -29,21 +39,34 @@ class FriendViewModel extends ChangeNotifier {
   }
 
   //FCM处理
-  void onPush(RemoteMessage msg) {
-    final String type = msg.data['type'];
-    final String content = msg.data['content'];
-    final String title = msg.data['title'];
-    if (type == 'friendRequestResponse') {
-      //对方接受了我的好友申请，刷新好友列表
-      if (content == "1") {
+  void onPush(PushEventData msg) {
+    final String type = msg.message.data['type'];
+    final String content = msg.message.data['content'];
+    final String title = msg.message.data['title'];
+    switch (type) {
+      //对方接受了我的好友申请
+      case 'friendRequestResponse':
+        if (content == "1") {
+          loadFriends();
+        }
+        break;
+      //有人向我申请好友
+      case 'friendrequest':
+        loadRequestFriends();
+        break;
+      //朋友更新自己的信息
+      case 'friendinfochange':
         loadFriends();
-      }
+        break;
+      default:
+        break;
     }
   }
 
   //加载好友
   Future<void> loadFriends() async {
     friends = await Api.instance.getFriendList();
+    friendMap = {for (final friend in friends) friend.userId: friend};
     notifyListeners();
   }
 
@@ -62,5 +85,11 @@ class FriendViewModel extends ChangeNotifier {
       loadFriends();
       notifyListeners();
     }
+  }
+
+  @override
+  void dispose() {
+    _sub?.cancel();
+    super.dispose();
   }
 }

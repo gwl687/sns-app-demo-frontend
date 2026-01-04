@@ -119,14 +119,15 @@ class ChatDbManager {
   static Future<void> insertMessage(
     int fromUser,
     int toUser,
-    String content,
-  ) async {
+    String content, {
+    String? createTime,
+  }) async {
     final db = await getDb();
     await db.insert('messages', {
       'fromUser': fromUser,
       'toUser': toUser,
       'content': content,
-      'time': DateTime.now().toIso8601String(),
+      'time': createTime ?? DateTime.now().toIso8601String(),
     }, conflictAlgorithm: ConflictAlgorithm.replace);
   }
 

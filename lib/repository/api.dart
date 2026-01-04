@@ -27,27 +27,25 @@ class Api {
   Future<dynamic> sendVerificationCode(String emailaddress) async {
     await DioInstance.instance().post(
       path: "/api/user/sendverificationcode",
-      data: {"emailaddress", emailaddress},
+      queryParameters: {"emailaddress": emailaddress},
     );
   }
 
   ///注册
-  Future<dynamic> register(
+  Future<bool> register(
     String emailaddress,
-    String password,
     String verificationCode,
+    String password,
   ) async {
-    await DioInstance.instance().post(
-      path: "api/user/register",
+    Response response = await DioInstance.instance().post(
+      path: "/api/user/register",
       data: {
-        "emailaddress",
-        emailaddress,
-        "password",
-        password,
-        "verificationCode",
-        verificationCode,
+        "emailaddress": emailaddress,
+        "password": password,
+        "verificationCode": verificationCode,
       },
     );
+    return response.data['code'] == 1;
   }
 
   ///登录
@@ -65,6 +63,14 @@ class Api {
       },
     );
     return UserLoginData.fromJson(response.data['data']);
+  }
+
+  ///改名
+  Future<void> changeUserName(String newUserName) async {
+    Response response = await DioInstance.instance().post(
+      path: "/api/user/changeusername",
+      queryParameters: {"newUsername": newUserName},
+    );
   }
 
   //获取好友列表
@@ -137,9 +143,7 @@ class Api {
   }
 
   //发送群消息
-  Future<void> saveGroupMessage(
-    GroupMessageData groupMessageData,
-  ) async {
+  Future<void> saveGroupMessage(GroupMessageData groupMessageData) async {
     Response response = await DioInstance.instance().post(
       path: "/api/group/saveGroupMessage",
       queryParameters: {'groupMessageDTO': groupMessageData},
@@ -222,7 +226,6 @@ class Api {
     );
     return response.data['data'];
   }
-
 
   //推送帖子
   Future<String> postTimeline(

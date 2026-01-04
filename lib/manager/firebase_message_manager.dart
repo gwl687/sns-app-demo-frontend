@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:demo10/repository/datas/push_event_data.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
 class FirebaseMessageManager {
@@ -9,25 +10,29 @@ class FirebaseMessageManager {
   bool initialized = false;
   bool loggedIn = false;
 
-  final StreamController<RemoteMessage> _controller =
-      StreamController<RemoteMessage>.broadcast();
+  final StreamController<PushEventData> _controller =
+      StreamController<PushEventData>.broadcast();
 
-  Stream<RemoteMessage> get stream => _controller.stream;
+  Stream<PushEventData> get stream => _controller.stream;
 
   void init() {
     if (initialized) return;
     initialized = true;
 
     FirebaseMessaging.onMessage.listen(_onMessage);
-    FirebaseMessaging.onMessageOpenedApp.listen(_onMessage);
+    FirebaseMessaging.onMessageOpenedApp.listen(_onOpenedMessage);
   }
 
+  //前台
   void _onMessage(RemoteMessage msg) {
     print("收到推送: type = ${msg.data['type']}");
-    handleMessage(msg);
+    _controller.add(PushEventData(msg, false));
   }
 
-  void handleMessage(RemoteMessage msg) async {
-    _controller.add(msg);
+  //后台
+  void _onOpenedMessage(RemoteMessage msg) {
+    print("收到推送: type = ${msg.data['type']}");
+    _controller.add(PushEventData(msg, true));
   }
+
 }

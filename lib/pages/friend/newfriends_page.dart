@@ -1,4 +1,5 @@
 import 'package:demo10/pages/friend/friend_vm.dart';
+import 'package:demo10/pages/friend/newfriends_vm.dart';
 import 'package:demo10/repository/datas/user/search_for_user_data.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -20,24 +21,22 @@ class _NewFriendsPage extends State<NewFriendsPage> {
     return Scaffold(
       appBar: AppBar(title: const Text('New Friends'), centerTitle: true),
       //向我申请好友中的用户列表
-      body: Consumer<FriendViewModel>(
+      body: Consumer<NewFriendsViewModel>(
         builder: (context, vm, _) {
-          if (vm.requestFriends.isEmpty) {
+          if (vm.friendViewModel!.requestFriends.isEmpty) {
             return const Center(child: Text('No friend requests'));
           }
-
           return ListView.separated(
-            itemCount: vm.requestFriends.length,
+            itemCount: vm.friendViewModel!.requestFriends.length,
             separatorBuilder: (_, __) => const Divider(height: 0.5),
             itemBuilder: (context, index) {
-              final requestFriend = vm.requestFriends[index];
-
+              final requestFriend = vm.friendViewModel!.requestFriends[index];
               return ListTile(
                 leading: CircleAvatar(
                   backgroundImage: NetworkImage(requestFriend.avatarurl!),
                 ),
                 title: Text(requestFriend.username),
-                trailing: _buildAction(vm, requestFriend),
+                trailing: _buildAction(vm.friendViewModel!, requestFriend),
               );
             },
           );
@@ -65,14 +64,13 @@ class _NewFriendsPage extends State<NewFriendsPage> {
         TextButton(
           onPressed: () async {
             await vm.friendrequestresponse(user, 1);
-            await vm.loadFriends();
           },
           child: const Text('Accept', style: TextStyle(color: Colors.green)),
         ),
         //拒绝
         TextButton(
-          onPressed: () {
-            vm.friendrequestresponse(user, 0);
+          onPressed: () async {
+            await vm.friendrequestresponse(user, 0);
           },
           child: const Text('Reject', style: TextStyle(color: Colors.red)),
         ),

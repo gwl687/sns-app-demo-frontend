@@ -1,10 +1,13 @@
 import 'package:demo10/manager/chat_db_manager.dart';
 import 'package:demo10/manager/chat_message_manager.dart';
 import 'package:demo10/manager/websocket_manager.dart';
+import 'package:demo10/repository/datas/user/user_info_data.dart';
 import 'package:flutter/material.dart';
 
 class ChatViewModel extends ChangeNotifier {
   List<Map<String, dynamic>> privateMessages = [];
+
+  UserInfoData? userInfo;
 
   final int friendId;
   final int? myId;
@@ -53,7 +56,6 @@ class ChatViewModel extends ChangeNotifier {
   //刷新私聊消息
   Future<void> loadMessages(int fromUser, int toUser) async {
     final raw = await ChatDbManager.getPrivateMessages(fromUser, toUser);
-
     privateMessages = raw.map<Map<String, dynamic>>((e) {
       return {
         'fromUser': int.parse(e['fromUser'].toString()),
@@ -62,16 +64,15 @@ class ChatViewModel extends ChangeNotifier {
         'time': e['time'],
       };
     }).toList();
-
     notifyListeners();
   }
 
   //发起视频聊天
-  void requestVideoCall(String myName) {
+  void requestVideoCall() {
     WebsocketManager.instance.sendMessage(
       "videochatrequest",
       friendId,
-      "videochatrequest",
+      friendName + " invite you to video chat",
     );
   }
 

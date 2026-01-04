@@ -1,27 +1,25 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:livekit_client/livekit_client.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class VideoChatPage extends StatefulWidget {
-  final String livekitUrl = "ws://3.112.54.245:7880";
   final String token;
-  final String userName;
 
-  const VideoChatPage({
-    super.key,
-    required this.token,
-    required this.userName,
-  });
+  const VideoChatPage({super.key, required this.token});
 
   @override
-  State<VideoChatPage> createState() => _VideoChatPage();
+  State<VideoChatPage> createState() => _VideoChatPageState();
 }
 
-class _VideoChatPage extends State<VideoChatPage> {
+class _VideoChatPageState extends State<VideoChatPage> {
   late Room room;
+
+  bool _hadRemote = false;
+  bool _ended = false;
+
+  final String livekitUrl = "ws://3.112.54.245:7880";
 
   @override
   void initState() {
@@ -31,14 +29,34 @@ class _VideoChatPage extends State<VideoChatPage> {
 
   Future<void> initRoom() async {
     room = Room();
+
     await [Permission.camera, Permission.microphone].request();
 
     room.addListener(() {
+      if (!mounted || _ended) return;
+
+      final hasRemote = room.remoteParticipants.isNotEmpty;
+
+      if (hasRemote) {
+        _hadRemote = true;
+      }
+
+      if (_hadRemote && !hasRemote) {
+        _ended = true;
+
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text("The call has ended")));
+
+        Navigator.pop(context);
+        return;
+      }
+
       setState(() {});
     });
 
     await room.connect(
-      widget.livekitUrl,
+      livekitUrl,
       widget.token,
       connectOptions: const ConnectOptions(autoSubscribe: true),
     );
@@ -49,6 +67,10 @@ class _VideoChatPage extends State<VideoChatPage> {
 
   @override
   void dispose() {
+    try {
+      room.localParticipant?.setCameraEnabled(false);
+      room.localParticipant?.setMicrophoneEnabled(false);
+    } catch (_) {}
     room.disconnect();
     super.dispose();
   }
@@ -60,98 +82,93 @@ class _VideoChatPage extends State<VideoChatPage> {
 
     return Scaffold(
       backgroundColor: Colors.black,
-      appBar: AppBar(title: const Text("Video Chat")),
-      body: Column(
+      appBar: AppBar(title: const Text("视频通话"), backgroundColor: Colors.black),
+      body: Stack(
         children: [
-          /// 远端（占大屏）
-          Expanded(
-            flex: 3,
-            child: remote == null
-                ? _buildWaiting()
-                : _buildVideo(remote),
+          /// 远端：全屏
+          Positioned.fill(
+            child: remote == null ? _buildWaiting() : _buildVideo(remote),
           ),
 
-          /// 本地（小屏）
-          Expanded(
-            flex: 2,
-            child: local == null
-                ? const SizedBox()
-                : _buildVideo(local),
-          ),
+          /// 本地：左上角小窗
+          if (local != null)
+            Positioned(
+              top: 16,
+              left: 16,
+              width: 120,
+              height: 180,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Container(
+                  color: Colors.black,
+                  child: _buildVideo(local),
+                ),
+              ),
+            ),
         ],
       ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.red,
-        onPressed: () => Navigator.pop(context),
+        onPressed: () {
+          Navigator.pop(context);
+        },
         child: const Icon(Icons.call_end),
       ),
     );
   }
 
+  /// ================= UI =================
+
   Widget _buildWaiting() {
     return const Center(
       child: Text(
-        "Waiting for other participant...",
-        style: TextStyle(color: Colors.white70),
+        "connecting…",
+        style: TextStyle(color: Colors.white70, fontSize: 18),
       ),
     );
   }
 
   Widget _buildVideo(Participant participant) {
-    final pub = participant.videoTrackPublications
-        .where((p) => p.subscribed && !p.muted)
-        .firstOrNull;
-    final track = pub?.track as VideoTrack?;
+    dynamic pub;
+    dynamic track;
+
+    // 找一个可用的视频轨道
+    for (final p in participant.videoTrackPublications) {
+      if (p.subscribed == true && p.muted == false) {
+        pub = p;
+        track = p.track;
+        break;
+      }
+    }
+    // 显示名字
+    final String displayName = jsonDecode(participant.metadata!)['username'];
 
     return Stack(
+      fit: StackFit.expand,
       children: [
-        Positioned.fill(
-          child: track == null
-              ? Container(
-            color: Colors.black,
-            child: Center(
-              child: Text(
-                participant.identity,
-                style: const TextStyle(color: Colors.white),
-              ),
-            ),
-          )
-              : VideoTrackRenderer(track, fit: VideoViewFit.cover),
-        ),
+        /// 视频画面
+        if (track != null)
+          VideoTrackRenderer(track, fit: VideoViewFit.cover)
+        else
+          Container(color: Colors.black),
+
+        /// 名字
         Positioned(
-          right: 8,
+          left: 8,
           bottom: 8,
-          child: _buildUserName(participant),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: Colors.black.withOpacity(0.6),
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: Text(
+              displayName,
+              style: const TextStyle(color: Colors.white, fontSize: 12),
+            ),
+          ),
         ),
       ],
     );
   }
-
-  Widget _buildUserName(Participant participant) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.6),
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: Text(
-        getDisplayName(participant),
-        style: const TextStyle(color: Colors.white, fontSize: 12),
-      ),
-    );
-  }
-
-  String getDisplayName(Participant participant) {
-    final metadata = participant.metadata;
-    if (metadata == null || metadata.isEmpty) {
-      return participant.identity;
-    }
-    try {
-      final map = jsonDecode(metadata);
-      return map['username'] ?? participant.identity;
-    } catch (_) {
-      return participant.identity;
-    }
-  }
 }
-

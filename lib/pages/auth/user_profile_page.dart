@@ -42,10 +42,30 @@ class _UserProfilePage extends State<UserProfilePage> {
                 SizedBox(height: 20),
 
                 // 用户名
-                Text(
-                  vm.userInfo!.username,
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      vm.userInfo!.username,
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    GestureDetector(
+                      onTap: () {
+                        _showEditNameDialog(context, vm);
+                      },
+                      child: const Icon(
+                        Icons.edit,
+                        size: 18,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ],
                 ),
+
                 SizedBox(height: 40),
 
                 // 退出登录
@@ -61,6 +81,46 @@ class _UserProfilePage extends State<UserProfilePage> {
               ],
             ),
           ),
+        );
+      },
+    );
+  }
+
+  void _showEditNameDialog(BuildContext context, UserProfileViewModel vm) {
+    final controller = TextEditingController(text: vm.userInfo!.username);
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Change username'),
+          content: TextField(
+            controller: controller,
+            maxLength: 20,
+            decoration: const InputDecoration(hintText: 'Enter new username'),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                final newName = controller.text.trim();
+
+                if (newName.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Username cannot be empty')),
+                  );
+                  return;
+                }
+
+                vm.changeName(newName);
+                Navigator.pop(context);
+              },
+              child: const Text('OK'),
+            ),
+          ],
         );
       },
     );

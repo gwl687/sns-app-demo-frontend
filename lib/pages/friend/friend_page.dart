@@ -7,6 +7,7 @@ import 'package:demo10/pages/friend/add_friend_page.dart';
 import 'package:demo10/pages/friend/chat_list_vm.dart';
 import 'package:demo10/pages/friend/friend_vm.dart';
 import 'package:demo10/pages/friend/newfriends_page.dart';
+import 'package:demo10/pages/friend/newfriends_vm.dart';
 import 'package:demo10/repository/api.dart';
 import 'package:demo10/repository/datas/private_chat_data.dart';
 import 'package:demo10/utils/sp_utils.dart';
@@ -43,17 +44,17 @@ class _FriendPageState extends State<FriendPage> {
               );
             },
           ),
-          IconButton(
-            icon: Icon(Icons.group_add),
-            tooltip: 'create a group',
-            onPressed: () {
-              // 点击跳转到建群页面
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => CreateGroupPage()),
-              );
-            },
-          ),
+          // IconButton(
+          //   icon: Icon(Icons.group_add),
+          //   tooltip: 'create a group',
+          //   onPressed: () {
+          //     // 点击跳转到建群页面
+          //     Navigator.push(
+          //       context,
+          //       MaterialPageRoute(builder: (_) => CreateGroupPage()),
+          //     );
+          //   },
+          // ),
         ],
       ),
       //朋友列表
@@ -84,13 +85,11 @@ class _FriendPageState extends State<FriendPage> {
                       avatarUrl: friend.avatarurl!,
                     );
                     final chatList = context.read<ChatListViewModel>().chatList;
-                    print("聊天列表长度${chatList.length}");
                     final exists = chatList.any(
                       (e) => e is PrivateChatData && e.id == friend.userId,
                     );
                     //如果聊天列表里没有，添加到聊天列表
                     if (!exists) {
-                      print("添加聊天");
                       chatList.insert(0, privateChatData);
                       Api.instance.addToChatList(friend.userId);
                     }
@@ -135,9 +134,16 @@ class _FriendPageState extends State<FriendPage> {
         subtitle: Text('Friend requests', style: TextStyle(fontSize: 12)),
         trailing: Icon(Icons.chevron_right, color: Colors.blue),
         onTap: () {
+          final friendVm = context.read<FriendViewModel>();
+
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => NewFriendsPage()),
+            MaterialPageRoute(
+              builder: (_) => ChangeNotifierProvider(
+                create: (_) => NewFriendsViewModel(friendVm),
+                child:  NewFriendsPage(),
+              ),
+            ),
           );
         },
       ),

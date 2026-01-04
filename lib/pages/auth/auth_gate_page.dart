@@ -1,5 +1,6 @@
 import 'package:demo10/pages/auth/auth_vm.dart';
 import 'package:demo10/pages/auth/login_page.dart';
+import 'package:demo10/pages/auth/register_vm.dart';
 import 'package:demo10/pages/auth/user_profile_vm.dart';
 import 'package:demo10/pages/friend/chat_list_vm.dart';
 import 'package:demo10/pages/friend/friend_vm.dart';
@@ -15,18 +16,15 @@ class AuthGatePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthViewModel>();
-
     // 未登录
     if (!auth.isLoggedIn) {
       return const LoginPage();
     }
     // 已登录
+    context.read<UserProfileViewModel>().load();
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(
-          create: (_) => UserProfileViewModel(),
-        ),
-
+        //ChangeNotifierProvider(create: (_) => UserProfileViewModel()),
         ChangeNotifierProxyProvider<UserProfileViewModel, ChatListViewModel>(
           lazy: false,
           create: (_) => ChatListViewModel(),
@@ -45,14 +43,14 @@ class AuthGatePage extends StatelessWidget {
           },
         ),
 
-        ChangeNotifierProxyProvider<UserProfileViewModel, TimelineViewModel>(
-          lazy: false,
-          create: (_) => TimelineViewModel(),
-          update: (_, userVm, timelineVm) {
-            timelineVm!.init(userVm);
-            return timelineVm;
-          },
-        ),
+        // ChangeNotifierProxyProvider<UserProfileViewModel, TimelineViewModel>(
+        //   lazy: false,
+        //   create: (_) => TimelineViewModel(),
+        //   update: (_, userVm, timelineVm) {
+        //     timelineVm!.init(userVm);
+        //     return timelineVm;
+        //   },
+        // ),
 
         ChangeNotifierProxyProvider<UserProfileViewModel, FriendViewModel>(
           lazy: false,
@@ -63,8 +61,7 @@ class AuthGatePage extends StatelessWidget {
           },
         ),
       ],
-      child: const TabPage(),
+      child: TabPage(),
     );
-
   }
 }

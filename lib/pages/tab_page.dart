@@ -1,9 +1,12 @@
 import 'dart:async';
 
+import 'package:demo10/manager/dialog_manager.dart';
 import 'package:demo10/manager/firebase_message_manager.dart';
 import 'package:demo10/manager/websocket_manager.dart';
+import 'package:demo10/pages/Chat/Chat_page.dart';
 import 'package:demo10/pages/auth/user_profile_page.dart';
 import 'package:demo10/pages/auth/user_profile_vm.dart';
+import 'package:demo10/pages/chat/chat_vm.dart';
 import 'package:demo10/pages/chat/video_chat_page.dart';
 import 'package:demo10/pages/friend/chat_list_page.dart';
 import 'package:demo10/pages/friend/chat_list_vm.dart';
@@ -13,6 +16,7 @@ import 'package:demo10/pages/social/timeline_vm.dart';
 import 'package:demo10/pages/social/timeline_page.dart';
 import 'package:demo10/pages/tab_vm.dart';
 import 'package:demo10/repository/api.dart';
+import 'package:demo10/repository/datas/private_chat_data.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -48,6 +52,10 @@ class _TabPageState extends State<TabPage> {
   //初始化界面
   void initTabData() {
     currentIndex = widget.initialIndex;
+    //暂时特殊处理timeline
+    final timelineVm = context.read<TimelineViewModel>();
+    final userProFileVm = context.read<UserProfileViewModel>();
+    timelineVm.init(userProFileVm);
     pages = [TimelinePage(), FriendPage(), ChatListPage(), UserProfilePage()];
     labels = ["timeline", "friend", "chat", "userinfo"];
     icons = [
@@ -98,9 +106,10 @@ class _TabPageState extends State<TabPage> {
 
   //初始化公共弹窗事件监听
   void initListenPublicEvent() {
+    //视频聊天请求弹窗
     context.read<TabViewModel>().onVideoInvite =
         ({required int fromUserId, required String fromUserName}) {
-          return showVideoInviteDialog(
+          return DialogManager.instance.showVideoInviteDialog(
             context: context,
             fromUserId: fromUserId,
             fromUserName: fromUserName,
@@ -111,26 +120,43 @@ class _TabPageState extends State<TabPage> {
   @override
   void initState() {
     super.initState();
-    FirebaseMessageManager.instance.init();
-    //初始化firebase监听
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _sub = FirebaseMessageManager.instance.stream.listen((msg) {
-        //主页面
-        context.read<TabViewModel>().onPush(msg);
-        //时间线页面
-        context.read<TimelineViewModel>().onPush(msg);
-        //朋友页面
-        context.read<FriendViewModel>().onPush(msg);
-        //聊天页面
-        context.read<ChatListViewModel>().onPush(msg);
-      });
-    });
     initListenPublicEvent();
     initTabData();
   }
 
   @override
   Widget build(BuildContext context) {
+    // final tabVm = context.watch<TabViewModel>();
+    // WidgetsBinding.instance.addPostFrameCallback((_) {
+    //   final chatUserId = tabVm.pendingChatUserId;
+    //   if (chatUserId != null) {
+    //     //处理跳转
+    //     final userProfileVm = context.read<UserProfileViewModel>();
+    //     final chatList = context.read<ChatListViewModel>().chatList;
+    //     final PrivateChatData? chatItem = chatList.firstWhere(
+    //       (e) => e.id == tabVm.pendingChatUserId,
+    //       orElse: () => null,
+    //     );
+    //     final String userName = chatItem!.userName;
+    //     final String avatarUrl = chatItem.avatarUrl;
+    //     Navigator.push(
+    //       context,
+    //       MaterialPageRoute(
+    //         builder: (_) => ChangeNotifierProvider(
+    //           create: (_) => ChatViewModel(
+    //             myId: userProfileVm.userInfo!.userId,
+    //             friendId: tabVm.pendingChatUserId!,
+    //             friendAvatarUrl: avatarUrl,
+    //             friendName: userName,
+    //           ),
+    //           child: ChatPage(),
+    //         ),
+    //       ),
+    //     );
+    //   }
+    // });
+
+    //主页
     return Scaffold(
       body: pages[currentIndex], // 根据下标显示不同页面
       bottomNavigationBar: BottomNavigationBar(
@@ -149,72 +175,5 @@ class _TabPageState extends State<TabPage> {
         },
       ),
     );
-  }
-
-  //公共弹窗事件实现
-  bool _videoInviteShowing = false;
-
-  Future<void> showVideoInviteDialog({
-    required BuildContext context,
-    required int fromUserId,
-    required String fromUserName,
-  }) async {
-    // 防止重复弹窗
-    if (_videoInviteShowing) return;
-    _videoInviteShowing = true;
-
-    final bool? accepted = await showDialog<bool>(
-      context: context,
-      barrierDismissible: false,
-      builder: (ctx) {
-        return AlertDialog(
-          title: const Text("视频通话邀请"),
-          content: Text("$fromUserName 邀请你进行视频通话"),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(ctx).pop(false);
-              },
-              child: const Text("拒绝"),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(ctx).pop(true);
-              },
-              child: const Text("接受"),
-            ),
-          ],
-        );
-      },
-    );
-
-    _videoInviteShowing = false;
-
-    if (accepted == true) {
-      // 通知对方：接受
-      WebsocketManager.instance.sendMessage(
-        "VIDEO_CALL_ACCEPT",
-        fromUserId,
-        "VIDEO_CALL_ACCEPT",
-      );
-      String token = await Api.instance.getLivekitToken(fromUserId);
-      String myName = await context
-          .read<UserProfileViewModel>()
-          .userInfo!
-          .username;
-      // 跳转到视频页面
-      Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (_) => VideoChatPage(token: token, userName: myName),
-        ),
-      );
-    } else {
-      // 通知对方：拒绝
-      WebsocketManager.instance.sendMessage(
-        "VIDEO_CALL_REJECT",
-        fromUserId,
-        "VIDEO_CALL_REJECT",
-      );
-    }
   }
 }
