@@ -22,7 +22,7 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 }
 
 void main() async {
-  DioInstance.instance().initDio(baseUrl: AppConfig.baseUrl);
+  DioInstance.instance().initDio(baseUrl: AppConfig.baseUrl);//
   //FireBase
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
