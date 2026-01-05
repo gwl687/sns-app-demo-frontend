@@ -121,7 +121,6 @@ class ChatMessageManager {
         .getPrivateMessages();
     for (final msg in privateMessages) {
       DateTime localTime = msg.createTime.toLocal();
-      print("localTime=${localTime}");
       await ChatDbManager.insertMessage(
         msg.senderId,
         msg.receiverId,

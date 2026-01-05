@@ -119,7 +119,6 @@ class Api {
     Response response = await DioInstance.instance().get(
       path: "/api/friend/getchatlist",
     );
-    print("获取聊天列表: ${response.data['data']}");
     List<dynamic> result = [];
     (response.data['data'] as List).forEach((e) {
       if (e != null) {

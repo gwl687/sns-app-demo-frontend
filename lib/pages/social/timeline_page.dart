@@ -26,7 +26,7 @@ class _TimelinePage extends State<TimelinePage> {
 
   @override
   void initState() {
-    context.read<TimelineViewModel>().load(200, null);
+    //context.read<TimelineViewModel>().load(200, null);
     super.initState();
   }
 
@@ -49,9 +49,21 @@ class _TimelinePage extends State<TimelinePage> {
         builder: (context, vm, friendVm, userProfileVm, child) {
           final posts = vm.timelinePosts;
           final postMap = vm.timelinePostsMap;
+          if (vm.isLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (posts.isEmpty) {
+            return const Center(
+              child: Text(
+                'No timeline',
+                style: TextStyle(color: Colors.grey),
+              ),
+            );
+          }
           return RefreshIndicator(
             onRefresh: () async {
-              await vm.load(20, null);
+              await vm.load(200, null);
+              print("refreshtimeline");
             },
             child: ListView.builder(
               itemCount: posts.length,
@@ -100,7 +112,7 @@ class _TimelinePage extends State<TimelinePage> {
                               Text(
                                 DateFormat(
                                   'yyyy-MM-dd HH:mm',
-                                ).format(posts[index].createdAt),
+                                ).format(posts[index].createdAt.toLocal()),
                                 style: const TextStyle(
                                   fontSize: 12,
                                   color: Colors.grey,
@@ -267,7 +279,7 @@ class _TimelinePage extends State<TimelinePage> {
                                           postMap[timelineId]!
                                               .comments
                                               .last
-                                              .createdAt,
+                                              .createdAt.toLocal(),
                                         ),
                                         style: const TextStyle(
                                           fontSize: 11,

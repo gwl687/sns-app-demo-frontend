@@ -69,7 +69,7 @@ class _TimelinePageIntered extends State<TimelinePageIntered> {
                                   Text(
                                     DateFormat(
                                       'yyyy-MM-dd HH:mm',
-                                    ).format(post.createdAt),
+                                    ).format(post.createdAt.toLocal()),
                                     style: const TextStyle(
                                       fontSize: 11,
                                       color: Colors.grey,
@@ -232,7 +232,7 @@ class _TimelinePageIntered extends State<TimelinePageIntered> {
                                         Text(
                                           DateFormat(
                                             'yyyy-MM-dd HH:mm',
-                                          ).format(c.createdAt),
+                                          ).format(c.createdAt.toLocal()),
                                           style: const TextStyle(
                                             fontSize: 11,
                                             color: Colors.grey,
@@ -274,7 +274,7 @@ class _TimelinePageIntered extends State<TimelinePageIntered> {
                           if (text.isEmpty) return;
                           await Api.instance.postComment(post.timelineId, text);
                           _commentController.clear();
-                          await vm.load(20, null);
+                          await vm.load(200, null);
                         },
                       ),
                     ],

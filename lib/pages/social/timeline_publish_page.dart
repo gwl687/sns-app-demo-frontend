@@ -16,6 +16,7 @@ class TimelinePublishPage extends StatefulWidget {
 class _TimelinePublishPage extends State<TimelinePublishPage> {
   final TextEditingController _controller = TextEditingController();
   final ImagePicker _picker = ImagePicker();
+  bool _posting = false;
   List<XFile> _images = []; // 选中的图片文件
 
   // 选择多张图片
@@ -116,23 +117,49 @@ class _TimelinePublishPage extends State<TimelinePublishPage> {
 
             SizedBox(height: 16),
 
-            /// 发布按钮（不上传图片）
+            /// 发布按钮
+            /// 发布按钮
             ElevatedButton(
-              onPressed: () async {
-                int? id = await SpUtils.getInt(BaseConstants.SP_User_Id);
-                await Api.instance.postTimeline(
-                  id,
-                  _controller.text,
-                  _images,
-                  DateTime.now().toString(),
-                );
-                await context.read<TimelineViewModel>().load(20, null);
-                if (mounted) {
-                  Navigator.pop(context, true);
+              onPressed: _posting
+                  ? null
+                  : () async {
+                setState(() {
+                  _posting = true;
+                });
+
+                try {
+                  int? id = await SpUtils.getInt(BaseConstants.SP_User_Id);
+                  await Api.instance.postTimeline(
+                    id,
+                    _controller.text,
+                    _images,
+                    DateTime.now().toString(),
+                  );
+                  await context.read<TimelineViewModel>().load(20, null);
+
+                  if (mounted) {
+                    Navigator.pop(context, true);
+                  }
+                } finally {
+                  if (mounted) {
+                    setState(() {
+                      _posting = false;
+                    });
+                  }
                 }
               },
-              child: Text("Post"),
+              child: _posting
+                  ? const SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: Colors.white,
+                ),
+              )
+                  : const Text("Post"),
             ),
+
           ],
         ),
       ),

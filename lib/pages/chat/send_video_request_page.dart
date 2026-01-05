@@ -98,6 +98,28 @@ class _SendVideoRequestPageState extends State<SendVideoRequestPage> {
                         )
                       : CameraPreview(_controller!),
                 ),
+                // 等待提示
+                Positioned(
+                  top: 24,
+                  left: 0,
+                  right: 0,
+                  child: Center(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withAlpha(128),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: const Text(
+                        'Waiting for the other person to accept the invitation…',
+                        style: TextStyle(color: Colors.white, fontSize: 14),
+                      ),
+                    ),
+                  ),
+                ),
 
                 // === 底部取消按钮 ===
                 Positioned(

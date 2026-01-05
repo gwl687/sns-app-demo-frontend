@@ -12,6 +12,9 @@ import 'package:flutter/material.dart';
 class TimelineViewModel extends ChangeNotifier {
   UserProfileViewModel? userProfileVm;
   bool loaded = false;
+
+  //上面这个暂时不用，
+  bool isLoading = false;
   StreamSubscription? _sub;
   List<TimelinePostData> timelinePosts = [];
 
@@ -34,16 +37,16 @@ class TimelineViewModel extends ChangeNotifier {
 
   TimelineViewModel() {
     _sub = FirebaseMessageManager.instance.stream.listen(onPush);
-    load(20, null);
+    load(200, null);
   }
 
   void init(UserProfileViewModel vm) {
+    print("timeline init");
     userProfileVm ??= vm;
     if (!loaded && userProfileVm!.userInfo != null) {
       loaded = true;
-
       ///加载timeline
-      load(20, null);
+      load(200, null);
     }
   }
 
@@ -51,7 +54,7 @@ class TimelineViewModel extends ChangeNotifier {
   void onPush(PushEventData msg) {
     final type = msg.message.data['type'];
     if (type == 'timelinepost') {
-      load(20, null);
+      load(200, null);
     }
   }
 
@@ -62,6 +65,8 @@ class TimelineViewModel extends ChangeNotifier {
 
   //刷新获取timeline内容
   Future<void> load(int limit, DateTime? cursor) async {
+    print("timeline load");
+    isLoading = true;
     timelinePosts = await Api.instance.getTimelinePost(limit, cursor);
     for (int i = 0; i < timelinePosts.length; i++) {
       final post = timelinePosts[i];
@@ -88,6 +93,7 @@ class TimelineViewModel extends ChangeNotifier {
         }
       }
     }
+    isLoading = false;
     notifyListeners();
   }
 
