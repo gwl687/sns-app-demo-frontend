@@ -29,7 +29,7 @@ class DialogManager {
         _dialogContext = ctx;
         return AlertDialog(
           title: const Text("video chat invite"),
-          content: Text("$fromUserName is inviting you to a video chat"),
+          content: Text("${fromUserName} is inviting you to a video chat"),
           actions: [
             TextButton(
               onPressed: () {
