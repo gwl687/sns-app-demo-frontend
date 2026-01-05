@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:demo10/app_config.dart';
 import 'package:demo10/constant/base_constants.dart';
 import 'package:demo10/manager/chat_message_manager.dart';
 import 'package:demo10/utils/sp_utils.dart';
@@ -30,7 +31,7 @@ class WebsocketManager {
 
     try {
       _socket = await WebSocket.connect(
-        'ws://192.168.0.12:8081/ws',
+        AppConfig.wsUrl,
         headers: {'Authorization': 'Bearer $myToken'},
       );
 

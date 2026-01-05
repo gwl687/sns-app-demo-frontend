@@ -1,3 +1,4 @@
+import 'package:demo10/app_config.dart';
 import 'package:demo10/manager/chat_db_manager.dart';
 import 'package:demo10/options/firebase_options.dart';
 import 'package:demo10/http/dio_instance.dart';
@@ -21,7 +22,7 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 }
 
 void main() async {
-  DioInstance.instance().initDio(baseUrl: "http://192.168.0.12:8080/");
+  DioInstance.instance().initDio(baseUrl: AppConfig.baseUrl);
   //FireBase
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
