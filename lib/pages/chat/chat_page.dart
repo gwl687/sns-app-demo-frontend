@@ -13,17 +13,28 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class ChatPage extends StatefulWidget {
+  const ChatPage({super.key});
+
   @override
-  State<ChatPage> createState() => _ChatPage();
+  State<ChatPage> createState() => _ChatPageState();
 }
 
-class _ChatPage extends State<ChatPage> {
+class _ChatPageState extends State<ChatPage> {
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
 
-  @override
-  void initState() {
-    super.initState();
+  int _lastMessageCount = 0;
+
+  void _scrollToBottom() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
+    });
   }
 
   @override
@@ -37,18 +48,25 @@ class _ChatPage extends State<ChatPage> {
   Widget build(BuildContext context) {
     return Consumer<ChatViewModel>(
       builder: (context, vm, child) {
-        String myAvatarUrl = context
+        final myAvatarUrl = context
             .read<UserProfileViewModel>()
             .userInfo!
             .avatarurl;
+
+        /// ===== 核心：消息数量变化就滚到底 =====
+        if (vm.privateMessages.length != _lastMessageCount) {
+          _lastMessageCount = vm.privateMessages.length;
+          _scrollToBottom();
+        }
+
         return Scaffold(
           appBar: AppBar(
             title: Text(vm.friendName),
             backgroundColor: Colors.green,
             actions: [
               IconButton(
-                icon: Icon(Icons.videocam),
-                onPressed: () async {
+                icon: const Icon(Icons.videocam),
+                onPressed: () {
                   vm.requestVideoCall();
                   Navigator.push(
                     context,
@@ -66,17 +84,16 @@ class _ChatPage extends State<ChatPage> {
           ),
           body: Column(
             children: [
+              /// ===== 聊天列表 =====
               Expanded(
                 child: ListView.builder(
                   controller: _scrollController,
-                  reverse: true,
-                  padding: EdgeInsets.all(8),
+                  padding: const EdgeInsets.all(8),
                   itemCount: vm.privateMessages.length,
                   itemBuilder: (context, index) {
-                    final msg = vm.privateMessages[
-                    vm.privateMessages.length - 1 - index];
-                    final isMe = msg['fromUser'] == vm.myId!;
-                    final String formattedTime = DateFormat(
+                    final msg = vm.privateMessages[index];
+                    final isMe = msg['fromUser'] == vm.myId;
+                    final formattedTime = DateFormat(
                       'yyyy-MM-dd HH:mm',
                     ).format(DateTime.parse(msg['time']));
 
@@ -88,7 +105,6 @@ class _ChatPage extends State<ChatPage> {
                             : MainAxisAlignment.start,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // 左侧头像（对方）
                           if (!isMe)
                             Padding(
                               padding: const EdgeInsets.only(right: 6),
@@ -100,13 +116,11 @@ class _ChatPage extends State<ChatPage> {
                               ),
                             ),
 
-                          // 气泡 + 时间
                           Column(
                             crossAxisAlignment: isMe
                                 ? CrossAxisAlignment.end
                                 : CrossAxisAlignment.start,
                             children: [
-                              // 气泡
                               Container(
                                 constraints: const BoxConstraints(
                                   maxWidth: 260,
@@ -124,7 +138,6 @@ class _ChatPage extends State<ChatPage> {
                                 ),
                               ),
                               const SizedBox(height: 2),
-                              // 时间
                               Text(
                                 formattedTime,
                                 style: TextStyle(
@@ -134,7 +147,7 @@ class _ChatPage extends State<ChatPage> {
                               ),
                             ],
                           ),
-                          // 右侧头像（自己）
+
                           if (isMe)
                             Padding(
                               padding: const EdgeInsets.only(left: 6),
@@ -149,33 +162,29 @@ class _ChatPage extends State<ChatPage> {
                   },
                 ),
               ),
+
+              /// ===== 输入框 =====
               Container(
-                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 color: Colors.grey[200],
                 child: Row(
                   children: [
                     Expanded(
                       child: TextField(
                         controller: _controller,
-                        decoration: InputDecoration(
+                        decoration: const InputDecoration(
                           hintText: "input message...",
                           border: InputBorder.none,
                         ),
-                        //onSubmitted: _sendMessage,
                       ),
                     ),
                     IconButton(
-                      icon: Icon(Icons.send, color: Colors.green),
+                      icon: const Icon(Icons.send, color: Colors.green),
                       onPressed: () {
+                        if (_controller.text.trim().isEmpty) return;
+
                         vm.sendMessage(_controller.text);
                         _controller.clear();
-                        if (_scrollController.hasClients) {
-                          _scrollController.animateTo(
-                            0,
-                            duration: const Duration(milliseconds: 200),
-                            curve: Curves.easeOut,
-                          );
-                        }
                       },
                     ),
                   ],

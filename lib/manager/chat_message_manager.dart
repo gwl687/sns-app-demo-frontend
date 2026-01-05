@@ -53,7 +53,7 @@ class ChatMessageManager {
     final String content = data['content'];
     final int toUser = await SpUtils.getInt(BaseConstants.SP_User_Id) ?? 0;
     //保存到本地数据库
-    await ChatDbManager.insertMessage(fromUser, toUser, content);
+    await ChatDbManager.insertMessage(fromUser, toUser, content, createTime:  DateTime.now().toIso8601String());
     print("保存到本地:fromUser=${fromUser},toUser=${toUser}");
     //当前页面为聊天页面,调用聊天页面的收消息方法
     if (chatPagePrivateMessage_vm != null) {

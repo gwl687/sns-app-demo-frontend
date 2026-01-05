@@ -57,6 +57,7 @@ class ChatViewModel extends ChangeNotifier {
   Future<void> loadMessages(int fromUser, int toUser) async {
     final raw = await ChatDbManager.getPrivateMessages(fromUser, toUser);
     privateMessages = raw.map<Map<String, dynamic>>((e) {
+      print("聊天数据排序:${e['time']}");
       return {
         'fromUser': int.parse(e['fromUser'].toString()),
         'toUser': int.parse(e['toUser'].toString()),
@@ -72,7 +73,7 @@ class ChatViewModel extends ChangeNotifier {
     WebsocketManager.instance.sendMessage(
       "videochatrequest",
       friendId,
-      friendName + " invite you to video chat",
+      friendName,
     );
   }
 

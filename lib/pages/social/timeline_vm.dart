@@ -45,6 +45,7 @@ class TimelineViewModel extends ChangeNotifier {
     userProfileVm ??= vm;
     if (!loaded && userProfileVm!.userInfo != null) {
       loaded = true;
+
       ///加载timeline
       load(200, null);
     }
@@ -60,7 +61,14 @@ class TimelineViewModel extends ChangeNotifier {
 
   //清空timeline
   Future<void> clear() async {
+    //结构写错了暂时先这么清理，之后改结构
     timelinePosts = [];
+    timelinePostsMap = {};
+    heartLikeCount = {};
+    heartColorChange = {};
+    totalLikeCount = {};
+    userLikeMap = {};
+    userAvatarMap = {};
   }
 
   //刷新获取timeline内容
