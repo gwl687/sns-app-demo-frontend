@@ -31,7 +31,7 @@ class _FriendPage extends State<ChatListPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("CHAT"), backgroundColor: Colors.green),
+      appBar: AppBar(title: Text("Chat"), backgroundColor: Colors.green),
       body: Consumer<ChatListViewModel>(
         builder: (context, vm, child) {
           final chatList = vm.chatList;
@@ -47,7 +47,7 @@ class _FriendPage extends State<ChatListPage> {
                   //是私聊
                   return ListTile(
                     leading: CircleAvatar(
-                      child: Text(chat.userName[0]), // 显示首字母
+                      backgroundImage: NetworkImage(chat.avatarUrl), // 显示首字母
                     ),
                     title: Text(chat.userName),
                     onTap: () async{
