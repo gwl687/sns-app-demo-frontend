@@ -65,9 +65,9 @@ class DialogManager {
     } else {
       // 通知对方：拒绝
       WebsocketManager.instance.sendMessage(
-        "videochatrequestreject",
+        "videochatrequestresponse",
         fromUserId,
-        "",
+        "0",
       );
     }
   }
