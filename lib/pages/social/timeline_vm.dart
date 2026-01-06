@@ -76,6 +76,7 @@ class TimelineViewModel extends ChangeNotifier {
     print("timeline load");
     isLoading = true;
     timelinePosts = await Api.instance.getTimelinePost(limit, cursor);
+    userAvatarMap = {};
     for (int i = 0; i < timelinePosts.length; i++) {
       final post = timelinePosts[i];
       int timelineId = post.timelineId;

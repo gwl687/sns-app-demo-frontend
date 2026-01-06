@@ -1,3 +1,4 @@
+import 'package:demo10/manager/websocket_manager.dart';
 import 'package:demo10/pages/auth/auth_vm.dart';
 import 'package:demo10/pages/auth/user_profile_vm.dart';
 import 'package:demo10/pages/social/timeline_vm.dart';
@@ -70,7 +71,10 @@ class _UserProfilePage extends State<UserProfilePage> {
 
                 // 退出登录
                 ElevatedButton(
-                  onPressed: () {
+                  onPressed: () async {
+                    WebsocketManager.instance.close();
+                    //暂时这样清理timeline
+                    await context.read<TimelineViewModel>().clear();
                     context.read<AuthViewModel>().logout();
                   },
                   child: Text('Log out'),

@@ -41,7 +41,7 @@ class ChatViewModel extends ChangeNotifier {
       'fromUser': myId,
       'toUser': friendId,
       'content': text,
-      'time': DateTime.now().toIso8601String(),
+      'time': DateTime.now().toLocal().toIso8601String(),
     };
     privateMessages.add(privateMessage);
     notifyListeners();
