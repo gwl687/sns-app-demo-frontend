@@ -1,6 +1,7 @@
 import 'package:demo10/manager/websocket_manager.dart';
 import 'package:demo10/pages/auth/auth_vm.dart';
 import 'package:demo10/pages/auth/user_profile_vm.dart';
+import 'package:demo10/pages/friend/friend_vm.dart';
 import 'package:demo10/pages/social/timeline_vm.dart';
 import 'package:demo10/pages/auth/login_page.dart';
 import 'package:demo10/pages/friend/chat_list_vm.dart';
@@ -73,8 +74,10 @@ class _UserProfilePage extends State<UserProfilePage> {
                 ElevatedButton(
                   onPressed: () async {
                     WebsocketManager.instance.close();
-                    //暂时这样清理timeline
-                    await context.read<TimelineViewModel>().clear();
+                    //清理数据
+                    context.read<TimelineViewModel>().dispose();
+                    context.read<FriendViewModel>().dispose();
+                    context.read<ChatListViewModel>().dispose();
                     context.read<AuthViewModel>().logout();
                   },
                   child: Text('Log out'),

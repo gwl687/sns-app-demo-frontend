@@ -44,17 +44,20 @@ class _FriendPageState extends State<FriendPage> {
               );
             },
           ),
-          // IconButton(
-          //   icon: Icon(Icons.group_add),
-          //   tooltip: 'create a group',
-          //   onPressed: () {
-          //     // 点击跳转到建群页面
-          //     Navigator.push(
-          //       context,
-          //       MaterialPageRoute(builder: (_) => CreateGroupPage()),
-          //     );
-          //   },
-          // ),
+          IconButton(
+            icon: Icon(Icons.group_add),
+            tooltip: 'create a group',
+            onPressed: () {
+              final friendVm = context.read<FriendViewModel>();
+              // 点击跳转到建群页面
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => CreateGroupPage(),
+                ),
+              );
+            },
+          ),
         ],
       ),
       //朋友列表
@@ -141,7 +144,7 @@ class _FriendPageState extends State<FriendPage> {
             MaterialPageRoute(
               builder: (_) => ChangeNotifierProvider(
                 create: (_) => NewFriendsViewModel(friendVm),
-                child:  NewFriendsPage(),
+                child: NewFriendsPage(),
               ),
             ),
           );

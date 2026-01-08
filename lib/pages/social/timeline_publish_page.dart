@@ -124,43 +124,48 @@ class _TimelinePublishPage extends State<TimelinePublishPage> {
               onPressed: _posting
                   ? null
                   : () async {
-                setState(() {
-                  _posting = true;
-                });
+                      setState(() {
+                        _posting = true;
+                      });
 
-                try {
-                  int? id = await SpUtils.getInt(BaseConstants.SP_User_Id);
-                  await Api.instance.postTimeline(
-                    id,
-                    _controller.text,
-                    _images,
-                    DateTime.now().toString(),
-                  );
-                  await context.read<TimelineViewModel>().load(20, null);
+                      try {
+                        int? id = await SpUtils.getInt(
+                          BaseConstants.SP_User_Id,
+                        );
+                        await Api.instance.postTimeline(
+                          id,
+                          _controller.text,
+                          _images,
+                          DateTime.now().toString(),
+                        );
+                        await context.read<TimelineViewModel>().load(
+                          20,
+                          null,
+                          null,
+                        );
 
-                  if (mounted) {
-                    Navigator.pop(context, true);
-                  }
-                } finally {
-                  if (mounted) {
-                    setState(() {
-                      _posting = false;
-                    });
-                  }
-                }
-              },
+                        if (mounted) {
+                          Navigator.pop(context, true);
+                        }
+                      } finally {
+                        if (mounted) {
+                          setState(() {
+                            _posting = false;
+                          });
+                        }
+                      }
+                    },
               child: _posting
                   ? const SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: Colors.white,
-                ),
-              )
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
                   : const Text("Post"),
             ),
-
           ],
         ),
       ),

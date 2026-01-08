@@ -50,14 +50,9 @@ class _TimelinePage extends State<TimelinePage> {
           if (vm.isLoading) {
             return const Center(child: CircularProgressIndicator());
           }
-          // if (posts.isEmpty) {
-          //   return const Center(
-          //     child: Text('No timeline', style: TextStyle(color: Colors.grey)),
-          //   );
-          // }
           return RefreshIndicator(
             onRefresh: () async {
-              await vm.load(200, null);
+              await vm.load(20, null, null);
               print("refreshtimeline");
             },
             child: posts.isEmpty

@@ -3,6 +3,7 @@ import 'package:demo10/manager/websocket_manager.dart';
 import 'package:demo10/pages/auth/auth_vm.dart';
 import 'package:demo10/pages/auth/register_page.dart';
 import 'package:demo10/pages/auth/register_vm.dart';
+import 'package:demo10/pages/auth/user_profile_vm.dart';
 import 'package:demo10/pages/chat/group_chat_vm.dart';
 import 'package:demo10/pages/friend/chat_list_vm.dart';
 import 'package:demo10/pages/social/timeline_vm.dart';
@@ -144,6 +145,7 @@ class _LoginPageState extends State<LoginPage> {
                     onPressed: () async {
                       loginInfo.password = _passwordController.text;
                       await vm.login(loginInfo);
+                      await context.read<UserProfileViewModel>().load();
                     },
                     child: const Text("login"),
                   ),

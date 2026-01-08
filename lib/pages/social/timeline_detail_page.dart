@@ -276,7 +276,7 @@ class _TimelinePageIntered extends State<TimelinePageIntered> {
                           if (text.isEmpty) return;
                           await Api.instance.postComment(post.timelineId, text);
                           _commentController.clear();
-                          await vm.load(200, null);
+                          await vm.load(20, null,null);
                         },
                       ),
                     ],

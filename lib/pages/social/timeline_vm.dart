@@ -37,7 +37,6 @@ class TimelineViewModel extends ChangeNotifier {
 
   TimelineViewModel() {
     _sub = FirebaseMessageManager.instance.stream.listen(onPush);
-    load(200, null);
   }
 
   void init(UserProfileViewModel vm) {
@@ -47,7 +46,7 @@ class TimelineViewModel extends ChangeNotifier {
       loaded = true;
 
       ///加载timeline
-      load(200, null);
+      load(20, null, null);
     }
   }
 
@@ -55,7 +54,7 @@ class TimelineViewModel extends ChangeNotifier {
   void onPush(PushEventData msg) {
     final type = msg.message.data['type'];
     if (type == 'timelinepost') {
-      load(200, null);
+      load(20, null, null);
     }
   }
 
@@ -72,10 +71,10 @@ class TimelineViewModel extends ChangeNotifier {
   }
 
   //刷新获取timeline内容
-  Future<void> load(int limit, DateTime? cursor) async {
+  Future<void> load(int limit, DateTime? cursor, int? cursorId) async {
     print("timeline load");
     isLoading = true;
-    timelinePosts = await Api.instance.getTimelinePost(limit, cursor);
+    timelinePosts = await Api.instance.getTimelinePost(limit, cursor, cursorId);
     userAvatarMap = {};
     for (int i = 0; i < timelinePosts.length; i++) {
       final post = timelinePosts[i];

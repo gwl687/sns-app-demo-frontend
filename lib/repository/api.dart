@@ -93,7 +93,7 @@ class Api {
   //建群
   Future<GroupChatData> createGroupChat(List<int> selectedFriends) async {
     Response response = await DioInstance.instance().post(
-      path: "/api/user/creategroupchat",
+      path: "/api/group/creategroupchat",
       data: {"selectedFriends": selectedFriends},
     );
     //
@@ -261,11 +261,13 @@ class Api {
   //刷新获取帖子
   Future<List<TimelinePostData>> getTimelinePost(
     int limit,
-    DateTime? cursor,
+    DateTime? cursorTime,
+    int? cursorId,
   ) async {
     final params = <String, dynamic>{"limit": limit};
-    if (cursor != null) {
-      params["cursor"] = DateFormat('yyyy-MM-dd HH:mm:ss').format(cursor);
+    if (cursorTime != null) {
+      params["cursorTime"] = DateFormat('yyyy-MM-dd HH:mm:ss').format(cursorTime);
+      params["cursorId"] = cursorId;
     }
     Response response = await DioInstance.instance().get(
       path: "/api/timeline/gettimelinepost",

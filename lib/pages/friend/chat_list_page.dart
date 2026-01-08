@@ -13,11 +13,11 @@ import 'package:provider/provider.dart';
 class ChatListPage extends StatefulWidget {
   @override
   State createState() {
-    return _FriendPage();
+    return _ChatListPage();
   }
 }
 
-class _FriendPage extends State<ChatListPage> {
+class _ChatListPage extends State<ChatListPage> {
   static List<String> _friends = [];
 
   @override

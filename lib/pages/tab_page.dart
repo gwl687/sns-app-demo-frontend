@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:demo10/manager/dialog_manager.dart';
 import 'package:demo10/manager/firebase_message_manager.dart';
@@ -49,13 +50,21 @@ class _TabPageState extends State<TabPage> {
 
   late final StreamSubscription _sub;
 
+  //初始化四个主页面数据
+  void load() async {
+    await context.read<UserProfileViewModel>().load();
+    await context.read<ChatListViewModel>().load();
+    await context.read<FriendViewModel>().load();
+    await context.read<TimelineViewModel>().load(20, null, null);
+  }
+
   //初始化界面
   void initTabData() {
     currentIndex = widget.initialIndex;
     //暂时特殊处理timeline
-    final timelineVm = context.read<TimelineViewModel>();
-    final userProFileVm = context.read<UserProfileViewModel>();
-    timelineVm.init(userProFileVm);
+    // final timelineVm = context.read<TimelineViewModel>();
+    // final userProFileVm = context.read<UserProfileViewModel>();
+    // timelineVm.init(userProFileVm);
     pages = [TimelinePage(), FriendPage(), ChatListPage(), UserProfilePage()];
     labels = ["timeline", "friend", "chat", "userinfo"];
     icons = [
@@ -121,41 +130,12 @@ class _TabPageState extends State<TabPage> {
   void initState() {
     super.initState();
     initListenPublicEvent();
+    load();
     initTabData();
   }
 
   @override
   Widget build(BuildContext context) {
-    // final tabVm = context.watch<TabViewModel>();
-    // WidgetsBinding.instance.addPostFrameCallback((_) {
-    //   final chatUserId = tabVm.pendingChatUserId;
-    //   if (chatUserId != null) {
-    //     //处理跳转
-    //     final userProfileVm = context.read<UserProfileViewModel>();
-    //     final chatList = context.read<ChatListViewModel>().chatList;
-    //     final PrivateChatData? chatItem = chatList.firstWhere(
-    //       (e) => e.id == tabVm.pendingChatUserId,
-    //       orElse: () => null,
-    //     );
-    //     final String userName = chatItem!.userName;
-    //     final String avatarUrl = chatItem.avatarUrl;
-    //     Navigator.push(
-    //       context,
-    //       MaterialPageRoute(
-    //         builder: (_) => ChangeNotifierProvider(
-    //           create: (_) => ChatViewModel(
-    //             myId: userProfileVm.userInfo!.userId,
-    //             friendId: tabVm.pendingChatUserId!,
-    //             friendAvatarUrl: avatarUrl,
-    //             friendName: userName,
-    //           ),
-    //           child: ChatPage(),
-    //         ),
-    //       ),
-    //     );
-    //   }
-    // });
-
     //主页
     return Scaffold(
       body: pages[currentIndex], // 根据下标显示不同页面

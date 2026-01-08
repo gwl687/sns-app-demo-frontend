@@ -34,8 +34,8 @@ class FriendViewModel extends ChangeNotifier {
   }
 
   Future<void> load() async {
-    loadRequestFriends();
-    loadFriends();
+    await loadRequestFriends();
+    await loadFriends();
   }
 
   //FCM处理
