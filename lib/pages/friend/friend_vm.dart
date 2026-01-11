@@ -23,12 +23,11 @@ class FriendViewModel extends ChangeNotifier {
     _sub = FirebaseMessageManager.instance.stream.listen(onPush);
   }
 
-  void init(UserProfileViewModel vm) {
+  Future<void> init(UserProfileViewModel vm) async{
     userProfileVm ??= vm;
     if (!loaded && userProfileVm!.userInfo != null) {
+      print("friendpage成功绑定用户信息");
       loaded = true;
-      ///加载好友列表
-      load();
     }
   }
 

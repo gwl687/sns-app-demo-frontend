@@ -7,22 +7,21 @@ import 'package:demo10/pages/chat/send_video_request_page.dart';
 import 'package:demo10/pages/chat/send_video_request_vm.dart';
 import 'package:demo10/pages/chat/video_chat_page.dart';
 import 'package:demo10/pages/tab_page.dart';
+import 'package:demo10/repository/datas/user/user_info_data.dart';
 import 'package:demo10/utils/sp_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class ChatPage extends StatefulWidget {
-  const ChatPage({super.key});
-
   @override
   State<ChatPage> createState() => _ChatPageState();
 }
 
 class _ChatPageState extends State<ChatPage> {
+  UserInfoData? userInfo;
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
-
   int _lastMessageCount = 0;
 
   void _scrollToBottom() {
@@ -37,6 +36,16 @@ class _ChatPageState extends State<ChatPage> {
     });
   }
 
+  Future<void> load() async {
+    //userInfo = context.read<UserProfileViewModel>().userInfo;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    load();
+  }
+
   @override
   void dispose() {
     _controller.dispose();
@@ -46,19 +55,13 @@ class _ChatPageState extends State<ChatPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<ChatViewModel>(
-      builder: (context, vm, child) {
-        final myAvatarUrl = context
-            .read<UserProfileViewModel>()
-            .userInfo!
-            .avatarurl;
-
-        /// ===== 核心：消息数量变化就滚到底 =====
+    return Consumer2<ChatViewModel, UserProfileViewModel>(
+      builder: (context, vm, vm2, child) {
+        /// 消息数量变化就滚到底
         if (vm.privateMessages.length != _lastMessageCount) {
           _lastMessageCount = vm.privateMessages.length;
           _scrollToBottom();
         }
-
         return Scaffold(
           appBar: AppBar(
             title: Text(vm.friendName),
@@ -153,7 +156,9 @@ class _ChatPageState extends State<ChatPage> {
                               padding: const EdgeInsets.only(left: 6),
                               child: CircleAvatar(
                                 radius: 18,
-                                backgroundImage: NetworkImage(myAvatarUrl),
+                                backgroundImage: NetworkImage(
+                                  vm2.userInfo!.avatarurl,
+                                ),
                               ),
                             ),
                         ],

@@ -50,9 +50,16 @@ class _TabPageState extends State<TabPage> {
 
   late final StreamSubscription _sub;
 
-  //初始化四个主页面数据
-  void load() async {
-    await context.read<UserProfileViewModel>().load();
+  ///初始化四个主页面数据
+  Future<void> load() async {
+    ///用户信息页加载用户数据
+    final userProfileVm = context.read<UserProfileViewModel>();
+    await userProfileVm.load();
+    ///给其它三个主页面绑定好登录的用户信息
+    await context.read<ChatListViewModel>().init(userProfileVm);
+    await context.read<FriendViewModel>().init(userProfileVm);
+    await context.read<TimelineViewModel>().init(userProfileVm);
+    ///其它三个主页面初始化数据
     await context.read<ChatListViewModel>().load();
     await context.read<FriendViewModel>().load();
     await context.read<TimelineViewModel>().load(20, null, null);

@@ -43,8 +43,8 @@ class _TimelinePage extends State<TimelinePage> {
           );
         },
       ),
-      body: Consumer3<TimelineViewModel, FriendViewModel, UserProfileViewModel>(
-        builder: (context, vm, friendVm, userProfileVm, child) {
+      body: Consumer<TimelineViewModel>(
+        builder: (context, vm, child) {
           final posts = vm.timelinePosts;
           final postMap = vm.timelinePostsMap;
           if (vm.isLoading) {

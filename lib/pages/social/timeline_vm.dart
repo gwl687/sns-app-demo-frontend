@@ -39,14 +39,11 @@ class TimelineViewModel extends ChangeNotifier {
     _sub = FirebaseMessageManager.instance.stream.listen(onPush);
   }
 
-  void init(UserProfileViewModel vm) {
+  Future<void> init(UserProfileViewModel vm) async {
     print("timeline init");
     userProfileVm ??= vm;
     if (!loaded && userProfileVm!.userInfo != null) {
       loaded = true;
-
-      ///加载timeline
-      load(20, null, null);
     }
   }
 
@@ -60,19 +57,10 @@ class TimelineViewModel extends ChangeNotifier {
 
   //清空timeline
   Future<void> clear() async {
-    //结构写错了暂时先这么清理，之后改结构
-    timelinePosts = [];
-    timelinePostsMap = {};
-    heartLikeCount = {};
-    heartColorChange = {};
-    totalLikeCount = {};
-    userLikeMap = {};
-    userAvatarMap = {};
   }
 
   //刷新获取timeline内容
   Future<void> load(int limit, DateTime? cursor, int? cursorId) async {
-    print("timeline load");
     isLoading = true;
     timelinePosts = await Api.instance.getTimelinePost(limit, cursor, cursorId);
     userAvatarMap = {};

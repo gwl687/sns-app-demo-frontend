@@ -65,7 +65,6 @@ class AuthViewModel with ChangeNotifier {
     await initData();
     isLoggingIn = false;
     isLoggedIn = true;
-    print("google登录success");
     notifyListeners();
   }
 
@@ -83,14 +82,7 @@ class AuthViewModel with ChangeNotifier {
 
   ///登出后清理各种数据
   clearData() async {
-    ///登录成功后建立 WebSocket 连接
-    await WebsocketManager.instance.connect();
 
-    ///增量读取离线时收到的消息，存入本地数据库
-    await ChatMessageManager.instance.loadMessages();
-
-    ///初始化FCM
-    FirebaseMessageManager.instance.init();
   }
 
   ///登出

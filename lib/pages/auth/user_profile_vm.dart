@@ -10,13 +10,15 @@ class UserProfileViewModel with ChangeNotifier {
   UserInfoData? userInfo;
   final ImagePicker _picker = ImagePicker();
 
-  UserProfileViewModel() {
-    //load();
-  }
-
   ///加载我的个人信息
   Future<void> load() async {
     userInfo = await Api.instance.getUserInfo();
+    notifyListeners();
+  }
+
+  ///清空我的个人信息
+  Future<void> clear() async {
+    userInfo = null;
     notifyListeners();
   }
 

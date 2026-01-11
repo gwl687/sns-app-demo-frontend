@@ -10,7 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 // 好友列表页面
-class ChatListPage extends StatefulWidget {
+class  ChatListPage extends StatefulWidget {
   @override
   State createState() {
     return _ChatListPage();

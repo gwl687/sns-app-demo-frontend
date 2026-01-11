@@ -104,7 +104,7 @@ class _FriendPageState extends State<FriendPage> {
                           create: (_) => ChatViewModel(
                             myId: vm.userProfileVm!.userInfo!.userId,
                             friendId: friend.userId,
-                            friendAvatarUrl: friend.avatarurl!,
+                            friendAvatarUrl: friend.avatarurl,
                             friendName: friend.username,
                           ),
                           child: ChatPage(),

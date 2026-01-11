@@ -19,12 +19,10 @@ class ChatListViewModel extends ChangeNotifier {
     _sub = FirebaseMessageManager.instance.stream.listen(onPush);
   }
 
-  void init(UserProfileViewModel vm) {
+  Future<void> init(UserProfileViewModel vm) async{
     userProfileVm ??= vm;
     if (!loaded && userProfileVm!.userInfo != null) {
       loaded = true;
-      ///加载聊天列表
-      load();
     }
   }
 

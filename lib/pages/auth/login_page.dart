@@ -152,9 +152,6 @@ class _LoginPageState extends State<LoginPage> {
                               : () async {
                                   loginInfo.password = _passwordController.text;
                                   await vm.login(loginInfo);
-                                  await context
-                                      .read<UserProfileViewModel>()
-                                      .load();
                                 },
                           child: const Text("login"),
                         ),
