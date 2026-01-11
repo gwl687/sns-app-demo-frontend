@@ -64,7 +64,6 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-
   @override
   void dispose() {
     _socket?.close();
@@ -77,93 +76,148 @@ class _LoginPageState extends State<LoginPage> {
       builder: (context, vm, child) {
         return Scaffold(
           appBar: AppBar(title: const Text("Loginpage")),
-          body: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                /// 用户名输入框
-                TextField(
-                  controller: _usernameController,
-                  decoration: const InputDecoration(
-                    labelText: "username",
-                    border: OutlineInputBorder(),
-                  ),
-                  onChanged: (value) {
-                    loginInfo.name = value;
-                  },
-                ),
+          body: Stack(
+            children: [
+              AbsorbPointer(
+                absorbing: vm.isLoggingIn,
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      /// 用户名
+                      TextField(
+                        controller: _usernameController,
+                        decoration: const InputDecoration(
+                          labelText: "username",
+                          border: OutlineInputBorder(),
+                        ),
+                        onChanged: (value) {
+                          loginInfo.name = value;
+                        },
+                      ),
 
-                /// 历史账号列表
-                if (_historyAccounts.isNotEmpty) ...[
-                  const SizedBox(height: 8),
-                  Text(
-                    "history",
-                    style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-                  ),
-                  const SizedBox(height: 4),
-                  SizedBox(
-                    height: 120, // 最多显示的高度
-                    child: ListView.builder(
-                      itemCount: _historyAccounts.length,
-                      itemBuilder: (context, index) {
-                        final account = _historyAccounts[index];
-                        return ListTile(
-                          title: Text(account),
-                          onTap: () {
-                            _usernameController.text = account;
-                            loginInfo.name = account;
+                      if (_historyAccounts.isNotEmpty) ...[
+                        const SizedBox(height: 8),
+                        Text(
+                          "history",
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        SizedBox(
+                          height: 120,
+                          child: ListView.builder(
+                            itemCount: _historyAccounts.length,
+                            itemBuilder: (context, index) {
+                              final account = _historyAccounts[index];
+                              return ListTile(
+                                title: Text(account),
+                                onTap: () {
+                                  _usernameController.text = account;
+                                  loginInfo.name = account;
+                                },
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+
+                      const SizedBox(height: 16),
+
+                      /// 密码
+                      TextField(
+                        controller: _passwordController,
+                        decoration: const InputDecoration(
+                          labelText: "password",
+                          border: OutlineInputBorder(),
+                        ),
+                        obscureText: true,
+                        onChanged: (value) {
+                          loginInfo.password = value;
+                        },
+                      ),
+
+                      const SizedBox(height: 32),
+
+                      /// 登录
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: vm.isLoggingIn
+                              ? null
+                              : () async {
+                                  loginInfo.password = _passwordController.text;
+                                  await vm.login(loginInfo);
+                                  await context
+                                      .read<UserProfileViewModel>()
+                                      .load();
+                                },
+                          child: const Text("login"),
+                        ),
+                      ),
+
+                      Center(
+                        child: TextButton(
+                          onPressed: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(builder: (_) => RegisterPage()),
+                            );
                           },
-                        );
-                      },
-                    ),
-                  ),
-                ],
+                          child: const Text("register"),
+                        ),
+                      ),
 
-                const SizedBox(height: 16),
+                      const SizedBox(height: 12),
 
-                /// 密码输入框
-                TextField(
-                  controller: _passwordController,
-                  decoration: const InputDecoration(
-                    labelText: "password",
-                    border: OutlineInputBorder(),
-                  ),
-                  obscureText: true,
-                  onChanged: (value) {
-                    loginInfo.password = value;
-                  },
-                ),
-
-                const SizedBox(height: 32),
-
-                /// 登录
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () async {
-                      loginInfo.password = _passwordController.text;
-                      await vm.login(loginInfo);
-                      await context.read<UserProfileViewModel>().load();
-                    },
-                    child: const Text("login"),
-                  ),
-                ),
-
-                /// 注册
-                Center(
-                  child: TextButton(
-                    onPressed: () {
-                      Navigator.of(
-                        context,
-                      ).push(MaterialPageRoute(builder: (_) => RegisterPage()));
-                    },
-                    child: const Text("register"),
+                      /// Google 登录
+                      SizedBox(
+                        width: double.infinity,
+                        height: 48,
+                        child: OutlinedButton.icon(
+                          onPressed: vm.isLoggingIn
+                              ? null
+                              : () async {
+                                  await vm.googleLogin();
+                                },
+                          icon: Image.network(
+                            'https://developers.google.com/identity/images/g-logo.png',
+                            width: 18,
+                            height: 18,
+                          ),
+                          label: const Text(
+                            'Sign in with Google',
+                            style: TextStyle(
+                              color: Colors.black87,
+                              fontSize: 14,
+                            ),
+                          ),
+                          style: OutlinedButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            side: const BorderSide(color: Color(0xFFDADCE0)),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ],
-            ),
+              ),
+
+              ///loading覆盖层
+              if (vm.isLoggingIn)
+                Positioned.fill(
+                  child: Container(
+                    color: Colors.black.withAlpha(77),
+                    child: const Center(child: CircularProgressIndicator()),
+                  ),
+                ),
+            ],
           ),
         );
       },

@@ -34,11 +34,6 @@ void main() async {
       providers: [
         ChangeNotifierProvider(create: (_) => AuthViewModel()),
         ChangeNotifierProvider(create: (_) => RegisterViewModel()),
-        ChangeNotifierProvider(create: (_) => UserProfileViewModel()),
-        ChangeNotifierProvider(create: (_) => TimelineViewModel()),
-        ChangeNotifierProvider(create: (_) => ChatListViewModel()),
-        ChangeNotifierProvider(create: (_) => FriendViewModel()),
-        ChangeNotifierProvider(create: (_) => TabViewModel()),
       ],
       child: MyApp(),
     ),

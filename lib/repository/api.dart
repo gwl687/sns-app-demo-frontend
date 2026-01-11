@@ -65,6 +65,18 @@ class Api {
     return UserLoginData.fromJson(response.data['data']);
   }
 
+  ///google登录
+  Future<UserLoginData> googleLogin(
+    String? idTokenString,
+    String? pushToken,
+  ) async {
+    Response response = await DioInstance.instance().post(
+      path: "/api/user/googlelogin",
+      data: {"idTokenString": idTokenString, "pushToken": pushToken}
+    );
+    return UserLoginData.fromJson(response.data['data']);
+  }
+
   ///改名
   Future<void> changeUserName(String newUserName) async {
     Response response = await DioInstance.instance().post(
@@ -266,7 +278,9 @@ class Api {
   ) async {
     final params = <String, dynamic>{"limit": limit};
     if (cursorTime != null) {
-      params["cursorTime"] = DateFormat('yyyy-MM-dd HH:mm:ss').format(cursorTime);
+      params["cursorTime"] = DateFormat(
+        'yyyy-MM-dd HH:mm:ss',
+      ).format(cursorTime);
       params["cursorId"] = cursorId;
     }
     Response response = await DioInstance.instance().get(

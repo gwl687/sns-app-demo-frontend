@@ -75,9 +75,9 @@ class _UserProfilePage extends State<UserProfilePage> {
                   onPressed: () async {
                     WebsocketManager.instance.close();
                     //清理数据
-                    context.read<TimelineViewModel>().dispose();
-                    context.read<FriendViewModel>().dispose();
-                    context.read<ChatListViewModel>().dispose();
+                    // context.read<TimelineViewModel>().dispose();
+                    // context.read<FriendViewModel>().dispose();
+                    // context.read<ChatListViewModel>().dispose();
                     context.read<AuthViewModel>().logout();
                   },
                   child: Text('Log out'),

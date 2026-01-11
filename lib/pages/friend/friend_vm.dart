@@ -27,7 +27,6 @@ class FriendViewModel extends ChangeNotifier {
     userProfileVm ??= vm;
     if (!loaded && userProfileVm!.userInfo != null) {
       loaded = true;
-
       ///加载好友列表
       load();
     }
