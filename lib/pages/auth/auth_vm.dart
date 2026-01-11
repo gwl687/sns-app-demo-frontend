@@ -21,11 +21,11 @@ class AuthViewModel with ChangeNotifier {
 
   ///登录
   Future<void> login(LoginInfo loginInfo) async {
-    isLoggingIn = true;
-    notifyListeners();
     FirebaseMessaging messaging = FirebaseMessaging.instance;
     String? pushToken = await messaging.getToken();
     if (loginInfo.name != null && loginInfo.password != null) {
+      isLoggingIn = true;
+      notifyListeners();
       UserLoginData data = await Api.instance.login(
         emailaddress: loginInfo.name,
         password: loginInfo.password,

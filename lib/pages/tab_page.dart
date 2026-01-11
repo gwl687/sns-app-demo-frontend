@@ -56,9 +56,9 @@ class _TabPageState extends State<TabPage> {
     final userProfileVm = context.read<UserProfileViewModel>();
     await userProfileVm.load();
     ///给其它三个主页面绑定好登录的用户信息
-    await context.read<ChatListViewModel>().init(userProfileVm);
-    await context.read<FriendViewModel>().init(userProfileVm);
-    await context.read<TimelineViewModel>().init(userProfileVm);
+    //await context.read<ChatListViewModel>().init(userProfileVm);
+    //await context.read<FriendViewModel>().init(userProfileVm);
+    //await context.read<TimelineViewModel>().init(userProfileVm);
     ///其它三个主页面初始化数据
     await context.read<ChatListViewModel>().load();
     await context.read<FriendViewModel>().load();

@@ -19,7 +19,6 @@ class ChatPage extends StatefulWidget {
 }
 
 class _ChatPageState extends State<ChatPage> {
-  UserInfoData? userInfo;
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   int _lastMessageCount = 0;
