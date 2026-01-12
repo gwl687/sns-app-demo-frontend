@@ -17,23 +17,26 @@ class AuthGatePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthViewModel>();
+
     ///未登录
     if (!auth.isLoggedIn) {
       return LoginPage();
     }
+
     ///已登录
     Permission.notification.request();
-    return MultiProvider(
-      providers: [
-        ///四个个主页面
-        //ChangeNotifierProvider(create: (_) => UserProfileViewModel()),
-        ChangeNotifierProvider(create: (_) => TimelineViewModel()),
-        ChangeNotifierProvider(create: (_) => ChatListViewModel()),
-        ChangeNotifierProvider(create: (_) => FriendViewModel()),
-        ///管理用主页
-        ChangeNotifierProvider(create: (_) => TabViewModel()),
-      ],
-      child: TabPage(),
-    );
+    return TabPage();
+    // return MultiProvider(
+    //   providers: [
+    //     ///四个个主页面
+    //     //ChangeNotifierProvider(create: (_) => UserProfileViewModel()),
+    //     ChangeNotifierProvider(create: (_) => TimelineViewModel()),
+    //     ChangeNotifierProvider(create: (_) => ChatListViewModel()),
+    //     ChangeNotifierProvider(create: (_) => FriendViewModel()),
+    //     ///管理用主页
+    //     ChangeNotifierProvider(create: (_) => TabViewModel()),
+    //   ],
+    //   child: TabPage(),
+    // );
   }
 }

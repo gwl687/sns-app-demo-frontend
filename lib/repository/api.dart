@@ -72,7 +72,7 @@ class Api {
   ) async {
     Response response = await DioInstance.instance().post(
       path: "/api/user/googlelogin",
-      data: {"idTokenString": idTokenString, "pushToken": pushToken}
+      data: {"idTokenString": idTokenString, "pushToken": pushToken},
     );
     return UserLoginData.fromJson(response.data['data']);
   }
@@ -85,7 +85,7 @@ class Api {
     );
   }
 
-  //获取好友列表
+  ///获取好友列表
   Future<List<UserInfoData>> getFriendList() async {
     Response response = await DioInstance.instance().get(
       path: "/api/friend/getfriendlist",
@@ -94,7 +94,7 @@ class Api {
     return list.map((e) => UserInfoData.fromJson(e)).toList();
   }
 
-  //点击好友列表名字后添加到好友聊天列表
+  ///点击好友列表名字后添加到好友聊天列表
   Future<void> addToChatList(int friendId) async {
     await DioInstance.instance().post(
       path: "/api/friend/addtochatlist",
@@ -102,7 +102,7 @@ class Api {
     );
   }
 
-  //建群
+  ///建群
   Future<GroupChatData> createGroupChat(List<int> selectedFriends) async {
     Response response = await DioInstance.instance().post(
       path: "/api/group/creategroupchat",
@@ -115,7 +115,7 @@ class Api {
     return groupChatData;
   }
 
-  //获取群信息
+  ///获取群信息
   Future<GroupChatData> getGroupChat(int groupId) async {
     Response response = await DioInstance.instance().get(
       path: "/api/user/getgroupchat",
@@ -126,7 +126,7 @@ class Api {
     return GroupChatData.fromJson(response.data);
   }
 
-  //获取聊天列表
+  ///获取聊天列表
   Future<List<dynamic>> getChatList() async {
     Response response = await DioInstance.instance().get(
       path: "/api/friend/getchatlist",
@@ -144,7 +144,7 @@ class Api {
     return result;
   }
 
-  //获得私聊消息
+  ///获得私聊消息
   Future<List<PrivateMessageData>> getPrivateMessages() async {
     Response response = await DioInstance.instance().get(
       path: "/api/chatmessage/getprivatemessages",
@@ -153,7 +153,7 @@ class Api {
     return list.map((e) => PrivateMessageData.fromJson(e)).toList();
   }
 
-  //发送群消息
+  ///发送群消息
   Future<void> saveGroupMessage(GroupMessageData groupMessageData) async {
     Response response = await DioInstance.instance().post(
       path: "/api/group/saveGroupMessage",
@@ -162,20 +162,17 @@ class Api {
     print("保存聊天消息到后端: ${response.data}");
   }
 
-  //获得群聊天消息
-  Future<GroupMessageData> getGroupMessages(int groupId) async {
+  ///获得群聊天消息
+  Future<List<GroupMessageData>> getGroupMessages() async {
     Response response = await DioInstance.instance().get(
-      path: "/api/group/getgroupmessages",
-      param: {'groupId': groupId},
+      path: "/api/chatmessage/getgroupmessages",
     );
-    print("获取群消息: ${response.data}");
-    GroupMessageData groupMessageData = GroupMessageData.fromJson(
-      response.data,
-    );
-    return groupMessageData;
+    print("获取所有群聊消息: ${response.data}");
+    final List list = response.data['data'];
+    return list.map((e) => GroupMessageData.fromJson(e)).toList();
   }
 
-  //获取用户数据
+  ///获取用户数据
   Future<UserInfoData> getUserInfo() async {
     Response response = await DioInstance.instance().get(
       path: "/api/user/getuserinfo",
@@ -183,7 +180,7 @@ class Api {
     return UserInfoData.fromJson(response.data['data']);
   }
 
-  //更新用户数据
+  ///更新用户数据
   Future<bool> updateUserInfo(UserInfoData userInfoData) async {
     Response response = await DioInstance.instance().post(
       path: "/api/user/updateuserinfo",
@@ -192,7 +189,7 @@ class Api {
     return response.data['data'];
   }
 
-  //上传头像到s3
+  ///上传头像到s3
   Future<bool> uploadAvatar(String filePath, String fileName) async {
     final mimeType = lookupMimeType(filePath) ?? 'application/octet-stream';
     final formData = FormData.fromMap({
@@ -209,7 +206,7 @@ class Api {
     return response.data['data'];
   }
 
-  //添加群成员
+  ///添加群成员
   Future<bool> addGroupMembers(int groupId, List<int> selectedFriends) async {
     Response response = await DioInstance.instance().post(
       path: "/api/group/addgroupmembers/$groupId",
@@ -218,7 +215,7 @@ class Api {
     return response.data['data'];
   }
 
-  //移除群成员
+  ///移除群成员
   Future<bool> removeGroupMembers(
     int groupId,
     List<int> selectedFriends,
@@ -230,7 +227,7 @@ class Api {
     return response.data['data'];
   }
 
-  //获取livekittoken
+  ///获取livekittoken
   Future<String> getLivekitToken(int groupId) async {
     Response response = await DioInstance.instance().get(
       path: "/api/group/getlivekittoken/$groupId",
@@ -238,7 +235,7 @@ class Api {
     return response.data['data'];
   }
 
-  //推送帖子
+  ///推送帖子
   Future<String> postTimeline(
     int? id,
     String context,
@@ -270,7 +267,7 @@ class Api {
     return response.data['data'];
   }
 
-  //刷新获取帖子
+  ///刷新获取帖子
   Future<List<TimelinePostData>> getTimelinePost(
     int limit,
     DateTime? cursorTime,
@@ -292,7 +289,7 @@ class Api {
     return list.map((json) => TimelinePostData.fromJson(json)).toList();
   }
 
-  //获取指定帖子数据
+  ///获取指定帖子数据
   Future<TimelinePostData> getTimelinePostById(int timelineId) async {
     Response response = await DioInstance.instance().get(
       path: "/api/timeline/gettimelinepostbytimelindid",
@@ -301,7 +298,7 @@ class Api {
     return TimelinePostData.fromJson(response.data['data']);
   }
 
-  //给帖子点赞
+  ///给帖子点赞
   Future<void> timelineHitLike(int timelineId) async {
     Response response = await DioInstance.instance().post(
       path: "/api/timeline/hitlike",
@@ -309,7 +306,7 @@ class Api {
     );
   }
 
-  //给帖子评论
+  ///给帖子评论
   Future<void> postComment(int timelineId, String comment) async {
     Response response = await DioInstance.instance().post(
       path: "/api/timeline/postcomment",
@@ -317,7 +314,7 @@ class Api {
     );
   }
 
-  //获取指定用户id的头像url
+  ///获取指定用户id的头像url
   Future<String> getUserAvatarUrl(int userId) async {
     Response response = await DioInstance.instance().get(
       path: "/api/user/getuseravatar",
@@ -326,7 +323,7 @@ class Api {
     return response.data['data'].toString();
   }
 
-  //根据keyword查找用户
+  ///根据keyword查找用户
   Future<List<SearchForUserData>> searchForUsers(String keyword) async {
     Response response = await DioInstance.instance().get(
       path: "/api/friend/searchforusers",

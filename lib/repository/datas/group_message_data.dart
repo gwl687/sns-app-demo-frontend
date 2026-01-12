@@ -1,13 +1,3 @@
-import 'dart:convert';
-
-/// json string -> GroupMessageData
-GroupMessageData groupMessageDataFromJson(String str) =>
-    GroupMessageData.fromJson(json.decode(str));
-
-/// GroupMessageData -> json string
-String groupMessageDataToJson(GroupMessageData data) =>
-    json.encode(data.toJson());
-
 /// 群聊消息数据模型
 class GroupMessageData {
   final int id;
@@ -15,6 +5,7 @@ class GroupMessageData {
   final int senderId;
   final String content;
   final String type;
+  final DateTime createTime;
 
   GroupMessageData({
     required this.id,
@@ -22,6 +13,7 @@ class GroupMessageData {
     required this.senderId,
     required this.content,
     required this.type,
+    required this.createTime,
   });
 
   factory GroupMessageData.fromJson(Map<String, dynamic> json) {
@@ -31,6 +23,7 @@ class GroupMessageData {
       senderId: json['senderId'] as int,
       content: json['content'] as String,
       type: json['type'] as String,
+      createTime: DateTime.parse(json['createTime'] as String),
     );
   }
 
@@ -41,6 +34,7 @@ class GroupMessageData {
       'senderId': senderId,
       'content': content,
       'type': type,
+      'createTime': createTime.toIso8601String(),
     };
   }
 }

@@ -115,7 +115,7 @@ class ChatDbManager {
     return _db!;
   }
 
-  // 保存消息
+  ///插入私聊消息
   static Future<void> insertMessage(
     int fromUser,
     int toUser,
@@ -131,7 +131,7 @@ class ChatDbManager {
     }, conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
-  // 查询两个人之间的聊天记录
+  ///查询两个人之间的聊天记录
   static Future<List<Map<String, dynamic>>> getPrivateMessages(
     int user1,
     int user2,
@@ -145,18 +145,19 @@ class ChatDbManager {
     );
   }
 
-  //插入群聊消息
+  ///插入群聊消息
   static Future<void> insertGroupMessage(
     int fromUser,
     int groupId,
-    String content,
-  ) async {
+    String content, {
+    String? createTime,
+  }) async {
     final db = await getDb();
     await db.insert('group_messages', {
       'fromUser': fromUser,
       'groupId': groupId,
       'content': content,
-      'time': DateTime.now().toIso8601String(),
+      'time': createTime ?? DateTime.now().toIso8601String(),
     }, conflictAlgorithm: ConflictAlgorithm.replace);
   }
 

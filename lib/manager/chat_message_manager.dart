@@ -1,6 +1,7 @@
 import 'package:demo10/constant/base_constants.dart';
 import 'package:demo10/manager/chat_db_manager.dart';
 import 'package:demo10/repository/api.dart';
+import 'package:demo10/repository/datas/group_message_data.dart';
 import 'package:demo10/repository/datas/private_message_data.dart';
 import 'package:demo10/utils/sp_utils.dart';
 import 'package:flutter/cupertino.dart';
@@ -108,15 +109,15 @@ class ChatMessageManager {
     }
   }
 
-  //群里有人加入多人视频通话
+  ///群里有人加入多人视频通话
   void joingroupvideochat(Map<String, dynamic> data) async {}
 
-  //加载进本地sql
+  ///加载进本地sql
   Future<void> loadMessages() async {
-    //简单处理，登录时先清空本地数据
+    ///简单处理，登录时先清空本地数据
     await ChatDbManager.deleteFromTable("group_messages");
     await ChatDbManager.deleteFromTable("messages");
-    //私聊
+    ///私聊
     List<PrivateMessageData> privateMessages = await Api.instance
         .getPrivateMessages();
     for (final msg in privateMessages) {
@@ -128,6 +129,17 @@ class ChatMessageManager {
         createTime: localTime.toIso8601String(),
       );
     }
-    //群聊
+    ///群聊
+    List<GroupMessageData> groupMessages = await Api.instance
+        .getGroupMessages();
+    for (final msg in groupMessages) {
+      DateTime localTime = msg.createTime.toLocal();
+      await ChatDbManager.insertGroupMessage(
+        msg.senderId,
+        msg.id,
+        msg.content,
+        createTime: localTime.toIso8601String(),
+      );
+    }
   }
 }

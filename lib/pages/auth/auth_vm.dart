@@ -72,10 +72,8 @@ class AuthViewModel with ChangeNotifier {
   initData() async {
     ///登录成功后建立 WebSocket 连接
     await WebsocketManager.instance.connect();
-
     ///增量读取离线时收到的消息，存入本地数据库
     await ChatMessageManager.instance.loadMessages();
-
     ///初始化FCM
     FirebaseMessageManager.instance.init();
   }

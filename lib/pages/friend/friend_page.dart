@@ -78,14 +78,14 @@ class _FriendPageState extends State<FriendPage> {
 
                 return ListTile(
                   leading: CircleAvatar(
-                    backgroundImage: NetworkImage(friend.avatarurl!),
+                    backgroundImage: NetworkImage(friend.avatarurl),
                   ),
                   title: Text(friend.username),
                   onTap: () async {
                     final privateChatData = PrivateChatData(
                       id: friend.userId,
                       userName: friend.username,
-                      avatarUrl: friend.avatarurl!,
+                      avatarUrl: friend.avatarurl,
                     );
 
                     final chatList = context.read<ChatListViewModel>().chatList;

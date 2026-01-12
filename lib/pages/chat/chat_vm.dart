@@ -21,7 +21,8 @@ class ChatViewModel extends ChangeNotifier {
     required this.friendAvatarUrl,
   }) {
     loadMessages(myId!, friendId);
-    //聊天消息监听
+
+    ///聊天消息监听
     ChatMessageManager.instance.chatPagePrivateMessage_vm =
         (fromUser, toUser) async {
           await loadMessages(fromUser, toUser);
@@ -34,26 +35,7 @@ class ChatViewModel extends ChangeNotifier {
     super.dispose();
   }
 
-  //发送消息
-  void sendMessage(String text) async {
-    if (text.isEmpty) return;
-    final privateMessage = {
-      'fromUser': myId,
-      'toUser': friendId,
-      'content': text,
-      'time': DateTime.now().toLocal().toIso8601String(),
-    };
-    privateMessages.add(privateMessage);
-    notifyListeners();
-
-    // 发送消息到服务器
-    WebsocketManager.instance.sendMessage("private", friendId, text);
-
-    // 保存到本地数据库
-    await ChatDbManager.insertMessage(myId!, friendId, text);
-  }
-
-  //刷新私聊消息
+  ///加载私聊消息
   Future<void> loadMessages(int fromUser, int toUser) async {
     final raw = await ChatDbManager.getPrivateMessages(fromUser, toUser);
     privateMessages = raw.map<Map<String, dynamic>>((e) {
@@ -67,7 +49,26 @@ class ChatViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  //发起视频聊天
+  ///发送私聊消息
+  void sendMessage(String text) async {
+    if (text.isEmpty) return;
+    final privateMessage = {
+      'fromUser': myId,
+      'toUser': friendId,
+      'content': text,
+      'time': DateTime.now().toLocal().toIso8601String(),
+    };
+    privateMessages.add(privateMessage);
+    notifyListeners();
+
+    /// 发送消息到服务器
+    WebsocketManager.instance.sendMessage("private", friendId, text);
+
+    ///保存到本地数据库
+    await ChatDbManager.insertMessage(myId!, friendId, text);
+  }
+
+  ///发起视频聊天
   void requestVideoCall() {
     WebsocketManager.instance.sendMessage(
       "videochatrequest",
@@ -76,7 +77,7 @@ class ChatViewModel extends ChangeNotifier {
     );
   }
 
-  //收到视频聊天请求
+  ///收到视频聊天请求
   void onVideoChatRequest() {
     // videoChatRequest = true;
     notifyListeners();

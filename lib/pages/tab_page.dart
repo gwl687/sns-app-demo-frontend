@@ -52,20 +52,13 @@ class _TabPageState extends State<TabPage> {
 
   ///初始化四个主页面数据
   Future<void> load() async {
-    ///用户信息页加载用户数据
-    final userProfileVm = context.read<UserProfileViewModel>();
-    await userProfileVm.load();
-    ///给其它三个主页面绑定好登录的用户信息
-    //await context.read<ChatListViewModel>().init(userProfileVm);
-    //await context.read<FriendViewModel>().init(userProfileVm);
-    //await context.read<TimelineViewModel>().init(userProfileVm);
-    ///其它三个主页面初始化数据
+    await context.read<UserProfileViewModel>().load();
     await context.read<ChatListViewModel>().load();
     await context.read<FriendViewModel>().load();
     await context.read<TimelineViewModel>().load(20, null, null);
   }
 
-  //初始化界面
+  ///初始化界面
   void initTabData() {
     currentIndex = widget.initialIndex;
     //暂时特殊处理timeline

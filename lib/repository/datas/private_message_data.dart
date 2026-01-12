@@ -1,3 +1,4 @@
+///私聊消息数据模型
 class PrivateMessageData {
   final int id;
   final int receiverId;

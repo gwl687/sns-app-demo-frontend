@@ -2,6 +2,7 @@ import 'package:demo10/constant/base_constants.dart';
 import 'package:demo10/pages/Chat/Chat_page.dart';
 import 'package:demo10/pages/chat/chat_vm.dart';
 import 'package:demo10/pages/chat/group_chat_page.dart';
+import 'package:demo10/pages/chat/group_chat_vm.dart';
 import 'package:demo10/pages/friend/chat_list_vm.dart';
 import 'package:demo10/repository/datas/group_chat_data.dart';
 import 'package:demo10/repository/datas/private_chat_data.dart';
@@ -10,7 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 // 好友列表页面
-class  ChatListPage extends StatefulWidget {
+class ChatListPage extends StatefulWidget {
   @override
   State createState() {
     return _ChatListPage();
@@ -44,49 +45,55 @@ class _ChatListPage extends State<ChatListPage> {
               itemBuilder: (context, index) {
                 final chat = chatList[index];
                 if (chat is PrivateChatData) {
-                  //是私聊
+                  ///是私聊
                   return ListTile(
                     leading: CircleAvatar(
                       backgroundImage: NetworkImage(chat.avatarUrl), // 显示首字母
                     ),
                     title: Text(chat.userName),
-                    onTap: () async{
-                      final myId = await SpUtils.getInt(BaseConstants.SP_User_Id);
-                      //点击进入ChatPage
+                    onTap: () async {
+                      final myId = await SpUtils.getInt(
+                        BaseConstants.SP_User_Id,
+                      );
+
+                      ///点击进入ChatPage
                       Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (_) => ChangeNotifierProvider(
-                              create: (_) => ChatViewModel(
-                                  myId: myId,
-                                  friendId: chat.id,
-                                  friendAvatarUrl: chat.avatarUrl,
-                                  friendName: chat.userName
-                              ),
-                              child: ChatPage()
+                            create: (_) => ChatViewModel(
+                              myId: myId,
+                              friendId: chat.id,
+                              friendAvatarUrl: chat.avatarUrl,
+                              friendName: chat.userName,
+                            ),
+                            child: ChatPage(),
                           ),
                         ),
                       );
                     },
                   );
                 } else if (chat is GroupChatData) {
-                  //是群聊
+                  ///是群聊
                   return ListTile(
                     leading: CircleAvatar(
                       child: Text(chat.groupName[0]), // 显示首字母
                     ),
                     title: Text(chat.groupName),
                     onTap: () {
-                      //点击进入GroupChatPage
+                      ///点击进入GroupChatPage
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => GroupChatPage(
-                            id: chat.groupId,
-                            ownerId: chat.ownerId,
-                            memberIds: chat.memberIds,
-                            name: chat.groupName,
-                            avatarUrl: chat.avatarUrl,
+                          builder: (_) => ChangeNotifierProvider(
+                            create: (_) => GroupChatViewModel(
+                              id: chat.groupId,
+                              ownerId: chat.ownerId,
+                              memberIds: chat.memberIds,
+                              name: chat.groupName,
+                              avatarUrl: chat.avatarUrl,
+                            ),
+                            child: GroupChatPage(),
                           ),
                         ),
                       );

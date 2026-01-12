@@ -143,7 +143,7 @@ class _LoginPageState extends State<LoginPage> {
 
                       const SizedBox(height: 32),
 
-                      /// 登录
+                      ///登录
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
