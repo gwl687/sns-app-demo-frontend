@@ -23,13 +23,13 @@ class FirebaseMessageManager {
     FirebaseMessaging.onMessageOpenedApp.listen(_onOpenedMessage);
   }
 
-  //前台
+  ///前台
   void _onMessage(RemoteMessage msg) {
     print("收到推送: type = ${msg.data['type']}");
     _controller.add(PushEventData(msg, false));
   }
 
-  //后台
+  ///后台
   void _onOpenedMessage(RemoteMessage msg) {
     print("收到推送: type = ${msg.data['type']}");
     _controller.add(PushEventData(msg, true));

@@ -86,13 +86,18 @@ class _ChatListPage extends State<ChatListPage> {
                         context,
                         MaterialPageRoute(
                           builder: (_) => ChangeNotifierProvider(
-                            create: (_) => GroupChatViewModel(
-                              id: chat.groupId,
-                              ownerId: chat.ownerId,
-                              memberIds: chat.memberIds,
-                              name: chat.groupName,
-                              avatarUrl: chat.avatarUrl,
-                            ),
+                            create: (_) {
+                              final vm = GroupChatViewModel(
+                                id: chat.groupId,
+                                ownerId: chat.ownerId,
+                                memberIds: chat.memberIds,
+                                name: chat.groupName,
+                                avatarUrl: chat.avatarUrl,
+                              );
+                              vm.loadMessages();
+                              vm.loadMemberInfos();
+                              return vm;
+                            },
                             child: GroupChatPage(),
                           ),
                         ),

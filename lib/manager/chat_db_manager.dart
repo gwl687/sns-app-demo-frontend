@@ -161,17 +161,17 @@ class ChatDbManager {
     }, conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
-  //清空表
+  ///清空表
   static Future<void> deleteFromTable(String table) async {
     final db = await getDb();
     await db.delete(table);
   }
 
-  //获取某个群的所有消息（按时间升序）
+  ///获取某个群的所有消息（按时间升序）
   static Future<List<Map<String, dynamic>>> getGroupMessages(
     int? groupId,
   ) async {
-    //本地获取
+    ///本地获取
     final db = await getDb();
     return await db.query(
       'group_messages',

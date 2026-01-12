@@ -45,7 +45,7 @@ class WebsocketManager {
             print(e);
             data = {'content': message};
           }
-          //处理消息
+          ///处理消息
           String methodName = data['type'].contains('_')
               ? data['type'].split('_')[0]
               : data['type'];
@@ -70,7 +70,7 @@ class WebsocketManager {
     _socket?.add(msg);
   }
 
-  //发消息
+  ///发消息
   void sendMessage(String type, int toUser, String content) {
     final msg = {"type": type, "toUser": toUser, "content": content};
     send(jsonEncode(msg));

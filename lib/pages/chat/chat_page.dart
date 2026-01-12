@@ -86,7 +86,7 @@ class _ChatPageState extends State<ChatPage> {
           ),
           body: Column(
             children: [
-              /// ===== 聊天列表 =====
+              ///聊天列表
               Expanded(
                 child: ListView.builder(
                   controller: _scrollController,

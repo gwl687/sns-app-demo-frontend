@@ -42,17 +42,17 @@ class FriendViewModel extends ChangeNotifier {
     final String content = msg.message.data['content'];
     final String title = msg.message.data['title'];
     switch (type) {
-      //对方接受了我的好友申请
+      ///对方接受了我的好友申请
       case 'friendRequestResponse':
         if (content == "1") {
           loadFriends();
         }
         break;
-      //有人向我申请好友
+      ///有人向我申请好友
       case 'friendrequest':
         loadRequestFriends();
         break;
-      //朋友更新自己的信息
+      ///朋友更新自己的信息
       case 'friendinfochange':
         loadFriends();
         break;

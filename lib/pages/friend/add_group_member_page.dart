@@ -6,17 +6,12 @@ import 'package:provider/provider.dart';
 
 class AddGroupMemberPage extends StatefulWidget {
   final int groupId;
-  final bool isAdd;
   final List<int> memberIds;
 
   @override
   State createState() => _AddGroupMember();
 
-  AddGroupMemberPage({
-    required this.groupId,
-    required this.memberIds,
-    required this.isAdd,
-  });
+  AddGroupMemberPage({required this.groupId, required this.memberIds});
 }
 
 class _AddGroupMember extends State<AddGroupMemberPage> {
@@ -27,26 +22,19 @@ class _AddGroupMember extends State<AddGroupMemberPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("添加成员"),
+        title: Text("Add members"),
         centerTitle: true,
         actions: [
           TextButton(
             onPressed: () async {
-              if (widget.isAdd) {
-                await Api.instance.addGroupMembers(
-                  widget.groupId,
-                  _selectedFriends,
-                );
-              } else {
-                await Api.instance.removeGroupMembers(
-                  widget.groupId,
-                  _selectedFriends,
-                );
-              }
+              await Api.instance.addGroupMembers(
+                widget.groupId,
+                _selectedFriends,
+              );
               Navigator.pop(context);
             },
             child: Text(
-              "完成",
+              "Create",
               style: TextStyle(color: Colors.black, fontSize: 16),
             ),
           ),
@@ -55,16 +43,15 @@ class _AddGroupMember extends State<AddGroupMemberPage> {
       body: Consumer<FriendViewModel>(
         builder: (context, vm, child) {
           final friends = vm.friends;
-          final filteredFriends = widget.isAdd
-              ? friends.where((f) => !widget.memberIds.contains(f.userId)).toList()
-              : friends.where((f) => widget.memberIds.contains(f.userId)).toList();
+          final filteredFriends = friends
+              .where((f) => !widget.memberIds.contains(f.userId))
+              .toList();
           return ListView.separated(
             itemCount: filteredFriends.length,
             separatorBuilder: (context, index) => Divider(height: 0.5),
             itemBuilder: (context, index) {
               final friend = filteredFriends[index];
               final isSelected = _selectedFriends.contains(friend.userId);
-
               return ListTile(
                 leading: Checkbox(
                   value: isSelected,

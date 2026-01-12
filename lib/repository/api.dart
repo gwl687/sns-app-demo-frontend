@@ -167,12 +167,11 @@ class Api {
     Response response = await DioInstance.instance().get(
       path: "/api/chatmessage/getgroupmessages",
     );
-    print("获取所有群聊消息: ${response.data}");
     final List list = response.data['data'];
     return list.map((e) => GroupMessageData.fromJson(e)).toList();
   }
 
-  ///获取用户数据
+  ///获取当前登录用户数据
   Future<UserInfoData> getUserInfo() async {
     Response response = await DioInstance.instance().get(
       path: "/api/user/getuserinfo",
@@ -180,13 +179,22 @@ class Api {
     return UserInfoData.fromJson(response.data['data']);
   }
 
-  ///更新用户数据
+  ///更新当前登录用户数据
   Future<bool> updateUserInfo(UserInfoData userInfoData) async {
     Response response = await DioInstance.instance().post(
       path: "/api/user/updateuserinfo",
       queryParameters: {'updateUserInfoDTO': userInfoData},
     );
     return response.data['data'];
+  }
+
+  ///获取指定用户数据
+  Future<UserInfoData> getUserInfoById(int userId) async {
+    Response response = await DioInstance.instance().get(
+      path: "/api/user/getuserinfobyid",
+      param: {"userId": userId},
+    );
+    return UserInfoData.fromJson(response.data['data']);
   }
 
   ///上传头像到s3
@@ -209,8 +217,8 @@ class Api {
   ///添加群成员
   Future<bool> addGroupMembers(int groupId, List<int> selectedFriends) async {
     Response response = await DioInstance.instance().post(
-      path: "/api/group/addgroupmembers/$groupId",
-      data: {"selectedFriends": selectedFriends},
+      path: "/api/group/addgroupmembers",
+      data: {"groupId": groupId, "selectedFriends": selectedFriends},
     );
     return response.data['data'];
   }

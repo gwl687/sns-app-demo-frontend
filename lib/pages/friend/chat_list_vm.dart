@@ -8,7 +8,7 @@ import 'package:demo10/repository/datas/user/user_info_data.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/widgets.dart';
 
-//聊天朋友列表VM
+///聊天朋友列表VM
 class ChatListViewModel extends ChangeNotifier {
   UserProfileViewModel? userProfileVm;
   List<dynamic> chatList = [];
@@ -26,19 +26,19 @@ class ChatListViewModel extends ChangeNotifier {
     }
   }
 
-  //FCM处理
+  ///FCM处理
   void onPush(PushEventData msg) {
     final type = msg.message.data['type'];
     switch (type) {
-      //收到私聊消息
+      ///收到私聊消息
       case 'privatemessage':
         load();
         break;
-      //被邀请加入群聊
+      ///被邀请加入群聊
       case 'joingroup':
         load();
         break;
-      //朋友更新自己的信息
+      ///朋友更新自己的信息
       case 'friendinfochange':
         load();
         break;
@@ -47,9 +47,9 @@ class ChatListViewModel extends ChangeNotifier {
     }
   }
 
-  //加载数据
+  ///加载数据
   Future<void> load() async {
-    //加载聊天列表
+    ///加载聊天列表
     chatList = await Api.instance.getChatList();
     notifyListeners();
   }

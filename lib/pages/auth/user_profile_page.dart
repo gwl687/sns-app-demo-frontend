@@ -70,12 +70,12 @@ class _UserProfilePage extends State<UserProfilePage> {
 
                 SizedBox(height: 40),
 
-                // 退出登录
+                /// 退出登录
                 ElevatedButton(
                   onPressed: () async {
                     WebsocketManager.instance.close();
-                    //清理用户信息数据
-                    await context.read<UserProfileViewModel>().clear();
+                    ///清理用户信息数据
+                    vm.clear();
                     await context.read<AuthViewModel>().logout();
                   },
                   child: Text('Log out'),

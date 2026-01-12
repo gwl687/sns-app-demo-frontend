@@ -14,7 +14,7 @@ class GroupChatViewModel extends ChangeNotifier {
   List<int> memberIds;
   String name;
   String avatarUrl;
-  Map<int, String> avatarUrlMap = {};
+  Map<int, UserInfoData> memberMap = {};
 
   GroupChatViewModel({
     required this.id,
@@ -25,7 +25,7 @@ class GroupChatViewModel extends ChangeNotifier {
   }) {
     ChatMessageManager.instance.receiveGroupMessage_vm = (int groupId) {
       print("vm收到群聊消息");
-      loadMessages(groupId);
+      loadMessages();
     };
   }
 
@@ -35,22 +35,24 @@ class GroupChatViewModel extends ChangeNotifier {
     super.dispose();
   }
 
+  ///加载群成员信息
+  Future<void> loadMemberInfos() async {
+    for (int memberId in memberIds) {
+      memberMap[memberId] = await Api.instance.getUserInfoById(memberId);
+    }
+  }
+
   ///加载群聊消息
-  void loadMessages(int groupId) async {
-    groupMessages = await ChatDbManager.getGroupMessages(groupId);
-    ///提取senderId并去重
-    final senderIds = groupMessages
-        .map((m) => m['senderId'] as int)
-        .toSet();
-    ///并发请求头像
-    await Future.wait(
-      senderIds.map((userId) async {
-        ///已存在的不再请求
-        if (avatarUrlMap.containsKey(userId)) return;
-        final url = await Api.instance.getUserAvatarUrl(userId);
-        avatarUrlMap[userId] = url;
-      }),
-    );
+  Future<void> loadMessages() async {
+    final raw = await ChatDbManager.getGroupMessages(id);
+    groupMessages = raw.map<Map<String, dynamic>>((e) {
+      return {
+        'fromUser': int.parse(e['fromUser'].toString()),
+        'groupId': int.parse(e['groupId'].toString()),
+        'content': e['content'],
+        'time': e['time'],
+      };
+    }).toList();
     notifyListeners();
   }
 
