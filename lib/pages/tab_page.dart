@@ -52,10 +52,13 @@ class _TabPageState extends State<TabPage> {
 
   ///初始化四个主页面数据
   Future<void> load() async {
-    await context.read<UserProfileViewModel>().load();
+    UserProfileViewModel userProfileVm = await context.read<UserProfileViewModel>();
+    await userProfileVm.load();
+
+    await context.read<TimelineViewModel>().init(userProfileVm);
     await context.read<ChatListViewModel>().load();
     await context.read<FriendViewModel>().load();
-    await context.read<TimelineViewModel>().load(20, null, null);
+    await context.read<TimelineViewModel>().load(10, null, null);
   }
 
   ///初始化界面

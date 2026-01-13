@@ -215,7 +215,7 @@ class Api {
   }
 
   ///添加群成员
-  Future<bool> addGroupMembers(int groupId, List<int> selectedFriends) async {
+  Future<void> addGroupMembers(int groupId, List<int> selectedFriends) async {
     Response response = await DioInstance.instance().post(
       path: "/api/group/addgroupmembers",
       data: {"groupId": groupId, "selectedFriends": selectedFriends},
@@ -224,13 +224,13 @@ class Api {
   }
 
   ///移除群成员
-  Future<bool> removeGroupMembers(
+  Future<void> removeGroupMembers(
     int groupId,
     List<int> selectedFriends,
   ) async {
     Response response = await DioInstance.instance().post(
-      path: "/api/group/removegroupmembers/$groupId",
-      data: {"selectedFriends": selectedFriends},
+      path: "/api/group/removegroupmembers",
+      data: {"groupId": groupId, "selectedFriends": selectedFriends},
     );
     return response.data['data'];
   }
@@ -283,9 +283,7 @@ class Api {
   ) async {
     final params = <String, dynamic>{"limit": limit};
     if (cursorTime != null) {
-      params["cursorTime"] = DateFormat(
-        'yyyy-MM-dd HH:mm:ss',
-      ).format(cursorTime);
+      params["cursorTime"] = cursorTime.toIso8601String();
       params["cursorId"] = cursorId;
     }
     Response response = await DioInstance.instance().get(

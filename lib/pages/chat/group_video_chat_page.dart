@@ -21,6 +21,7 @@ class GroupVideoChatPage extends StatefulWidget {
 
 class _GroupVideoChatPageState extends State<GroupVideoChatPage> {
   late Room room;
+  VoidCallback? _roomListener;
 
   @override
   void initState() {
@@ -33,28 +34,33 @@ class _GroupVideoChatPageState extends State<GroupVideoChatPage> {
     room = Room();
     await [Permission.camera, Permission.microphone].request();
 
-    // 监听成员变化
-    room.addListener(() {
+    _roomListener = () {
+      if (!mounted) return;
       setState(() {});
-    });
+    };
 
-    // 连接房间
+    room.addListener(_roomListener!);
+
     await room.connect(
       widget.livekitUrl,
       widget.token,
       connectOptions: const ConnectOptions(autoSubscribe: true),
     );
 
-    // 发布本地视频与音频
     await room.localParticipant?.setCameraEnabled(true);
     await room.localParticipant?.setMicrophoneEnabled(true);
   }
 
+
   @override
   void dispose() {
+    room.removeListener(_roomListener!);
+
     room.disconnect();
+
     super.dispose();
   }
+
 
   Widget _buildVideo(Participant participant) {
     final pub = participant.videoTrackPublications
@@ -67,15 +73,7 @@ class _GroupVideoChatPageState extends State<GroupVideoChatPage> {
         /// 底层：视频或占位
         Positioned.fill(
           child: track == null
-              ? Container(
-                  color: Colors.black,
-                  child: Center(
-                    child: Text(
-                      participant.identity,
-                      style: const TextStyle(color: Colors.white),
-                    ),
-                  ),
-                )
+              ? Container(color: Colors.black)
               : VideoTrackRenderer(track, fit: VideoViewFit.cover),
         ),
 

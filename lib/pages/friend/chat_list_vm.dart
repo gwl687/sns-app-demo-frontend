@@ -15,11 +15,11 @@ class ChatListViewModel extends ChangeNotifier {
   bool loaded = false;
   StreamSubscription? _sub;
 
-  ChatListViewModel(){
+  ChatListViewModel() {
     _sub = FirebaseMessageManager.instance.stream.listen(onPush);
   }
 
-  Future<void> init(UserProfileViewModel vm) async{
+  Future<void> init(UserProfileViewModel vm) async {
     userProfileVm ??= vm;
     if (!loaded && userProfileVm!.userInfo != null) {
       loaded = true;
@@ -34,10 +34,17 @@ class ChatListViewModel extends ChangeNotifier {
       case 'privatemessage':
         load();
         break;
+
       ///被邀请加入群聊
       case 'joingroup':
         load();
         break;
+
+      ///有群成员被移出群
+      case 'removememberfromgroup':
+        load();
+        break;
+
       ///朋友更新自己的信息
       case 'friendinfochange':
         load();
@@ -53,6 +60,7 @@ class ChatListViewModel extends ChangeNotifier {
     chatList = await Api.instance.getChatList();
     notifyListeners();
   }
+
   @override
   void dispose() {
     _sub?.cancel();

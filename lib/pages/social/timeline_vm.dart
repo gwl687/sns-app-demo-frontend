@@ -12,27 +12,27 @@ import 'package:flutter/material.dart';
 class TimelineViewModel extends ChangeNotifier {
   UserProfileViewModel? userProfileVm;
   bool loaded = false;
-
-  //上面这个暂时不用，
   bool isLoading = false;
+  bool isLoadingMore = false;
+  bool hasMore = true;
   StreamSubscription? _sub;
   List<TimelinePostData> timelinePosts = [];
 
   Map<int, TimelinePostData> timelinePostsMap = {};
 
-  //自己的点赞数
+  ///自己的点赞数
   Map<int, int> heartLikeCount = {};
 
-  //爱心变红
+  ///爱心变红
   Map<int, bool> heartColorChange = {};
 
-  //总点赞数
+  ///总点赞数
   Map<int, int> totalLikeCount = {};
 
-  //用户id对应点赞数
+  ///用户id对应点赞数
   Map<int, Map<int, int>> userLikeMap = {};
 
-  //用户id对应头像url
+  ///用户id对应头像url
   Map<int, String> userAvatarMap = {};
 
   TimelineViewModel() {
@@ -55,15 +55,19 @@ class TimelineViewModel extends ChangeNotifier {
     }
   }
 
-  //清空timeline
-  Future<void> clear() async {
-  }
-
-  //刷新获取timeline内容
+  ///刷新获取timeline内容
   Future<void> load(int limit, DateTime? cursor, int? cursorId) async {
     isLoading = true;
-    timelinePosts = await Api.instance.getTimelinePost(limit, cursor, cursorId);
-    userAvatarMap = {};
+    List<TimelinePostData> newTimelinePosts = await Api.instance
+        .getTimelinePost(limit, cursor, cursorId);
+    if (newTimelinePosts.isEmpty) {
+      hasMore = false;
+      isLoading = false;
+      notifyListeners();
+      return;
+    }
+    timelinePosts.addAll(newTimelinePosts);
+    //userAvatarMap = {};
     for (int i = 0; i < timelinePosts.length; i++) {
       final post = timelinePosts[i];
       int timelineId = post.timelineId;
@@ -93,16 +97,31 @@ class TimelineViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  //刷新单条timeline内容
+  ///分页加载更多
+  Future<void> loadMore() async {
+    if (isLoadingMore || !hasMore || timelinePosts.isEmpty) return;
+
+    isLoadingMore = true;
+
+    final last = timelinePosts.last;
+    await load(10, last.createdAt, last.timelineId);
+
+    isLoadingMore = false;
+  }
+
+  ///刷新单条timeline内容
   Future<void> loadByTimelineId(int timelineId) async {
     timelinePosts[timelineId] = await Api.instance.getTimelinePostById(
       timelineId,
     );
-    //自己的点赞
+
+    ///自己的点赞
     heartLikeCount[timelineId] = timelinePosts[timelineId].likedByMeCount;
-    //总点赞
+
+    ///总点赞
     totalLikeCount[timelineId] = timelinePosts[timelineId].totalLikeCount;
-    //大爱心
+
+    ///大爱心
     if (timelinePosts[timelineId]!.hasLikedByMe) {
       heartColorChange[timelineId] = true;
     } else {
@@ -110,9 +129,10 @@ class TimelineViewModel extends ChangeNotifier {
     }
     userLikeMap = {};
     for (final user in timelinePosts[timelineId].topLikeUsers) {
-      //用户id对应点赞数
+      ///用户id对应点赞数
       userLikeMap[timelineId]![user.userId] = user.userLikeCount;
-      //用户id对应头像url
+
+      ///用户id对应头像url
       if (!userAvatarMap.containsKey(user.userId)) {
         userAvatarMap[user.userId] = user.avatarUrl;
       }

@@ -31,7 +31,7 @@ class FirebaseMessageManager {
 
   ///后台
   void _onOpenedMessage(RemoteMessage msg) {
-    print("收到推送: type = ${msg.data['type']}");
+    print("收到onOpened推送: type = ${msg.data['type']}");
     _controller.add(PushEventData(msg, true));
   }
 

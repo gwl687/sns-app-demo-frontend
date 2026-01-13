@@ -1,8 +1,12 @@
+import 'dart:async';
+
 import 'package:demo10/constant/base_constants.dart';
 import 'package:demo10/manager/chat_db_manager.dart';
 import 'package:demo10/manager/chat_message_manager.dart';
+import 'package:demo10/manager/firebase_message_manager.dart';
 import 'package:demo10/manager/websocket_manager.dart';
 import 'package:demo10/repository/api.dart';
+import 'package:demo10/repository/datas/push_event_data.dart';
 import 'package:demo10/repository/datas/user/user_info_data.dart';
 import 'package:demo10/utils/sp_utils.dart';
 import 'package:flutter/cupertino.dart';
@@ -15,6 +19,8 @@ class GroupChatViewModel extends ChangeNotifier {
   String name;
   String avatarUrl;
   Map<int, UserInfoData> memberMap = {};
+  StreamSubscription? _sub;
+  VoidCallback? onKickedOut;
 
   GroupChatViewModel({
     required this.id,
@@ -23,10 +29,39 @@ class GroupChatViewModel extends ChangeNotifier {
     required this.name,
     required this.avatarUrl,
   }) {
+    ///websocket监听
     ChatMessageManager.instance.receiveGroupMessage_vm = (int groupId) {
       print("vm收到群聊消息");
       loadMessages();
     };
+
+    ///firebase监听
+    _sub = FirebaseMessageManager.instance.stream.listen(onPush);
+  }
+
+  void onPush(PushEventData msg) async {
+    final type = msg.message.data['type'];
+    final content = msg.message.data['content'];
+    final myId = await SpUtils.getInt(BaseConstants.SP_User_Id) ?? 0;
+    switch (type) {
+      ///有群成员被移出群
+      case 'removememberfromgroup':
+        ///如果content里包含自己，提示被踢出,pop
+        List<int> idList = [];
+        if (content is String) {
+          idList = content
+              .split(',')
+              .where((e) => e.trim().isNotEmpty)
+              .map((e) => int.parse(e.trim()))
+              .toList();
+        } else if (content is List) {
+          idList = content.map((e) => int.parse(e.toString())).toList();
+        }
+        if (idList.contains(myId)) {
+          onKickedOut?.call();
+        }
+        break;
+    }
   }
 
   @override

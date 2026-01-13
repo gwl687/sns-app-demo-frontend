@@ -4,6 +4,7 @@ import 'package:demo10/pages/auth/user_profile_vm.dart';
 import 'package:demo10/pages/chat/group_chat_vm.dart';
 import 'package:demo10/pages/chat/group_video_chat_page.dart';
 import 'package:demo10/pages/friend/add_group_member_page.dart';
+import 'package:demo10/pages/friend/remove_group_member_page.dart';
 import 'package:demo10/pages/tab_page.dart';
 import 'package:demo10/repository/api.dart';
 import 'package:demo10/repository/datas/user/user_info_data.dart';
@@ -21,7 +22,17 @@ class _GroupChatPage extends State<GroupChatPage> {
 
   @override
   void initState() {
+    final vm = context.read<GroupChatViewModel>();
     super.initState();
+    vm.onKickedOut = () {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('You have been removed from this chat')),
+      );
+
+      /// 退出当前页面
+      Navigator.pop(context);
+    };
   }
 
   @override
@@ -48,14 +59,13 @@ class _GroupChatPage extends State<GroupChatPage> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => AddGroupMemberPage(
-                        groupId: groupChatVm.id,
-                        memberIds: groupChatVm.memberIds,
-                      ),
+                      builder: (_) =>
+                          AddGroupMemberPage(groupChatVm: groupChatVm),
                     ),
                   );
                 },
               ),
+
               ///踢出群成员
               IconButton(
                 icon: const Icon(Icons.person_remove),
@@ -63,14 +73,13 @@ class _GroupChatPage extends State<GroupChatPage> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => AddGroupMemberPage(
-                        groupId: groupChatVm.id,
-                        memberIds: groupChatVm.memberIds,
-                      ),
+                      builder: (_) =>
+                          RemoveGroupMemberPage(groupChatVm: groupChatVm),
                     ),
                   );
                 },
               ),
+
               ///群视频通话
               IconButton(
                 icon: const Icon(Icons.camera_front),

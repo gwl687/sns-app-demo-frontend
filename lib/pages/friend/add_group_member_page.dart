@@ -1,3 +1,4 @@
+import 'package:demo10/pages/chat/group_chat_vm.dart';
 import 'package:demo10/pages/friend/friend_vm.dart';
 import 'package:demo10/repository/api.dart';
 import 'package:flutter/cupertino.dart';
@@ -5,13 +6,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class AddGroupMemberPage extends StatefulWidget {
-  final int groupId;
-  final List<int> memberIds;
-
+  final GroupChatViewModel groupChatVm;
   @override
   State createState() => _AddGroupMember();
-
-  AddGroupMemberPage({required this.groupId, required this.memberIds});
+  AddGroupMemberPage({required this.groupChatVm});
 }
 
 class _AddGroupMember extends State<AddGroupMemberPage> {
@@ -28,9 +26,11 @@ class _AddGroupMember extends State<AddGroupMemberPage> {
           TextButton(
             onPressed: () async {
               await Api.instance.addGroupMembers(
-                widget.groupId,
+                widget.groupChatVm.id,
                 _selectedFriends,
               );
+              widget.groupChatVm.memberIds.addAll(_selectedFriends);
+              widget.groupChatVm.notifyListeners();
               Navigator.pop(context);
             },
             child: Text(
@@ -44,7 +44,7 @@ class _AddGroupMember extends State<AddGroupMemberPage> {
         builder: (context, vm, child) {
           final friends = vm.friends;
           final filteredFriends = friends
-              .where((f) => !widget.memberIds.contains(f.userId))
+              .where((f) => !widget.groupChatVm.memberIds.contains(f.userId))
               .toList();
           return ListView.separated(
             itemCount: filteredFriends.length,
