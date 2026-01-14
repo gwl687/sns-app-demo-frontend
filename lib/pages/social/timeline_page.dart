@@ -63,7 +63,6 @@ class _TimelinePage extends State<TimelinePage> {
             child: RefreshIndicator(
               onRefresh: () async {
                 await vm.load(10, null, null);
-                print("refreshtimeline");
               },
               child: posts.isEmpty
                   ? ListView(
@@ -155,19 +154,18 @@ class _TimelinePage extends State<TimelinePage> {
 
                                   /// 帖子内容
                                   Text(
-                                    postMap[timelineId]!.context,
+                                    posts[index].context,
                                     style: TextStyle(fontSize: 16),
                                   ),
                                   const SizedBox(height: 12),
 
                                   /// 图片区域
-                                  if (postMap[timelineId]!.imgUrls.isNotEmpty)
+                                  if (posts[index].imgUrls.isNotEmpty)
                                     GridView.builder(
                                       shrinkWrap: true,
                                       physics:
                                           const NeverScrollableScrollPhysics(),
-                                      itemCount:
-                                          postMap[timelineId]!.imgUrls.length,
+                                      itemCount: posts[index].imgUrls.length,
                                       gridDelegate:
                                           const SliverGridDelegateWithFixedCrossAxisCount(
                                             crossAxisCount: 3,
@@ -180,7 +178,7 @@ class _TimelinePage extends State<TimelinePage> {
                                             8,
                                           ),
                                           child: Image.network(
-                                            postMap[timelineId]!.imgUrls[i],
+                                            posts[index].imgUrls[i],
                                             fit: BoxFit.cover,
                                           ),
                                         );
@@ -216,9 +214,7 @@ class _TimelinePage extends State<TimelinePage> {
                                             size: 28,
                                           ),
                                           onPressed: () {
-                                            vm.likeHit(
-                                              postMap[timelineId]!.timelineId,
-                                            );
+                                            vm.likeHit(posts[index].timelineId);
                                           },
                                         ),
                                       ),
@@ -235,7 +231,7 @@ class _TimelinePage extends State<TimelinePage> {
                                         final userId = entry.key;
                                         final likeCount = entry.value;
                                         final avatarUrl =
-                                            vm.userAvatarMap?[userId];
+                                            vm.userAvatarMap[userId];
                                         return Column(
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
@@ -275,9 +271,7 @@ class _TimelinePage extends State<TimelinePage> {
                                   ],
 
                                   /// 如果有评论，显示最新一条
-                                  if (postMap[timelineId]!
-                                          .comments
-                                          .isNotEmpty &&
+                                  if (posts[index].comments.isNotEmpty &&
                                       lastCommentUserId != null) ...[
                                     const Divider(),
                                     Row(
@@ -306,7 +300,7 @@ class _TimelinePage extends State<TimelinePage> {
                                                 CrossAxisAlignment.start,
                                             children: [
                                               Text(
-                                                postMap[timelineId]!
+                                                posts[index]
                                                     .comments
                                                     .last
                                                     .comment,
@@ -322,7 +316,7 @@ class _TimelinePage extends State<TimelinePage> {
                                                 DateFormat(
                                                   'yyyy-MM-dd HH:mm',
                                                 ).format(
-                                                  postMap[timelineId]!
+                                                  posts[index]
                                                       .comments
                                                       .last
                                                       .createdAt

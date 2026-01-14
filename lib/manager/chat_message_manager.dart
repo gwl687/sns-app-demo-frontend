@@ -13,14 +13,19 @@ class ChatMessageManager {
     messageHandlers = {
       ///私聊消息
       "private": privateMessage,
+
       ///群聊消息
       "group": groupMessage,
+
       ///私人视频通话请求
       "videochatrequest": vedioChatRequest,
+
       ///私人视频通话发起方请求取消
       "videochatrequestcancel": vedioChatRequestCancel,
+
       ///对方对视频请求的回复
       "videochatrequestresponse": vedioChatRequestResponse,
+
       ///对方挂断
       //"videochatcancel": videoChatCancel,
     };
@@ -53,9 +58,16 @@ class ChatMessageManager {
     final int fromUser = data['fromUser'];
     final String content = data['content'];
     final int toUser = await SpUtils.getInt(BaseConstants.SP_User_Id) ?? 0;
+
     ///保存到本地数据库
-    await ChatDbManager.insertMessage(fromUser, toUser, content, createTime:  DateTime.now().toIso8601String());
+    await ChatDbManager.insertMessage(
+      fromUser,
+      toUser,
+      content,
+      createTime: DateTime.now().toIso8601String(),
+    );
     print("保存到本地:fromUser=${fromUser},toUser=${toUser}");
+
     ///当前页面为聊天页面,调用聊天页面的收消息方法
     if (chatPagePrivateMessage_vm != null) {
       chatPagePrivateMessage_vm!(fromUser, toUser);
@@ -67,8 +79,10 @@ class ChatMessageManager {
     final int fromUser = data['fromUser'];
     final int toUser = data['toUser'];
     final String content = data['content'].toString();
+
     ///保存到本地数据库
     await ChatDbManager.insertGroupMessage(fromUser, toUser, content);
+
     ///当前页面为聊天页面,调用聊天页面的收消息方法
     if (receiveGroupMessage_vm != null) {
       receiveGroupMessage_vm!(toUser);
@@ -96,6 +110,7 @@ class ChatMessageManager {
   void vedioChatRequestResponse(Map<String, dynamic> data) async {
     final int fromUser = data['fromUser'];
     final int accept = int.parse(data['content']);
+
     ///accept=1,接受
     if (vedioChatRequestReponse_vm != null) {
       vedioChatRequestReponse_vm!(fromUser, accept);
@@ -117,6 +132,7 @@ class ChatMessageManager {
     ///简单处理，登录时先清空本地数据
     await ChatDbManager.deleteFromTable("group_messages");
     await ChatDbManager.deleteFromTable("messages");
+
     ///私聊
     List<PrivateMessageData> privateMessages = await Api.instance
         .getPrivateMessages();
@@ -129,6 +145,7 @@ class ChatMessageManager {
         createTime: localTime.toIso8601String(),
       );
     }
+
     ///群聊
     List<GroupMessageData> groupMessages = await Api.instance
         .getGroupMessages();

@@ -26,18 +26,22 @@ class AuthViewModel with ChangeNotifier {
     if (loginInfo.name != null && loginInfo.password != null) {
       isLoggingIn = true;
       notifyListeners();
-      UserLoginData data = await Api.instance.login(
-        emailaddress: loginInfo.name,
-        password: loginInfo.password,
-        pushToken: pushToken!,
-      );
-      ///保存用户信息
-      SpUtils.saveInt(BaseConstants.SP_User_Id, data.id ?? 0);
-      SpUtils.saveString(BaseConstants.SP_Token, data.token ?? "");
-      await initData();
-      isLoggingIn = false;
-      isLoggedIn = true;
-      notifyListeners();
+      try {
+        UserLoginData data = await Api.instance.login(
+          emailaddress: loginInfo.name,
+          password: loginInfo.password,
+          pushToken: pushToken!,
+        );
+        ///保存用户信息
+        SpUtils.saveInt(BaseConstants.SP_User_Id, data.id ?? 0);
+        SpUtils.saveString(BaseConstants.SP_Token, data.token ?? "");
+        await initData();
+        isLoggedIn = true;
+      } catch (e) {
+      } finally {
+        isLoggingIn = false;
+        notifyListeners();
+      }
     } else {
       showToast("Input can not be empty");
     }
@@ -59,6 +63,7 @@ class AuthViewModel with ChangeNotifier {
       idTokenString,
       pushToken,
     );
+
     ///保存用户信息
     SpUtils.saveInt(BaseConstants.SP_User_Id, data.id ?? 0);
     SpUtils.saveString(BaseConstants.SP_Token, data.token ?? "");
@@ -72,16 +77,16 @@ class AuthViewModel with ChangeNotifier {
   initData() async {
     ///登录成功后建立 WebSocket 连接
     await WebsocketManager.instance.connect();
+
     ///增量读取离线时收到的消息，存入本地数据库
     await ChatMessageManager.instance.loadMessages();
+
     ///初始化FCM
     FirebaseMessageManager.instance.init();
   }
 
   ///登出后清理各种数据
-  clearData() async {
-
-  }
+  clearData() async {}
 
   ///登出
   logout() {

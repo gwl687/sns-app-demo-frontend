@@ -66,27 +66,17 @@ class DioInstance {
           final data = response.data;
 
           if (data is Map && data.containsKey('code')) {
-            final code = data['code'];
-            final msg = data['msg'];
-
-            if (code != 1) {
-              /// 业务错误
-              if (msg != null) {
-                showToast(msg.toString());
-              }
-              return handler.next(response);
-              /// 阻断后续
-              // return handler.reject(
-              //   DioException(
-              //     requestOptions: response.requestOptions,
-              //     response: response,
-              //     error: msg,
-              //     type: DioExceptionType.badResponse,
-              //   ),
-              // );
+            if (data['code'] != 1) {
+              showToast(data['msg']?.toString() ?? '请求失败');
+              return handler.reject(
+                DioException(
+                  requestOptions: response.requestOptions,
+                  response: response,
+                  type: DioExceptionType.badResponse,
+                ),
+              );
             }
           }
-
           handler.next(response);
         },
 
@@ -100,8 +90,7 @@ class DioInstance {
           } else if (e.message != null) {
             showToast(e.message!);
           }
-
-          handler.next(e);
+          handler.reject(e);
         },
       ),
     );
@@ -122,7 +111,8 @@ class DioInstance {
     return await _dio.get(
       path,
       queryParameters: param,
-      options: options ??
+      options:
+          options ??
           Options(
             method: HttpMethod.GET,
             receiveTimeout: _defaultTime,
@@ -143,7 +133,8 @@ class DioInstance {
       path,
       queryParameters: param,
       data: data,
-      options: options ??
+      options:
+          options ??
           Options(
             method: HttpMethod.PUT,
             receiveTimeout: _defaultTime,
@@ -165,7 +156,8 @@ class DioInstance {
       queryParameters: queryParameters,
       data: data,
       cancelToken: cancelToken,
-      options: options ??
+      options:
+          options ??
           Options(
             method: HttpMethod.POST,
             receiveTimeout: _defaultTime,

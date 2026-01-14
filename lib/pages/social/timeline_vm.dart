@@ -9,6 +9,21 @@ import 'package:demo10/utils/sp_utils.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 
+///随点击变化各种数值的本地timeline类
+class LocalTimeline {
+  ///自己的点赞数
+  int? heartLikeCount;
+
+  ///爱心变红
+  bool? heartColorChange;
+
+  ///总点赞数
+  int? totalLikeCount;
+
+  ///用户id对应点赞数
+  Map<int, int> userLikeMap = {};
+}
+
 class TimelineViewModel extends ChangeNotifier {
   UserProfileViewModel? userProfileVm;
   bool loaded = false;
@@ -47,7 +62,7 @@ class TimelineViewModel extends ChangeNotifier {
     }
   }
 
-  //处理firebase推送的消息
+  ///处理firebase推送的消息
   void onPush(PushEventData msg) {
     final type = msg.message.data['type'];
     if (type == 'timelinepost') {
@@ -66,28 +81,36 @@ class TimelineViewModel extends ChangeNotifier {
       notifyListeners();
       return;
     }
-    timelinePosts.addAll(newTimelinePosts);
-    //userAvatarMap = {};
+
+    ///判断是否为下拉加载
+    if (isLoadingMore) {
+      timelinePosts.addAll(newTimelinePosts);
+    } else {
+      timelinePosts = newTimelinePosts;
+    }
+    userAvatarMap = {};
     for (int i = 0; i < timelinePosts.length; i++) {
       final post = timelinePosts[i];
       int timelineId = post.timelineId;
-      //
-      timelinePostsMap[timelineId] = timelinePosts[i];
-      //自己的点赞
+
+      ///自己的点赞
       heartLikeCount[timelineId] = post.likedByMeCount;
-      //总点赞
+
+      ///总点赞
       totalLikeCount[timelineId] = post.totalLikeCount;
-      //大爱心
+
+      ///大爱心
       if (post.hasLikedByMe) {
         heartColorChange[timelineId] = true;
       } else {
         heartColorChange[timelineId] = false;
       }
       userLikeMap[timelineId] = {};
-      for (final user in timelinePosts[i].topLikeUsers) {
-        //用户id对应点赞数
+      for (final user in post.topLikeUsers) {
+        ///用户id对应点赞数
         userLikeMap[timelineId]![user.userId] = user.userLikeCount;
-        //用户id对应头像url
+
+        ///用户id对应头像url
         if (!userAvatarMap.containsKey(user.userId)) {
           userAvatarMap[user.userId] = user.avatarUrl;
         }
