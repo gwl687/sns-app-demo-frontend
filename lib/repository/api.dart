@@ -5,6 +5,7 @@ import 'dart:typed_data';
 import 'package:camera/camera.dart';
 import 'package:demo10/repository/datas/group_chat_data.dart';
 import 'package:demo10/repository/datas/group_message_data.dart';
+import 'package:demo10/repository/datas/interest_data.dart';
 import 'package:demo10/repository/datas/login_data.dart';
 import 'package:demo10/repository/datas/private_chat_data.dart';
 import 'package:demo10/repository/datas/private_message_data.dart';
@@ -339,7 +340,7 @@ class Api {
     return list.map((e) => SearchForUserData.fromJson(e)).toList();
   }
 
-  //申请好友
+  ///申请好友
   Future<void> sendFriendRequest(int userId) async {
     await DioInstance.instance().post(
       path: "/api/friend/sendfriendrequest",
@@ -347,7 +348,7 @@ class Api {
     );
   }
 
-  //回复好友申请
+  ///回复好友申请
   Future<void> friendRequestResponse(int friendId, int res) async {
     await DioInstance.instance().post(
       path: "/api/friend/friendrequestresponse",
@@ -355,12 +356,28 @@ class Api {
     );
   }
 
-  //获取正在申请成为我好友的用户
+  ///获取正在申请成为我好友的用户
   Future<List<SearchForUserData>> getRequestFriends() async {
     Response response = await DioInstance.instance().get(
       path: "/api/friend/getrequestfriends",
     );
     final List list = response.data['data'];
     return list.map((e) => SearchForUserData.fromJson(e)).toList();
+  }
+
+  ///获取全部兴趣
+  Future<List<InterestData>> getAllInterests() async {
+    Response response = await DioInstance.instance().get(
+      path: "/api/interest/getallinterests",
+    );
+    final List list = response.data['data'];
+    return list.map((e) => InterestData.fromJson(e)).toList();
+  }
+
+  ///更新用户兴趣
+  Future<void> updateUserInterests() async {
+    Response response = await DioInstance.instance().post(
+      path: "/api/interest/updateuserinterests",
+    );
   }
 }

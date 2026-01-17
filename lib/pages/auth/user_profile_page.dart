@@ -12,15 +12,33 @@ import 'package:provider/provider.dart';
 ///我的个人信息页面
 class UserProfilePage extends StatefulWidget {
   @override
-  State<StatefulWidget> createState() => _UserProfilePage();
+  State<UserProfilePage> createState() => _UserProfilePage();
 }
 
 class _UserProfilePage extends State<UserProfilePage> {
-  UserInfoData? userInfoData;
+  late TextEditingController _nameController;
+  late TextEditingController _ageController;
+
+  int? _sex;
+  List<String> _selectedInterests = [];
 
   @override
   void initState() {
     super.initState();
+
+    final user = context.read<UserProfileViewModel>().userInfo!;
+
+    _nameController = TextEditingController(text: user.username);
+    _ageController = TextEditingController(text: user.age.toString());
+    _sex = user.sex;
+    _selectedInterests = List.from(user.interests!);
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _ageController.dispose();
+    super.dispose();
   }
 
   @override
@@ -28,12 +46,12 @@ class _UserProfilePage extends State<UserProfilePage> {
     return Consumer<UserProfileViewModel>(
       builder: (context, vm, child) {
         return Scaffold(
-          appBar: AppBar(title: Text('Mypage'), centerTitle: true),
-          body: Center(
+          appBar: AppBar(title: const Text('My Page'), centerTitle: true),
+          body: SingleChildScrollView(
+            padding: const EdgeInsets.all(20),
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // 头像
+                /// avatar：点了就直接传
                 GestureDetector(
                   onTap: vm.changeAvatar,
                   child: CircleAvatar(
@@ -41,48 +59,25 @@ class _UserProfilePage extends State<UserProfilePage> {
                     backgroundImage: NetworkImage(vm.userInfo!.avatarurl),
                   ),
                 ),
-                SizedBox(height: 20),
 
-                // 用户名
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      vm.userInfo!.username,
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(width: 6),
-                    GestureDetector(
-                      onTap: () {
-                        _showEditNameDialog(context, vm);
-                      },
-                      child: const Icon(
-                        Icons.edit,
-                        size: 18,
-                        color: Colors.grey,
-                      ),
-                    ),
-                  ],
-                ),
+                const SizedBox(height: 20),
 
-                SizedBox(height: 40),
+                _buildNameField(),
+                const SizedBox(height: 16),
 
-                /// 退出登录
-                ElevatedButton(
-                  onPressed: () async {
-                    WebsocketManager.instance.close();
-                    ///清理用户信息数据
-                    vm.clear();
-                    await context.read<AuthViewModel>().logout();
-                  },
-                  child: Text('Log out'),
-                  style: ElevatedButton.styleFrom(
-                    padding: EdgeInsets.symmetric(horizontal: 40, vertical: 12),
-                  ),
-                ),
+                _buildAgeField(),
+                const SizedBox(height: 16),
+
+                _buildSexSelector(),
+                const SizedBox(height: 16),
+
+                _buildInterestSelector(vm),
+                const SizedBox(height: 32),
+
+                _buildSaveButton(vm),
+                const SizedBox(height: 24),
+
+                _buildLogout(vm),
               ],
             ),
           ),
@@ -91,43 +86,122 @@ class _UserProfilePage extends State<UserProfilePage> {
     );
   }
 
-  void _showEditNameDialog(BuildContext context, UserProfileViewModel vm) {
-    final controller = TextEditingController(text: vm.userInfo!.username);
+  // ================= Widgets =================
 
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Change username'),
-          content: TextField(
-            controller: controller,
+  Widget _buildNameField() {
+    return Row(
+      children: [
+        const SizedBox(width: 80, child: Text('Name')),
+        Expanded(
+          child: TextField(
+            controller: _nameController,
             maxLength: 20,
-            decoration: const InputDecoration(hintText: 'Enter new username'),
+            decoration: const InputDecoration(counterText: ''),
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                final newName = controller.text.trim();
-
-                if (newName.isEmpty) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Username cannot be empty')),
-                  );
-                  return;
-                }
-
-                vm.changeName(newName);
-                Navigator.pop(context);
-              },
-              child: const Text('OK'),
-            ),
-          ],
-        );
-      },
+        ),
+      ],
     );
+  }
+
+  Widget _buildAgeField() {
+    return Row(
+      children: [
+        const SizedBox(width: 80, child: Text('Age')),
+        Expanded(
+          child: TextField(
+            controller: _ageController,
+            keyboardType: TextInputType.number,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSexSelector() {
+    return Row(
+      children: [
+        const SizedBox(width: 80, child: Text('Sex')),
+        DropdownButton<int>(
+          value: _sex,
+          items: const [
+            DropdownMenuItem(value: 0, child: Text('Male')),
+            DropdownMenuItem(value: 1, child: Text('Female')),
+          ],
+          onChanged: (v) {
+            setState(() {
+              _sex = v;
+            });
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildInterestSelector(UserProfileViewModel vm) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text('Interests', style: TextStyle(fontWeight: FontWeight.bold)),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          children: vm.allInterests!.map((interest) {
+            final selected = _selectedInterests.contains(interest.name);
+            return FilterChip(
+              label: Text(interest.name),
+              selected: selected,
+              onSelected: (v) {
+                setState(() {
+                  v
+                      ? _selectedInterests.add(interest.name)
+                      : _selectedInterests.remove(interest.name);
+                });
+              },
+            );
+          }).toList(),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSaveButton(UserProfileViewModel vm) {
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton(
+        onPressed: () => _onSave(vm),
+        child: const Text('Save'),
+      ),
+    );
+  }
+
+  Widget _buildLogout(UserProfileViewModel vm) {
+    return ElevatedButton(
+      onPressed: () async {
+        WebsocketManager.instance.close();
+        vm.clear();
+        await context.read<AuthViewModel>().logout();
+      },
+      child: const Text('Log out'),
+    );
+  }
+
+  // ================= Logic =================
+
+  Future<void> _onSave(UserProfileViewModel vm) async {
+    final name = _nameController.text.trim();
+    final age = int.tryParse(_ageController.text);
+
+    if (name.isEmpty || age == null || _sex == null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Invalid profile data')));
+      return;
+    }
+
+    await vm.updateProfile(name, age, _sex!, _selectedInterests);
+
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Profile updated')));
   }
 }

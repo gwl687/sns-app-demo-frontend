@@ -1,5 +1,6 @@
 import 'package:camera/camera.dart';
 import 'package:demo10/repository/api.dart';
+import 'package:demo10/repository/datas/interest_data.dart';
 import 'package:demo10/repository/datas/user/user_info_data.dart';
 import 'package:flutter/foundation.dart';
 import 'package:image_picker/image_picker.dart';
@@ -8,11 +9,13 @@ import 'package:path/path.dart';
 ///我的个人信息页面VM
 class UserProfileViewModel with ChangeNotifier {
   UserInfoData? userInfo;
+  List<InterestData>? allInterests;
   final ImagePicker _picker = ImagePicker();
 
   ///加载我的个人信息
   Future<void> load() async {
     userInfo = await Api.instance.getUserInfo();
+    allInterests = await Api.instance.getAllInterests();
     notifyListeners();
   }
 
@@ -39,4 +42,11 @@ class UserProfileViewModel with ChangeNotifier {
     await Api.instance.changeUserName(newUserName);
     await load();
   }
+
+  Future<void> updateProfile(
+    String username,
+    int age,
+    int sex,
+    List<String> interests,
+  ) async {}
 }
