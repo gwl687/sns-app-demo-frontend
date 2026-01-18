@@ -4,7 +4,7 @@ import 'package:demo10/manager/firebase_message_manager.dart';
 import 'package:demo10/pages/auth/user_profile_vm.dart';
 import 'package:demo10/repository/api.dart';
 import 'package:demo10/repository/datas/push_event_data.dart';
-import 'package:demo10/repository/datas/timeline/timline_post_data.dart';
+import 'package:demo10/repository/datas/timline_post_data.dart';
 import 'package:demo10/utils/sp_utils.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -55,7 +55,6 @@ class TimelineViewModel extends ChangeNotifier {
   }
 
   Future<void> init(UserProfileViewModel vm) async {
-    print("timeline init");
     userProfileVm ??= vm;
     if (!loaded && userProfileVm!.userInfo != null) {
       loaded = true;

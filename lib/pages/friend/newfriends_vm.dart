@@ -1,7 +1,7 @@
 import 'package:demo10/pages/friend/friend_vm.dart';
 import 'package:demo10/repository/api.dart';
-import 'package:demo10/repository/datas/user/search_for_user_data.dart';
-import 'package:demo10/repository/datas/user/user_info_data.dart';
+import 'package:demo10/repository/datas/search_for_user_data.dart';
+import 'package:demo10/repository/datas/user_info_data.dart';
 import 'package:flutter/cupertino.dart';
 
 class NewFriendsViewModel extends ChangeNotifier {

@@ -3,7 +3,7 @@ import 'package:demo10/constant/base_constants.dart';
 import 'package:demo10/pages/auth/user_profile_vm.dart';
 import 'package:demo10/pages/friend/friend_vm.dart';
 import 'package:demo10/repository/api.dart';
-import 'package:demo10/repository/datas/timeline/timline_post_data.dart';
+import 'package:demo10/repository/datas/timline_post_data.dart';
 import 'package:demo10/utils/sp_utils.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:path/path.dart';

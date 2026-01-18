@@ -7,7 +7,7 @@ import 'package:demo10/pages/friend/add_group_member_page.dart';
 import 'package:demo10/pages/friend/remove_group_member_page.dart';
 import 'package:demo10/pages/tab_page.dart';
 import 'package:demo10/repository/api.dart';
-import 'package:demo10/repository/datas/user/user_info_data.dart';
+import 'package:demo10/repository/datas/user_info_data.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';

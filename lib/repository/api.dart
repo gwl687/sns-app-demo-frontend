@@ -9,10 +9,11 @@ import 'package:demo10/repository/datas/interest_data.dart';
 import 'package:demo10/repository/datas/login_data.dart';
 import 'package:demo10/repository/datas/private_chat_data.dart';
 import 'package:demo10/repository/datas/private_message_data.dart';
-import 'package:demo10/repository/datas/timeline/timline_post_data.dart';
-import 'package:demo10/repository/datas/user/search_for_user_data.dart';
-import 'package:demo10/repository/datas/user/user_info_data.dart';
-import 'package:demo10/repository/datas/user/user_login_data.dart';
+import 'package:demo10/repository/datas/request/update_user_info_req.dart';
+import 'package:demo10/repository/datas/timline_post_data.dart';
+import 'package:demo10/repository/datas/search_for_user_data.dart';
+import 'package:demo10/repository/datas/user_info_data.dart';
+import 'package:demo10/repository/datas/user_login_data.dart';
 import 'package:dio/dio.dart';
 import 'package:intl/intl.dart';
 import 'package:oktoast/oktoast.dart';
@@ -181,10 +182,10 @@ class Api {
   }
 
   ///更新当前登录用户数据
-  Future<bool> updateUserInfo(UserInfoData userInfoData) async {
+  Future<void> updateUserInfo(UpdateUserInfoReq updateUserInfoReq) async {
     Response response = await DioInstance.instance().post(
       path: "/api/user/updateuserinfo",
-      queryParameters: {'updateUserInfoDTO': userInfoData},
+      data: updateUserInfoReq.toJson(),
     );
     return response.data['data'];
   }
@@ -376,8 +377,17 @@ class Api {
 
   ///更新用户兴趣
   Future<void> updateUserInterests() async {
-    Response response = await DioInstance.instance().post(
+    await DioInstance.instance().post(
       path: "/api/interest/updateuserinterests",
     );
+  }
+
+  ///获取推荐好友
+  Future<List<UserInfoData>> getRecomanndedFriends() async {
+    Response response = await DioInstance.instance().get(
+      path: "/api/friend/getrecommandedfriends",
+    );
+    final List list = response.data['data'];
+    return list.map((e) => UserInfoData.fromJson(e)).toList();
   }
 }

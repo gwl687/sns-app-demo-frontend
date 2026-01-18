@@ -1,7 +1,7 @@
 import 'package:camera/camera.dart';
 import 'package:demo10/repository/api.dart';
 import 'package:demo10/repository/datas/interest_data.dart';
-import 'package:demo10/repository/datas/user/user_info_data.dart';
+import 'package:demo10/repository/datas/user_info_data.dart';
 import 'package:flutter/foundation.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart';

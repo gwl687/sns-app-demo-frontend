@@ -1,6 +1,6 @@
 import 'package:demo10/pages/friend/friend_vm.dart';
 import 'package:demo10/pages/friend/newfriends_vm.dart';
-import 'package:demo10/repository/datas/user/search_for_user_data.dart';
+import 'package:demo10/repository/datas/search_for_user_data.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';

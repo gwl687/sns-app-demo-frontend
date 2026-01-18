@@ -7,7 +7,7 @@ import 'package:demo10/pages/chat/send_video_request_page.dart';
 import 'package:demo10/pages/chat/send_video_request_vm.dart';
 import 'package:demo10/pages/chat/video_chat_page.dart';
 import 'package:demo10/pages/tab_page.dart';
-import 'package:demo10/repository/datas/user/user_info_data.dart';
+import 'package:demo10/repository/datas/user_info_data.dart';
 import 'package:demo10/utils/sp_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';

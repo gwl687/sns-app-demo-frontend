@@ -5,7 +5,9 @@ import 'package:demo10/pages/friend/friend_vm.dart';
 import 'package:demo10/pages/social/timeline_vm.dart';
 import 'package:demo10/pages/auth/login_page.dart';
 import 'package:demo10/pages/friend/chat_list_vm.dart';
-import 'package:demo10/repository/datas/user/user_info_data.dart';
+import 'package:demo10/repository/api.dart';
+import 'package:demo10/repository/datas/request/update_user_info_req.dart';
+import 'package:demo10/repository/datas/user_info_data.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -20,7 +22,7 @@ class _UserProfilePage extends State<UserProfilePage> {
   late TextEditingController _ageController;
 
   int? _sex;
-  List<String> _selectedInterests = [];
+  List<int> _selectedInterests = [];
 
   @override
   void initState() {
@@ -31,7 +33,7 @@ class _UserProfilePage extends State<UserProfilePage> {
     _nameController = TextEditingController(text: user.username);
     _ageController = TextEditingController(text: user.age.toString());
     _sex = user.sex;
-    _selectedInterests = List.from(user.interests!);
+    _selectedInterests = List.from(user.interests);
   }
 
   @override
@@ -124,8 +126,8 @@ class _UserProfilePage extends State<UserProfilePage> {
         DropdownButton<int>(
           value: _sex,
           items: const [
-            DropdownMenuItem(value: 0, child: Text('Male')),
-            DropdownMenuItem(value: 1, child: Text('Female')),
+            DropdownMenuItem(value: 0, child: Text('Female')),
+            DropdownMenuItem(value: 1, child: Text('Male')),
           ],
           onChanged: (v) {
             setState(() {
@@ -146,15 +148,15 @@ class _UserProfilePage extends State<UserProfilePage> {
         Wrap(
           spacing: 8,
           children: vm.allInterests!.map((interest) {
-            final selected = _selectedInterests.contains(interest.name);
+            final selected = _selectedInterests.contains(interest.id);
             return FilterChip(
               label: Text(interest.name),
               selected: selected,
               onSelected: (v) {
                 setState(() {
                   v
-                      ? _selectedInterests.add(interest.name)
-                      : _selectedInterests.remove(interest.name);
+                      ? _selectedInterests.add(interest.id)
+                      : _selectedInterests.remove(interest.id);
                 });
               },
             );
@@ -188,17 +190,24 @@ class _UserProfilePage extends State<UserProfilePage> {
   // ================= Logic =================
 
   Future<void> _onSave(UserProfileViewModel vm) async {
-    final name = _nameController.text.trim();
+    final username = _nameController.text.trim();
     final age = int.tryParse(_ageController.text);
 
-    if (name.isEmpty || age == null || _sex == null) {
+    if (username.isEmpty || age == null || _sex == null) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('Invalid profile data')));
       return;
     }
 
-    await vm.updateProfile(name, age, _sex!, _selectedInterests);
+    UpdateUserInfoReq updateUserInfoReq = UpdateUserInfoReq(
+      id: vm.userInfo!.userId,
+      username: username,
+      sex: _sex,
+      age: age,
+      interests: _selectedInterests,
+    );
+    await Api.instance.updateUserInfo(updateUserInfoReq);
 
     ScaffoldMessenger.of(
       context,

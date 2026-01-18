@@ -1,7 +1,7 @@
 import 'package:demo10/manager/chat_db_manager.dart';
 import 'package:demo10/manager/chat_message_manager.dart';
 import 'package:demo10/manager/websocket_manager.dart';
-import 'package:demo10/repository/datas/user/user_info_data.dart';
+import 'package:demo10/repository/datas/user_info_data.dart';
 import 'package:flutter/material.dart';
 
 class ChatViewModel extends ChangeNotifier {

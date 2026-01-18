@@ -5,7 +5,7 @@ class UserInfoData {
   int age;
   String avatarurl;
   String emailaddress;
-  List<String>? interests;
+  List<int> interests;
 
   UserInfoData({
     required this.userId,
@@ -18,6 +18,8 @@ class UserInfoData {
   });
 
   factory UserInfoData.fromJson(Map<String, dynamic> json) {
+    final rawInterests = json["interests"];
+
     return UserInfoData(
       userId: json["userId"] as int,
       username: json["username"] as String,
@@ -25,9 +27,9 @@ class UserInfoData {
       age: json["age"] as int,
       avatarurl: json["avatarurl"] as String,
       emailaddress: json["emailaddress"] as String,
-      interests: (json["interests"] as List<dynamic>)
-          .map((e) => e as String)
-          .toList(),
+      interests: rawInterests == null
+          ? <int>[]
+          : List<int>.from(rawInterests),
     );
   }
 
